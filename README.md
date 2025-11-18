@@ -184,7 +184,44 @@ ALLOWED_HOSTS=
 
 ### 4. Database Setup
 
-Import the database schema (you'll need to create the initial schema - check the `src/lib/db.ts` file for the required tables or set up through the admin panel on first run).
+Import the database schema using the provided `schema.sql` file:
+
+```bash
+# Create the database
+mysql -u root -p -e "CREATE DATABASE r5 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Import the schema
+mysql -u root -p r5 < schema.sql
+```
+
+Or import directly in one step:
+
+```bash
+# Schema will use existing database or you can uncomment the CREATE DATABASE line in schema.sql
+mysql -u root -p < schema.sql
+```
+
+The `schema.sql` file includes:
+- All required tables (users, banned_users, servers, checksums, versions, etc.)
+- Optimized indexes for fast queries
+- Cleanup procedures for expired bans and stale servers
+- Default data (MOTD, EULA)
+- Detailed comments and documentation
+
+**Optional**: Create a dedicated MySQL user for better security:
+
+```bash
+mysql -u root -p
+```
+
+```sql
+CREATE USER 'r5valk'@'localhost' IDENTIFIED BY 'secure_password_here';
+GRANT SELECT, INSERT, UPDATE, DELETE ON r5.* TO 'r5valk'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+Then update your `.env` file with the new credentials.
 
 ### 5. Running the Development Server
 
