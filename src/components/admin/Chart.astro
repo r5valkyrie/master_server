@@ -1,0 +1,73 @@
+---
+interface Props {
+	chartId: string;
+	title: string;
+	timeRange: number;
+}
+
+const { chartId, title, timeRange } = Astro.props;
+---
+
+<div class="chart-wrapper">
+  <div class="chart-header">
+    {title}
+    <div class="time-range-selector">
+      <select id={`${chartId}TimeRange`} name={`${chartId}TimeRange`}>
+        <option value="7">Past 7 Days</option>
+        <option value="14">Past 14 Days</option>
+        <option value="30">Past 30 Days</option>
+        <option value="60">Past 60 Days</option>
+        <option value="120">Past 120 Days</option>
+        <option value="365">Past 365 Days</option>
+      </select>
+    </div>
+  </div>
+  <div class="chart-container">
+    <canvas id={chartId}></canvas>
+  </div>
+</div>
+
+<script define:vars={{ chartId, title, timeRange }}>
+  async function fetchChartData(url, chartId, datasetLabel) {
+      const response = await fetch(url);
+      const data = await response.json();
+      const ctx = document.getElementById(chartId).getContext('2d');
+      new Chart(ctx, {
+          type: 'line',
+          data: data,
+          options: {
+              maintainAspectRatio: false,
+              responsive: true,
+              plugins: {
+                  legend: { position: 'top', labels: { color: '#cfd6dd', font: { weight: '600' } } },
+                  tooltip: {
+                      callbacks: {
+                          label: (tooltipItem) => `${datasetLabel}: ${tooltipItem.raw}`
+                      }
+                  }
+              },
+              scales: {
+                  x: { beginAtZero: true, ticks: { color: '#cfd6dd' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                  y: { beginAtZero: true, ticks: { color: '#cfd6dd' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+              }
+          }
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const timeRangeSelect = document.getElementById(`${chartId}TimeRange`);
+
+    function updateURL() {
+      const timeRange = timeRangeSelect.value;
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set(`${chartId}TimeRange`, timeRange);
+      window.location.search = searchParams.toString();
+    }
+
+    timeRangeSelect.addEventListener('change', updateURL);
+
+    const searchParams = new URLSearchParams(window.location.search);
+    timeRangeSelect.value = searchParams.get(`${chartId}TimeRange`) || timeRange;
+    fetchChartData(`/api/admin/${chartId}Chart?timeRange=${timeRangeSelect.value}`, chartId, `Total ${title}`);
+  });
+</script>

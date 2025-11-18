@@ -1,0 +1,36 @@
+{
+  "name": "r5a-comp-sv-astro",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev --host",
+    "start": "./node_modules/.bin/dotenv -e .env -- node dist/server/entry.mjs",
+    "build": "astro build && cp auth.key dist/server/",
+    "preview": "astro preview --host",
+    "ts-watcher:once": "node -e \"import('./dist/server/chunks/utils_Bp74E0DP.mjs');\" && node -e \"console.log('Thunderstore watcher runs with the SSR server via middleware');\"",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.4.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/marked": "^5.0.2",
+    "astro": "^5.12.9",
+    "axios": "^1.11.0",
+    "bad-words": "^4.0.0",
+    "bcrypt": "^5.1.1",
+    "bit-buffer": "^0.2.5",
+    "discord.js": "^14.15.3",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "marked": "^16.1.2",
+    "mysql2": "^3.14.3",
+    "redis": "^5.8.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "dotenv-cli": "^7.4.2"
+  }
+}

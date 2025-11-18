@@ -1,0 +1,381 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+<Dashboard>
+  <!-- Versions Management -->
+  <div id="versions-list">
+    <!-- Header Actions -->
+    <div class="flex justify-end items-center gap-4 mb-6">
+      <button class="btn btn-primary" id="add-version-btn">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Version
+      </button>
+      <button class="btn btn-success" id="push-versions-btn">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Sync to Master
+      </button>
+    </div>
+
+    <!-- Versions Table -->
+    <div class="card">
+      <div class="table-container">
+        <table class="table" id="versions-table">
+          <thead>
+            <tr>
+              <th>Version Name</th>
+              <th>Checksums Enabled</th>
+              <th>Supported</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="versions-table-body">
+            <!-- Rows will be inserted here by script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Version Modal -->
+  <div id="versions-add" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Version</h3>
+        <button class="modal-close" id="close-add-modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <form id="versions-add-form">
+          <div class="form-group">
+            <label class="form-label" for="nameInput">Version Name</label>
+            <input type="text" id="nameInput" class="form-input" required placeholder="e.g., v1.0.0">
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="checksumsEnabledInput" class="form-checkbox">
+              <span class="form-label mb-0">Enable Checksums</span>
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="supportedInput" class="form-checkbox" checked>
+              <span class="form-label mb-0">Supported Version</span>
+            </label>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-add-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Version</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Version Modal -->
+  <div id="versions-update" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Update Version</h3>
+        <button class="modal-close" id="close-update-modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <form id="versions-update-form">
+          <div class="form-group">
+            <label class="form-label" for="name2Input">Version Name</label>
+            <input type="text" id="name2Input" class="form-input" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="checksumsEnabled2Input" class="form-checkbox">
+              <span class="form-label mb-0">Enable Checksums</span>
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="supported2Input" class="form-checkbox">
+              <span class="form-label mb-0">Supported Version</span>
+            </label>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-update-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Version</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</Dashboard>
+
+<script>
+// @ts-nocheck
+document.addEventListener('DOMContentLoaded', function () {
+  // Modal elements
+  const addModal = document.getElementById('versions-add');
+  const updateModal = document.getElementById('versions-update');
+  const addBtn = document.getElementById('add-version-btn');
+  const pushBtn = document.getElementById('push-versions-btn');
+
+  // Notification helper
+  function notify(type, title, message) {
+    window.showNotification?.(type, title, message);
+  }
+
+  // Modal management
+  function openModal(modal) {
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function closeModal(modal) {
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // Add version button
+  if (addBtn) {
+    addBtn.addEventListener('click', () => openModal(addModal));
+  }
+
+  // Push to master button
+  if (pushBtn) {
+    pushBtn.addEventListener('click', async function() {
+      pushBtn.disabled = true;
+      const originalText = pushBtn.textContent;
+      pushBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Syncing...';
+      
+      try {
+        const res = await fetch('/api/admin/versionsPush', { method: 'POST' });
+        if (res.ok) {
+          notify('success', 'Success', 'Versions synced successfully');
+        } else {
+          notify('error', 'Error', 'Failed to sync versions');
+        }
+      } catch (e) {
+        notify('error', 'Error', 'Failed to sync versions');
+      } finally {
+        pushBtn.disabled = false;
+        pushBtn.innerHTML = originalText;
+      }
+    });
+  }
+
+  // Simplified version loading for now - keeping original functionality
+  async function fetchVersions() {
+    try {
+      const response = await fetch('/api/admin/versions');
+      const payload = await response.json();
+      const versions = payload.versions || [];
+      const tableBody = document.getElementById('versions-table-body');
+      
+      if (!tableBody) return;
+
+      if (versions.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center py-8 text-gray-500">
+              <div class="flex flex-col items-center">
+                <svg class="w-12 h-12 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
+                </svg>
+                <p>No versions found</p>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = versions.map(version => `
+          <tr>
+            <td class="font-mono text-sm">${version.name || ''}</td>
+            <td>
+              <span class="badge ${version.checksums_enabled ? 'badge-success' : 'badge-error'}">
+                ${version.checksums_enabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </td>
+            <td>
+              <span class="badge ${version.supported ? 'badge-success' : 'badge-warning'}">
+                ${version.supported ? 'Supported' : 'Legacy'}
+              </span>
+            </td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-outline btn-sm btn-edit" data-name="${version.name}" data-checksums="${version.checksums_enabled}" data-supported="${version.supported}">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Edit
+                </button>
+                <button class="btn btn-danger btn-sm btn-delete" data-name="${version.name}">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        // Bind edit handlers
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const name = this.dataset.name;
+            const checksums = this.dataset.checksums === 'true';
+            const supported = this.dataset.supported === 'true';
+
+            document.getElementById('name2Input').value = name;
+            document.getElementById('checksumsEnabled2Input').checked = checksums;
+            document.getElementById('supported2Input').checked = supported;
+
+            openModal(updateModal);
+          });
+        });
+
+        // Bind delete handlers
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            const name = this.dataset.name;
+            
+            if (!confirm(`Are you sure you want to delete version "${name}"?\n\nThis action cannot be undone.`)) {
+              return;
+            }
+            
+            try {
+              const res = await fetch(`/api/admin/versions?name=${encodeURIComponent(name)}`, {
+                method: 'DELETE'
+              });
+              
+              if (res.ok) {
+                notify('success', 'Success', `Version "${name}" deleted successfully`);
+                fetchVersions(); // Refresh the table
+              } else {
+                const error = await res.json();
+                notify('error', 'Error', error.error || 'Failed to delete version');
+              }
+            } catch (error) {
+              console.error('Error deleting version:', error);
+              notify('error', 'Error', 'Failed to delete version');
+            }
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch versions:', error);
+      notify('error', 'Error', 'Failed to load versions');
+    }
+  }
+
+  // Modal close handlers
+  document.querySelectorAll('.modal-close, #cancel-add-btn, #cancel-update-btn, #close-add-modal, #close-update-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+      closeModal(addModal);
+      closeModal(updateModal);
+    });
+  });
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        closeModal(overlay);
+      }
+    });
+  });
+
+  // Form submission handlers
+  const addForm = document.getElementById('versions-add-form');
+  if (addForm) {
+    addForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('nameInput').value;
+      const checksums_enabled = document.getElementById('checksumsEnabledInput').checked;
+      const supported = document.getElementById('supportedInput').checked;
+      
+      if (!name.trim()) {
+        notify('error', 'Error', 'Version name is required');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/admin/versions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            name: name.trim(), 
+            checksums_enabled: checksums_enabled, 
+            supported: supported 
+          })
+        });
+        
+        if (res.ok) {
+          notify('success', 'Success', 'Version added successfully');
+          closeModal(addModal);
+          fetchVersions();
+          // Reset form
+          addForm.reset();
+          document.getElementById('supportedInput').checked = true; // Default to checked
+        } else {
+          const error = await res.json();
+          notify('error', 'Error', error.error || 'Failed to add version');
+        }
+      } catch (error) {
+        console.error('Error adding version:', error);
+        notify('error', 'Error', 'Failed to add version');
+      }
+    });
+  }
+
+  const updateForm = document.getElementById('versions-update-form');
+  if (updateForm) {
+    updateForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('name2Input').value;
+      const checksums_enabled = document.getElementById('checksumsEnabled2Input').checked;
+      const supported = document.getElementById('supported2Input').checked;
+      
+      try {
+        const res = await fetch('/api/admin/versions', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            name: name, 
+            checksums_enabled: checksums_enabled, 
+            supported: supported 
+          })
+        });
+        
+        if (res.ok) {
+          notify('success', 'Success', 'Version updated successfully');
+          closeModal(updateModal);
+          fetchVersions();
+        } else {
+          const error = await res.json();
+          notify('error', 'Error', error.error || 'Failed to update version');
+        }
+      } catch (error) {
+        console.error('Error updating version:', error);
+        notify('error', 'Error', 'Failed to update version');
+      }
+    });
+  }
+
+  // Initial load
+  fetchVersions();
+});
+</script>

@@ -1,0 +1,36 @@
+---
+import Main from '../layouts/Main.astro';
+---
+<Main>
+  <section class="container fade-in-on-scroll" style="max-width: 920px; margin: 0 auto;">
+    <h1>End User License Agreement (EULA)</h1>
+    <p id="eula-updated" class="muted"></p>
+    <div id="eula-content" style="white-space: pre-wrap; line-height: 1.5; background: rgba(25,28,34,0.6); border: 1px solid rgba(255,255,255,0.08); padding: 16px; border-radius: 8px; min-height: 200px;"></div>
+  </section>
+</Main>
+<script>
+// @ts-nocheck
+(function(){
+  async function loadEula(){
+    try{
+      const res = await fetch('/api/eula');
+      const data = await res.json();
+      if (data && data.success && data.data) {
+        const c = document.getElementById('eula-content');
+        const u = document.getElementById('eula-updated');
+        if (c) c.textContent = data.data.contents || '';
+        if (u && data.data.modified) u.textContent = 'Last Modified: ' + new Date(data.data.modified).toLocaleString();
+      } else {
+        const c = document.getElementById('eula-content');
+        if (c) c.textContent = 'Unable to load EULA.';
+      }
+    } catch {
+      const c = document.getElementById('eula-content');
+      if (c) c.textContent = 'Unable to load EULA.';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', loadEula);
+  document.addEventListener('astro:after-swap', loadEula);
+})();
+</script>
+

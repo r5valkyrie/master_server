@@ -1,0 +1,222 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valkyrie Admin Login</title>
+  <link rel="stylesheet" type="text/css" href="/admin/css/modern-admin.css">
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+  <div class="auth-background">
+    <div class="auth-background-pattern"></div>
+    <div class="auth-background-gradient"></div>
+  </div>
+  
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <svg class="auth-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          <h1 class="auth-title">Valkyrie Admin</h1>
+        </div>
+        <p class="auth-subtitle">Secure administrative access</p>
+      </div>
+      
+      <div class="auth-content">
+        <slot />
+      </div>
+      
+      <div class="auth-footer">
+        <p class="auth-footer-text">© 2024 Valkyrie Management System</p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Auth-specific styles with fallback values */
+    :root {
+      --auth-gray-900: #111827;
+      --auth-gray-800: #1f2937;
+      --auth-gray-200: #e5e7eb;
+      --auth-gray-150: #f3f4f6;
+      --auth-gray-100: #f9fafb;
+      --auth-gray-75: #fafbfc;
+      --auth-gray-700: #374151;
+      --auth-gray-600: #4b5563;
+      --auth-gray-500: #6b7280;
+      --auth-primary-500: #3b82f6;
+      --auth-primary-600: #2563eb;
+      --auth-space-sm: 0.5rem;
+      --auth-space-md: 1rem;
+      --auth-space-lg: 1.5rem;
+      --auth-space-xl: 2rem;
+      --auth-text-xs: 0.75rem;
+      --auth-text-sm: 0.875rem;
+      --auth-text-2xl: 1.5rem;
+      --auth-radius-xl: 1rem;
+    }
+
+    .auth-body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--auth-gray-900, #111827) !important;
+      overflow: hidden;
+    }
+
+    .auth-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+    }
+
+    .auth-background-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 25% 25%, var(--auth-primary-500, #3b82f6) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, var(--auth-primary-600, #2563eb) 0%, transparent 50%);
+      opacity: 0.1;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .auth-background-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--auth-gray-900, #111827) 0%, var(--auth-gray-800, #1f2937) 50%, var(--auth-gray-900, #111827) 100%);
+    }
+
+    .auth-container {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--auth-space-lg, 1.5rem);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 28rem;
+      background: #2d3748 !important; /* Dark gray card */
+      border: 1px solid #4a5568 !important;
+      border-radius: var(--auth-radius-xl, 1rem);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    .auth-header {
+      padding: var(--auth-space-xl, 2rem) var(--auth-space-xl, 2rem) var(--auth-space-lg, 1.5rem);
+      text-align: center;
+      background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+      border-bottom: 1px solid #4a5568 !important;
+    }
+
+    .auth-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: var(--auth-space-md, 1rem);
+    }
+
+    .auth-logo-icon {
+      width: 3rem;
+      height: 3rem;
+      color: var(--auth-primary-500, #3b82f6);
+      margin-bottom: var(--auth-space-sm, 0.5rem);
+    }
+
+    .auth-title {
+      font-size: var(--auth-text-2xl, 1.5rem);
+      font-weight: 700;
+      color: #f9fafb !important;
+      margin: 0;
+      letter-spacing: -0.025em;
+    }
+
+    .auth-subtitle {
+      font-size: var(--auth-text-sm, 0.875rem);
+      color: #d1d5db !important;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .auth-content {
+      padding: var(--auth-space-xl, 2rem);
+      background: #2d3748 !important;
+    }
+
+    .auth-footer {
+      padding: var(--auth-space-lg, 1.5rem) var(--auth-space-xl, 2rem);
+      background: #1f2937 !important;
+      border-top: 1px solid #4a5568 !important;
+    }
+
+    .auth-footer-text {
+      font-size: var(--auth-text-xs, 0.75rem);
+      color: #9ca3af !important;
+      text-align: center;
+      margin: 0;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(120deg); }
+      66% { transform: translate(-20px, 20px) rotate(240deg); }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 640px) {
+      .auth-container {
+        padding: var(--space-md);
+      }
+      
+      .auth-card {
+        max-width: none;
+      }
+      
+      .auth-header,
+      .auth-content,
+      .auth-footer {
+        padding-left: var(--space-lg);
+        padding-right: var(--space-lg);
+      }
+    }
+  </style>
+</body>
+</html>
+
+

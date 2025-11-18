@@ -1,0 +1,37 @@
+---
+---
+<div id="banlist-add" class="banlist-tab" hidden>
+  <div class="top-content"></div>
+    <form id="banlist-add-form">
+      <button class="close-btn" type="button">X</button>
+      <label>Add Ban</label><br>
+
+      <label for="ban_type">Ban Type (0 - connect, 1 - comms)</label>
+      <input name="ban_type" type="text" id="banTypeInput"/><br>
+
+      <label for="identifier">Identifier</label>
+      <input name="identifier" type="text" id="identifierInput"/><br>
+
+      <label for="reason">Reason</label>
+      <input name="reason" type="text" id="reasonInput"/><br>
+
+      <label for="permanent">Permanent Ban</label>
+      <input name="permanent" type="checkbox" id="permabanInput" checked /><br>
+
+      <label for="end_date">End Date</label>
+      <input name="end_date" type="datetime-local" id="end-date-input"/><br>
+
+      <button class="btn-primary" type="submit">Ban User</button>
+    </form>
+</div>
+<script>
+    document.querySelector('.close-btn').addEventListener('click', () => {
+        document.getElementById('banlist-add').hidden = true;
+        document.getElementById('banlist-list').hidden = false;
+    });
+
+    document.getElementById('permabanInput').addEventListener('change', (ev) => {
+        const target = ev.target as HTMLInputElement;
+        document.getElementById('end-date-input').disabled = target.checked;
+    });
+</script>

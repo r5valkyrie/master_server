@@ -1,0 +1,31 @@
+.conf-notice {
+    color: rgb(127, 127, 127);
+    font-size: 90%;
+    font-weight: 100;
+}
+
+table#search-results-table > thead > tr th {
+    padding-top: 10px;
+}
+
+table#search-results-table th, table#search-results-table td {
+    padding: 10px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.user-entry-banned {
+    color: darkred;
+}
+
+button.nav-button {
+    text-decoration: none;
+    background-color: #ff6060;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    color: #f8f8f8;
+    border: 1px black solid;
+    
+    margin-bottom: 10px;
+}

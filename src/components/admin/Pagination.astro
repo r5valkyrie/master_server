@@ -1,0 +1,42 @@
+---
+---
+<br>
+<div id="pagination-controls">
+    <button class="btn-primary margin">Previous</button>
+    <span id="page-number">Page 1</span>
+    <button class="btn-primary">Next</button>
+</div>
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function setupPagination(rows) {
+        totalPages = Math.ceil(rows.length / 30);
+        showPage(1);
+    }
+
+    function changePage(direction) {
+        currentPage += direction;
+
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        showPage(currentPage);
+    }
+
+    function showPage(pageNumber) {
+        const rows = Array.from(document.getElementsByClassName("banlist-entry"));
+        const start = (pageNumber - 1) * 30;
+        const end = start + 30;
+
+        rows.forEach(row => (row as HTMLElement).style.display = "none");
+
+        const pageRows = rows.slice(start, end);
+        pageRows.forEach(row => (row as HTMLElement).style.display = "");
+
+        document.getElementById("page-number").textContent = `Page ${pageNumber} of ${totalPages}`;
+    }
+
+    document.querySelector('#pagination-controls .margin').addEventListener('click', () => changePage(-1));
+    document.querySelector('#pagination-controls button:last-child').addEventListener('click', () => changePage(1));
+</script>

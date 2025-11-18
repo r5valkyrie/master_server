@@ -1,0 +1,109 @@
+import { defineMiddleware } from 'astro:middleware';
+import { getPlayerBanStatus } from './lib/bansystem';
+import { getSessionCookieName, verifyAdminSessionToken } from './lib/session';
+import { startBanCleanupScheduler } from './lib/banCleanupScheduler';
+import { startServerPresenceTracker, startServerCountUpdater, startActiveServersListUpdater } from './lib/serverPresenceTracker';
+import { startPrefixCommandListener } from './lib/discord';
+import { startThunderstoreWatcher } from './lib/thunderstoreWatcher';
+import { addSecurityHeaders } from './lib/security-headers';
+
+export async function ipFilter(request: Request) {
+    const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for');
+    if (ip) {
+        try {
+            const { isBanned } = await getPlayerBanStatus(null, ip);
+            if (isBanned) {
+                return new Response(JSON.stringify({ success: false, err: `Failed to handshake with r5v server.` }), { status: 401 });
+            }
+        } catch (error) {
+            console.error('Error checking IP ban status:', error);
+            // Continue without blocking if ban check fails
+        }
+    }
+    return null; // Not banned or no IP found
+}
+
+export const onRequest = defineMiddleware(async (context, next) => {
+    const { request, url } = context;
+    // Ensure ban cleanup scheduler is running
+    startBanCleanupScheduler();
+    // Ensure server presence tracker is running
+    startServerPresenceTracker();
+    // Periodically update the servers online channel name based on latest list
+    startServerCountUpdater();
+    // Maintain a single active servers list message in the logs channel
+    startActiveServersListUpdater();
+    // Start prefix command listener for bot commands
+    startPrefixCommandListener();
+    // Start Thunderstore watcher for mod updates -> Discord
+    startThunderstoreWatcher();
+    
+    // IP Filtering for specific endpoint
+    if (url.pathname === '/api/servers/add') {
+        const ipFilterResponse = await ipFilter(request);
+        if (ipFilterResponse) {
+            return ipFilterResponse;
+        }
+    }
+
+    // Session auth for /admin routes (except login and static assets under /admin)
+    if ((url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin')) &&
+        !url.pathname.startsWith('/admin/login') &&
+        !url.pathname.startsWith('/api/admin/auth/login')) {
+        const cookieHeader = request.headers.get('cookie') || '';
+        const cookieName = getSessionCookieName();
+        const cookieValue = cookieHeader.split(';').map(s => s.trim()).find(s => s.startsWith(cookieName + '='))?.split('=')[1];
+
+        const session = cookieValue ? verifyAdminSessionToken(cookieValue) : null;
+
+        if (!session) {
+            // If it's an API path, return 401 JSON; if it's a page, redirect to login
+            if (url.pathname.startsWith('/api/')) {
+                return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 401 });
+            }
+            return new Response(null, {
+                status: 302,
+                headers: { Location: '/admin/login' }
+            });
+        }
+
+        // Role-based guards
+        const isMaster = session.role === 'master';
+        const isModerator = session.role === 'moderator';
+        if (url.pathname.startsWith('/admin/userManagement') || url.pathname.startsWith('/api/admin/users/manage')) {
+            if (!isMaster) {
+                if (url.pathname.startsWith('/api/')) {
+                    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
+                }
+                return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });
+            }
+        }
+
+        // Moderators: allow dashboard, users list, banlist, userQuery, servers, content; deny MOTD admin API
+        if (isModerator) {
+            const allowedPages = ['/admin/dashboard', '/admin/users', '/admin/banlist', '/admin/userQuery', '/admin/servers', '/admin/content', '/admin/verifiedMods'];
+            const allowedApiPrefixes = ['/api/admin/users', '/api/admin/banlist', '/api/admin/userQuery', '/api/admin/servers', '/api/admin/auth/changePassword', '/api/admin/motd', '/api/admin/playersChart', '/api/admin/bansChart', '/api/admin/eula', '/api/admin/recentActivity', '/api/admin/uptime', '/api/admin/systemHealth', '/api/admin/banStats', '/api/admin/userGrowth', '/api/admin/playerStats', '/api/admin/verifiedMods'];
+            if (url.pathname.startsWith('/admin') && !allowedPages.some(p => url.pathname.startsWith(p))) {
+                return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });
+            }
+            if (url.pathname.startsWith('/api/admin') && !allowedApiPrefixes.some(p => url.pathname.startsWith(p))) {
+                return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
+            }
+            // Allow moderators to view MOTD (GET) but block edits (POST/PUT/DELETE)
+            if (url.pathname.startsWith('/api/admin/motd')) {
+                if (request.method && request.method.toUpperCase() !== 'GET') {
+                    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
+                }
+            }
+            if (url.pathname.startsWith('/api/admin/eula')) {
+                if (request.method && request.method.toUpperCase() !== 'GET') {
+                    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
+                }
+            }
+        }
+    }
+
+    // Continue to next middleware or route and add security headers
+    const response = await next();
+    return addSecurityHeaders(response);
+});

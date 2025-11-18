@@ -1,0 +1,219 @@
+---
+import Main from '../layouts/Main.astro';
+---
+
+<Main title="Mods">
+	<div class="container mods-page">
+		<div class="search-container">
+			<input type="text" id="search-bar" placeholder="Search for mods...">
+		</div>
+		<div class="grid" id="mods-grid">
+			<div class="loader"></div>
+		</div>
+	</div>
+</Main>
+
+<script>
+	let allMods: any[] = [];
+	let filteredMods: any[] = [];
+	let renderedCount = 0;
+	const BATCH_SIZE = 9;
+	let infiniteObserver: IntersectionObserver | null = null;
+	let scrollFallbackAttached = false;
+
+	function createModCard(mod: any) {
+		const card = document.createElement('div');
+		card.className = 'card fade-in-on-scroll';
+
+		const latestVersion = mod.versions?.[0] || {};
+		const iconUrl = mod.icon || latestVersion.icon || 'https://placehold.co/100?text=PlaceHolder';
+		const description = latestVersion?.description || 'No description available.';
+		const downloadUrl = 'r5v://mod/install?name=' + mod.full_name || '#';
+		const packageUrl = mod.package_url || '#';
+		const displayName = (mod.name || '').replace(/_/g, ' ');
+
+		card.innerHTML = `
+			<div class="mod-icon-wrapper">
+				<div class="img-loader"></div>
+				<img alt="${displayName}" class="mod-icon" loading="lazy" style="opacity: 0;" />
+			</div>
+			<div class="card-content">
+				<div class="card-main-content">
+					<h2>${displayName}</h2>
+					<p>${description}</p>
+				</div>
+				<div class="card-actions">
+					<a href="${downloadUrl}" class="btn download-btn">Download</a>
+					<a href="${packageUrl}" target="_blank" rel="noopener noreferrer" class="btn thunder-btn">View on Thunderstore</a>
+				</div>
+			</div>
+		`;
+
+		const img = card.querySelector('.mod-icon') as HTMLImageElement;
+		const loader = card.querySelector('.img-loader') as HTMLElement;
+
+		function showImage() {
+			if (loader) loader.style.display = 'none';
+			img.style.opacity = '1';
+		}
+
+		// Preload to ensure onload fires consistently across browsers
+		const pre = new Image();
+		const placeholder = 'https://placehold.co/100?text=PlaceHolder';
+		let settled = false;
+		const settle = (src: string) => {
+			if (settled) return;
+			settled = true;
+			img.src = src;
+			showImage();
+		};
+		pre.onload = () => settle(iconUrl);
+		pre.onerror = () => settle(placeholder);
+		pre.decoding = 'async';
+		pre.loading = 'eager';
+		pre.src = iconUrl;
+
+		// Safety timeout
+		window.setTimeout(() => {
+			if (!settled) settle(placeholder);
+		}, 5000);
+
+		return card;
+	}
+
+	function ensureSentinel(grid: HTMLElement) {
+		let sentinel = document.getElementById('mods-sentinel');
+		if (!sentinel) {
+			sentinel = document.createElement('div');
+			sentinel.id = 'mods-sentinel';
+			sentinel.style.height = '1px';
+			sentinel.style.width = '100%';
+			sentinel.style.gridColumn = '1 / -1';
+			grid.appendChild(sentinel);
+		}
+		return sentinel as HTMLElement;
+	}
+
+	function appendNextBatch() {
+		const grid = document.getElementById('mods-grid');
+		if (!grid) return;
+
+		const end = Math.min(renderedCount + BATCH_SIZE, filteredMods.length);
+		const ref = document.getElementById('mods-sentinel');
+		for (let i = renderedCount; i < end; i++) {
+			const card = createModCard(filteredMods[i]);
+			if (ref && ref.parentElement === grid) {
+				grid.insertBefore(card, ref);
+			} else {
+				grid.appendChild(card);
+			}
+		}
+		renderedCount = end;
+
+		if ((window as any).setupObserver) {
+			(window as any).setupObserver();
+		}
+
+		if (renderedCount >= filteredMods.length && infiniteObserver) {
+			infiniteObserver.disconnect();
+		}
+	}
+
+	function setupInfiniteScroll() {
+		const grid = document.getElementById('mods-grid');
+		if (!grid) return;
+		const sentinel = ensureSentinel(grid);
+
+		if (!('IntersectionObserver' in window)) {
+			while (renderedCount < filteredMods.length) appendNextBatch();
+			return;
+		}
+
+		if (infiniteObserver) {
+			infiniteObserver.disconnect();
+		}
+
+		infiniteObserver = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting && renderedCount < filteredMods.length) {
+					appendNextBatch();
+				}
+			});
+		}, { rootMargin: '600px 0px' });
+
+		infiniteObserver.observe(sentinel);
+
+		// Scroll fallback: if near bottom and IO didn't trigger
+		if (!scrollFallbackAttached) {
+			scrollFallbackAttached = true;
+			window.addEventListener('scroll', () => {
+				const nearBottom = window.innerHeight + window.scrollY >= (document.body.offsetHeight - 800);
+				if (nearBottom && renderedCount < filteredMods.length) {
+					appendNextBatch();
+				}
+			}, { passive: true });
+		}
+	}
+
+	function renderMods(modsToRender: any[]) {
+		const grid = document.getElementById('mods-grid');
+		if (!grid) return;
+
+		grid.innerHTML = '';
+		filteredMods = modsToRender;
+		renderedCount = 0;
+
+		ensureSentinel(grid);
+		appendNextBatch();
+		setupInfiniteScroll();
+	}
+
+	function filterAndRenderMods() {
+		const searchTerm = (document.getElementById('search-bar') as HTMLInputElement).value.toLowerCase();
+		const filtered = allMods.filter(mod => !mod?.is_deprecated && !mod?.has_nsfw_content && (mod.name || '').toLowerCase().includes(searchTerm));
+		renderMods(filtered);
+	}
+
+	function fetchMods() {
+		(async () => {
+			const grid = document.getElementById('mods-grid');
+			const pageRoot = document.querySelector('.mods-page');
+
+			pageRoot?.classList.add('is-loading');
+			if (grid) grid.innerHTML = '<div class="loader"></div>';
+
+			if (allMods.length > 0) {
+				filterAndRenderMods();
+				pageRoot?.classList.remove('is-loading');
+				return;
+			}
+
+			try {
+				const q = (document.getElementById('search-bar') as HTMLInputElement)?.value || '';
+				const endpoint = q ? `/api/client/mods?q=${encodeURIComponent(q)}` : '/api/client/mods';
+				const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}`);
+				}
+				allMods = await response.json();
+				filterAndRenderMods();
+				pageRoot?.classList.remove('is-loading');
+			} catch (error) {
+				if (grid) {
+					grid.innerHTML = '<p>Failed to load mods. Please try again later.</p>';
+				}
+				pageRoot?.classList.remove('is-loading');
+				console.error('Failed to fetch mods:', error);
+			}
+		})();
+	}
+
+	// Run on initial page load
+	fetchMods();
+	// Run on subsequent page loads
+	document.addEventListener('astro:page-load', fetchMods);
+
+	document.getElementById('search-bar')?.addEventListener('input', () => {
+		filterAndRenderMods();
+	});
+</script>

@@ -1,0 +1,705 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+import { getSessionCookieName, verifyAdminSessionToken } from '../../lib/session';
+
+// Get current user for self-deletion prevention
+let currentUser = '';
+try {
+  const cookieHeader = Astro.request.headers.get('cookie') || '';
+  const cookieName = getSessionCookieName();
+  const cookieValue = cookieHeader.split(';').map(s => s.trim()).find(s => s.startsWith(cookieName + '='))?.split('=')[1];
+  if (cookieValue) {
+    const session = verifyAdminSessionToken(cookieValue);
+    if (session) {
+      currentUser = session.username;
+    }
+  }
+} catch (e) {
+  console.error('Failed to get current user:', e);
+}
+---
+<Dashboard>
+  <!-- User Management -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">User Management</h1>
+      <p class="page-description">Manage admin users, roles and permissions</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" id="open-create-user-modal">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Create New User
+      </button>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card">
+    <div class="table-container">
+      <table class="data-table" id="users-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Last Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-table-body">
+          <tr>
+            <td colspan="6" class="text-center py-8">
+              <div class="loading-state">
+                <svg class="spinner" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+                </svg>
+                <p>Loading users...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create User Modal -->
+  <div id="create-user-modal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New User</h3>
+        <button type="button" class="modal-close" onclick="closeCreateUserModal()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <form id="create-user-form">
+        <div class="modal-content">
+          <div class="space-y-4">
+            <div class="form-group">
+              <label class="form-label" for="modal-new-username">Username</label>
+              <input 
+                type="text" 
+                id="modal-new-username" 
+                class="form-input" 
+                placeholder="Enter username"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modal-new-role">Role</label>
+              <select id="modal-new-role" class="form-select" required>
+                <option value="moderator">Moderator</option>
+                <option value="admin">Admin</option>
+                <option value="master">Master</option>
+              </select>
+            </div>
+          </div>
+          <div id="modal-create-status" class="mt-4 text-sm"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-create-user">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete User Confirmation Modal -->
+  <div id="delete-user-modal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete User</h3>
+        <button type="button" class="modal-close" onclick="closeDeleteUserModal()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Delete User Account</h3>
+          <p class="text-sm text-gray-500 mb-4">
+            Are you sure you want to delete the user <strong id="delete-username"></strong>? 
+            This action cannot be undone and will permanently remove their access to the admin panel.
+          </p>
+        </div>
+        <div id="delete-status" class="mt-4 text-sm"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeDeleteUserModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete-user">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          Delete User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .data-table thead {
+      background: var(--bg-secondary);
+    }
+
+    .data-table th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr {
+      transition: background-color 0.2s;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--bg-secondary);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .user-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .user-badges {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Badge styles */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .badge-info {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .badge-success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .badge-warning {
+      background: rgba(251, 191, 36, 0.1);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .badge-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+      gap: 0.5rem;
+    }
+
+    .role-select {
+      padding: 0.375rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .role-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-color-alpha);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn-icon {
+      padding: 0.5rem;
+      min-width: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-secondary);
+      border-color: var(--primary-color);
+    }
+
+    .btn-danger {
+      background: var(--error-color, #ef4444);
+      color: white;
+      border: 1px solid var(--error-color, #ef4444);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state svg {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1rem;
+      opacity: 0.3;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .py-8 {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+  </style>
+
+<script>
+// @ts-nocheck
+document.addEventListener('DOMContentLoaded', function() {
+  async function loadUsers() {
+    try {
+      const res = await fetch('/api/admin/users/manage');
+      const data = await res.json();
+      const users = data.users || [];
+      const tbody = document.getElementById('users-table-body');
+      
+      if (!tbody) return;
+
+      if (users.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+                </svg>
+                <p>No users found</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const currentUsername = '${currentUser}';
+      
+      tbody.innerHTML = users.map(user => {
+        const roleClass = user.role === 'master' ? 'badge-info' : user.role === 'admin' ? 'badge-success' : 'badge-warning';
+        const statusClass = user.must_change_password ? 'badge-error' : 'badge-success';
+        const isCurrentUser = user.username === currentUsername;
+        
+        return `
+          <tr>
+            <td>
+              <div class="user-name">
+                ${user.username}
+                ${isCurrentUser ? '<span class="badge badge-info">You</span>' : ''}
+              </div>
+            </td>
+            <td>
+              <select class="role-select" data-action="set-role" data-username="${user.username}">
+                <option value="moderator" ${user.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                <option value="master" ${user.role === 'master' ? 'selected' : ''}>Master</option>
+              </select>
+            </td>
+            <td>
+              <span class="badge ${statusClass}">
+                ${user.must_change_password ? 'Reset Required' : 'Active'}
+              </span>
+            </td>
+            <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
+            <td>${user.updated_at ? new Date(user.updated_at).toLocaleDateString() : '-'}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-outline btn-icon" data-action="temp-pass" data-username="${user.username}" title="Set Temporary Password">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                  </svg>
+                </button>
+                ${!isCurrentUser ? `
+                  <button class="btn btn-danger btn-icon" data-action="delete-user" data-username="${user.username}" title="Delete User">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      bindActions();
+    } catch (error) {
+      console.error('Failed to load users:', error);
+      window.showNotification?.('error', 'Error', 'Failed to load users');
+    }
+  }
+
+  function bindActions() {
+    // Role change handlers
+    document.querySelectorAll('[data-action="set-role"]').forEach(el => {
+      el.addEventListener('change', async function() {
+        const username = this.getAttribute('data-username');
+        const role = this.value;
+        
+        try {
+          const res = await fetch('/api/admin/users/manage', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, role })
+          });
+          
+          if (res.ok) {
+            window.showNotification?.('success', 'Success', `Role updated for ${username}`);
+            loadUsers();
+          } else {
+            window.showNotification?.('error', 'Error', 'Failed to update role');
+          }
+        } catch (error) {
+          console.error('Failed to update role:', error);
+          window.showNotification?.('error', 'Error', 'Failed to update role');
+        }
+      });
+    });
+
+    // Temporary password handlers
+    document.querySelectorAll('[data-action="temp-pass"]').forEach(el => {
+      el.addEventListener('click', async function() {
+        const username = this.getAttribute('data-username');
+        
+        try {
+          const res = await fetch('/api/admin/users/manage', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, setTempPassword: true })
+          });
+          const data = await res.json();
+          
+          if (data.tempPassword) {
+            // Show password in a modal-like notification
+            window.showNotification?.('success', 'Temporary Password Set', `Password for ${username}: ${data.tempPassword}`);
+            loadUsers();
+          } else {
+            window.showNotification?.('error', 'Error', 'Failed to set temporary password');
+          }
+        } catch (error) {
+          console.error('Failed to set temporary password:', error);
+          window.showNotification?.('error', 'Error', 'Failed to set temporary password');
+        }
+      });
+    });
+
+    // Delete user handlers
+    document.querySelectorAll('[data-action="delete-user"]').forEach(el => {
+      el.addEventListener('click', function() {
+        const username = this.getAttribute('data-username');
+        openDeleteUserModal(username);
+      });
+    });
+  }
+
+  // Modal functions
+  function openCreateUserModal() {
+    const modal = document.getElementById('create-user-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      
+      // Focus on username input
+      const usernameInput = document.getElementById('modal-new-username');
+      if (usernameInput) {
+        setTimeout(() => usernameInput.focus(), 100);
+      }
+    }
+  }
+
+  function closeCreateUserModal() {
+    const modal = document.getElementById('create-user-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      
+      // Clear form and status
+      const form = document.getElementById('create-user-form');
+      if (form) form.reset();
+      
+      const statusEl = document.getElementById('modal-create-status');
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.className = 'mt-4 text-sm';
+      }
+    }
+  }
+
+  // Delete modal functions
+  let userToDelete = '';
+
+  function openDeleteUserModal(username) {
+    userToDelete = username;
+    const modal = document.getElementById('delete-user-modal');
+    const usernameEl = document.getElementById('delete-username');
+    
+    if (modal && usernameEl) {
+      usernameEl.textContent = username;
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeDeleteUserModal() {
+    const modal = document.getElementById('delete-user-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      userToDelete = '';
+      
+      // Clear status
+      const statusEl = document.getElementById('delete-status');
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.className = 'mt-4 text-sm';
+      }
+    }
+  }
+
+  // Make modal functions global
+  window.closeCreateUserModal = closeCreateUserModal;
+  window.closeDeleteUserModal = closeDeleteUserModal;
+
+  // Open modal button handler
+  document.getElementById('open-create-user-modal')?.addEventListener('click', openCreateUserModal);
+
+  // Create user form handler
+  document.getElementById('create-user-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const usernameInput = document.getElementById('modal-new-username');
+    const roleSelect = document.getElementById('modal-new-role');
+    const statusEl = document.getElementById('modal-create-status');
+    const submitBtn = document.getElementById('modal-create-user');
+    
+    const username = usernameInput?.value?.trim() || '';
+    const role = roleSelect?.value || 'moderator';
+    
+    if (!username) {
+      if (statusEl) {
+        statusEl.textContent = 'Please enter a username';
+        statusEl.className = 'mt-4 text-sm text-error-600';
+      }
+      return;
+    }
+    
+    try {
+      // Set loading state
+      if (statusEl) {
+        statusEl.textContent = 'Creating user...';
+        statusEl.className = 'mt-4 text-sm text-gray-500';
+      }
+      if (submitBtn) submitBtn.disabled = true;
+      
+      const res = await fetch('/api/admin/users/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, role })
+      });
+      const data = await res.json();
+      
+      if (data && data.success) {
+        if (statusEl) {
+          statusEl.textContent = `User created! Initial password: ${data.firstPassword}`;
+          statusEl.className = 'mt-4 text-sm text-success-600';
+        }
+        window.showNotification?.('success', 'User Created', `User ${username} created successfully`);
+        
+        loadUsers();
+        
+        // Close modal after short delay
+        setTimeout(() => {
+          closeCreateUserModal();
+        }, 2000);
+      } else {
+        if (statusEl) {
+          statusEl.textContent = data.error || 'Failed to create user';
+          statusEl.className = 'mt-4 text-sm text-error-600';
+        }
+        window.showNotification?.('error', 'Error', data.error || 'Failed to create user');
+      }
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      if (statusEl) {
+        statusEl.textContent = 'Failed to create user';
+        statusEl.className = 'mt-4 text-sm text-error-600';
+      }
+      window.showNotification?.('error', 'Error', 'Failed to create user');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+
+  // Close modal on background click
+  document.getElementById('create-user-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCreateUserModal();
+    }
+  });
+
+  // Delete user confirmation handler
+  document.getElementById('confirm-delete-user')?.addEventListener('click', async function() {
+    if (!userToDelete) return;
+    
+    const statusEl = document.getElementById('delete-status');
+    const confirmBtn = this;
+    
+    try {
+      // Set loading state
+      if (statusEl) {
+        statusEl.textContent = 'Deleting user...';
+        statusEl.className = 'mt-4 text-sm text-gray-500';
+      }
+      if (confirmBtn) confirmBtn.disabled = true;
+      
+      const res = await fetch('/api/admin/users/manage', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: userToDelete })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          window.showNotification?.('success', 'User Deleted', `User ${userToDelete} has been deleted successfully`);
+          loadUsers();
+          closeDeleteUserModal();
+        } else {
+          throw new Error(data.error || 'Failed to delete user');
+        }
+      } else {
+        throw new Error('Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      if (statusEl) {
+        statusEl.textContent = error.message || 'Failed to delete user';
+        statusEl.className = 'mt-4 text-sm text-error-600';
+      }
+      window.showNotification?.('error', 'Error', error.message || 'Failed to delete user');
+    } finally {
+      if (confirmBtn) confirmBtn.disabled = false;
+    }
+  });
+
+  // Close delete modal on background click
+  document.getElementById('delete-user-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeDeleteUserModal();
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeCreateUserModal();
+      closeDeleteUserModal();
+    }
+  });
+
+  // Initial load
+  loadUsers();
+});
+</script>
+
+</Dashboard>

@@ -1,0 +1,77 @@
+---
+interface Props {
+	currentPage: string;
+    loggedInUser: string;
+    role?: 'master' | 'admin' | 'moderator' | '';
+}
+
+const { currentPage, loggedInUser, role = '' } = Astro.props;
+---
+<div id="bg-blur"></div>
+
+<nav>
+  <h1>R5Valk Backend</h1>
+  <hr>
+  <div>
+      <a href="/admin/dashboard" class:list={[
+        { 'active-page': currentPage === 'Dashboard' }
+      ]}>
+        Dashboard
+      </a>
+      {(role === 'master' || role === 'admin' || role === 'moderator') && (
+        <>
+            <a href="/admin/banlist" class:list={[
+                { 'active-page': currentPage === 'Banlist' }
+            ]}>
+                Global Banlist
+            </a>
+            <a href="/admin/users" class:list={[
+                { 'active-page': currentPage === 'Users' }
+            ]}>
+                Users
+            </a>
+            <a href="/admin/userQuery" class:list={[
+                { 'active-page': currentPage === 'UserQuery' }
+            ]}>
+                User Query
+            </a>
+            <a href="/admin/verifiedMods" class:list={[
+                { 'active-page': currentPage === 'Verified Mods' }
+            ]}>
+                Verified Mods
+            </a>
+        </>
+      )}
+      {(role === 'master' || role === 'admin') && (
+        <>
+          <a href="/admin/checksums" class:list={[
+            { 'active-page': currentPage === 'Checksums' }
+          ]}>
+            Checksums
+          </a>
+          <a href="/admin/versions" class:list={[
+            { 'active-page': currentPage === 'Versions' }
+          ]}>
+            Versions
+          </a>
+          {role === 'master' && (
+            <a href="/admin/userManagement" class:list={[
+                { 'active-page': currentPage === 'UserManagement' }
+            ]}>
+                User Management
+            </a>
+          )}
+        </>
+      )}
+  </div>
+  <button class="loggedinas" id="logout-btn">Logged in as: {loggedInUser}</button>
+</nav>
+<script>
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await fetch('/api/admin/auth/logout', { method: 'POST' });
+      window.location.href = '/admin/login';
+    });
+  }
+</script>

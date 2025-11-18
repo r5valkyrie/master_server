@@ -1,0 +1,35 @@
+---
+interface Props {
+	data: {
+        identifier: string;
+        ban_date: Date;
+        ban_expiry_date: string;
+        ban_reason: string;
+        notes: string;
+    };
+}
+
+const { data } = Astro.props;
+---
+<tr class="banlist-entry">
+    <td>{data.identifier}</td>
+    <td>{data.ban_date.toISOString()}</td>
+    <td>{data.ban_expiry_date}</td>
+    <td>{data.ban_reason}</td>
+    <td><textarea cols="30" style="background: transparent; resize:none; border:none;color: white" placeholder="Add a note..." readonly>{data.notes}</textarea></td>
+    <td><button class="btn-primary">Unban</button></td>
+</tr>
+<script>
+    document.querySelectorAll('.btn-primary').forEach(button => {
+        button.addEventListener('click', (ev) => {
+            const row = (ev.target as HTMLElement).closest('tr');
+            if (row) {
+                const identifier = row.querySelectorAll('td')[0].textContent;
+                if(confirm(`really unban ${identifier}?`))
+                {
+                    // Unban logic will be handled later
+                }
+            }
+        });
+    });
+</script>

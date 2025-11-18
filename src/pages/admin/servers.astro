@@ -1,0 +1,588 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+<Dashboard>
+  <!-- Servers Management -->
+  <div id="servers-admin">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Server Management</h1>
+        <p class="page-subtitle">Monitor and manage game servers</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="refresh-servers">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Refresh
+        </button>
+        <button class="btn btn-secondary" id="stats-btn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Statistics
+        </button>
+      </div>
+    </div>
+
+    <!-- Server Statistics Cards -->
+    <div class="stats-grid" id="server-stats">
+      <div class="stat-card">
+        <div class="stat-icon bg-primary-100 text-primary-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Total Servers</div>
+          <div class="stat-value" id="total-servers">-</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon bg-success-100 text-success-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Active Servers</div>
+          <div class="stat-value" id="active-servers">-</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon bg-warning-100 text-warning-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Total Players</div>
+          <div class="stat-value" id="total-players">-</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon bg-info-100 text-info-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Capacity</div>
+          <div class="stat-value" id="total-capacity">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="flex flex-col gap-4 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="search-container">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="search-bar" class="search-input" placeholder="Search servers..." />
+        </div>
+        
+        <div class="flex gap-2">
+          <select id="sort-select" class="form-select form-select-sm">
+            <option value="playerCount">Sort by Players</option>
+            <option value="name">Sort by Name</option>
+            <option value="region">Sort by Region</option>
+            <option value="map">Sort by Map</option>
+            <option value="maxPlayers">Sort by Capacity</option>
+          </select>
+          <select id="order-select" class="form-select form-select-sm">
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Quick Filters -->
+      <div class="flex flex-wrap gap-2">
+        <span class="text-sm text-gray-600">Quick filters:</span>
+        <button class="btn btn-outline btn-sm filter-btn active" data-filter="">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+          </svg>
+          All Servers
+        </button>
+        <button class="btn btn-outline btn-sm filter-btn" data-filter="active">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+          Active
+        </button>
+        <button class="btn btn-outline btn-sm filter-btn" data-filter="empty">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+          </svg>
+          Empty
+        </button>
+        <button class="btn btn-outline btn-sm filter-btn" data-filter="full">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Full
+        </button>
+        <button class="btn btn-outline btn-sm filter-btn" data-filter="password">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Password Protected
+        </button>
+        <button class="btn btn-outline btn-sm filter-btn" data-filter="modded">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+          </svg>
+          Modded
+        </button>
+      </div>
+    </div>
+
+    <!-- Servers Table -->
+    <div class="card">
+      <div class="table-container">
+        <table class="table" id="servers-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Server Name</th>
+              <th>Region</th>
+              <th>Players</th>
+              <th>Map</th>
+              <th>Gamemode</th>
+              <th>Mods</th>
+              <th>IP:Port</th>
+            </tr>
+          </thead>
+          <tbody id="servers-table-body">
+            <!-- Rows will be inserted here by script -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pagination-info">
+          <span id="page-info">Loading...</span>
+        </div>
+        <div class="pagination-controls">
+          <button class="btn btn-outline btn-sm" id="prev-page">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Previous
+          </button>
+          <span id="page-number" class="px-3 py-2 text-sm text-gray-700">Page 1</span>
+          <button class="btn btn-outline btn-sm" id="next-page">
+            Next
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Server Statistics Modal -->
+  <div id="stats-modal" class="modal-overlay hidden">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Detailed Server Statistics</h3>
+        <button class="modal-close" id="close-stats-modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="font-semibold text-lg mb-4">Servers by Region</h4>
+            <div id="region-stats" class="space-y-2">
+              <!-- Region stats will be loaded here -->
+            </div>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-4">Servers by Gamemode</h4>
+            <div id="gamemode-stats" class="space-y-2">
+              <!-- Gamemode stats will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Dashboard>
+
+<script>
+// @ts-nocheck
+document.addEventListener('DOMContentLoaded', function() {
+  let currentPage = 1;
+  const pageSize = 50;
+  let total = 0;
+  let query = '';
+  let currentFilter = '';
+  let sortBy = 'playerCount';
+  let sortOrder = 'desc';
+
+  const searchBar = document.getElementById('search-bar');
+  const sortSelect = document.getElementById('sort-select');
+  const orderSelect = document.getElementById('order-select');
+  const statsModal = document.getElementById('stats-modal');
+
+  // Notification helper
+  function notify(type, title, message) {
+    if (window.showNotification) {
+      window.showNotification(type, title, message);
+    }
+  }
+
+  // Gamemode mapping
+  function getGamemodeName(playlist) {
+    const gamemodes = {
+      'fs_dm': 'Team Deathmatch',
+      'fs_prophunt': 'Prop Hunt',
+      'fs_1v1': '1v1',
+      'fs_duckhunt': 'Duck Hunt',
+      'fs_mantlejumppractice': 'Mantle Jump Practice',
+      'fs_infected': 'Infected',
+      'custom_tdm': 'Custom TDM',
+      'custom_ctf': 'Capture The Flag',
+      'survival': 'Battle Royale',
+      'fs_movementgym': 'Movement Gym',
+      'fs_survival_solos': 'BR Solo'
+    };
+    return gamemodes[playlist] || playlist || 'Unknown';
+  }
+
+  // Map name mapping
+  function getMapName(mapname) {
+    const maps = {
+      'mp_rr_canyonlands_staging': 'Firing Range',
+      'mp_rr_aqueduct': 'Overflow',
+      'mp_rr_aqueduct_night': 'Overflow After Dark',
+      'mp_rr_ashs_redemption': 'Ash\'s Redemption',
+      'mp_rr_canyonlands_64k_x_64k': 'Kings Canyon S1',
+      'mp_rr_canyonlands_mu1': 'Kings Canyon S2',
+      'mp_rr_canyonlands_mu1_night': 'Kings Canyon S2 After Dark',
+      'mp_rr_desertlands_64k_x_64k': 'World\'s Edge',
+      'mp_rr_desertlands_64k_x_64k_nx': 'World\'s Edge After Dark',
+      'mp_rr_desertlands_64k_x_64k_tt': 'World\'s Edge Mirage Voyage',
+      'mp_rr_arena_composite': 'Drop Off',
+      'mp_rr_arena_skygarden': 'Encore',
+      'mp_rr_party_crasher': 'Party Crasher',
+      'mp_lobby': 'Lobby'
+    };
+    return maps[mapname] || mapname || 'Unknown';
+  }
+
+  // Update pagination info
+  function updatePager() {
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const pageInfo = document.getElementById('page-info');
+    const pageNumber = document.getElementById('page-number');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    if (pageInfo) {
+      const start = (currentPage - 1) * pageSize + 1;
+      const end = Math.min(currentPage * pageSize, total);
+      pageInfo.textContent = `Showing ${start}-${end} of ${total} servers`;
+    }
+    
+    if (pageNumber) pageNumber.textContent = `Page ${currentPage} of ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+  }
+
+  // Search with debounce
+  let debounceTimer;
+  if (searchBar) {
+    searchBar.addEventListener('input', function(){
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function(){
+        query = searchBar.value.trim();
+        currentPage = 1;
+        fetchServers();
+      }, 300);
+    });
+  }
+
+  // Sort handlers
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function() {
+      sortBy = this.value;
+      currentPage = 1;
+      fetchServers();
+    });
+  }
+
+  if (orderSelect) {
+    orderSelect.addEventListener('change', function() {
+      sortOrder = this.value;
+      currentPage = 1;
+      fetchServers();
+    });
+  }
+
+  // Fetch and display servers
+  async function fetchServers() {
+    try {
+      let url = `/api/admin/servers?page=${currentPage}&limit=${pageSize}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+      if (query) url += '&q=' + encodeURIComponent(query);
+      if (currentFilter) url += '&filter=' + encodeURIComponent(currentFilter);
+      
+      const response = await fetch(url);
+      const payload = await response.json();
+      
+      if (!payload.success) {
+        notify('error', 'Error', 'Failed to load servers');
+        return;
+      }
+
+      const servers = payload.data || [];
+      total = payload.total || 0;
+      const stats = payload.stats || {};
+      
+      // Update statistics
+      updateStats(stats);
+      
+      const tableBody = document.getElementById('servers-table-body');
+      if (!tableBody) return;
+
+      if (servers.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-8 text-gray-500">
+              <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+              </svg>
+              <p>No servers found</p>
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = servers.map(server => {
+          const playerCount = parseInt(server.playerCount) || 0;
+          const maxPlayers = parseInt(server.maxPlayers) || 0;
+          const isFull = playerCount >= maxPlayers;
+          const isEmpty = playerCount === 0;
+          const hasPassword = server.hasPassword === true || server.hasPassword === 'true';
+          
+          // Status badge
+          let statusBadge;
+          if (isFull) {
+            statusBadge = '<span class="badge badge-error">Full</span>';
+          } else if (isEmpty) {
+            statusBadge = '<span class="badge badge-gray">Empty</span>';
+          } else {
+            statusBadge = '<span class="badge badge-success">Active</span>';
+          }
+          
+          // Password indicator
+          const passwordIcon = hasPassword ? 
+            '<svg class="w-4 h-4 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' :
+            '';
+          
+          // Required mods
+          let requiredMods = [];
+          if (Array.isArray(server.requiredMods)) {
+            requiredMods = server.requiredMods;
+          } else if (typeof server.requiredMods === 'string') {
+            try {
+              const parsed = JSON.parse(server.requiredMods);
+              if (Array.isArray(parsed)) {
+                requiredMods = parsed;
+              }
+            } catch {}
+          }
+          const modsText = requiredMods.length > 0 ? requiredMods.join(', ') : '-';
+          const modsCount = requiredMods.length > 0 ? `<span class="badge badge-info">${requiredMods.length} mods</span>` : '-';
+
+          return `
+            <tr>
+              <td>
+                <div class="flex items-center gap-2">
+                  ${statusBadge}
+                  ${passwordIcon}
+                </div>
+              </td>
+              <td class="font-medium">${server.name || 'Unknown'}</td>
+              <td>${server.region || 'Unknown'}</td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono">${playerCount}/${maxPlayers}</span>
+                  <div class="w-16 bg-gray-200 rounded-full h-2">
+                    <div class="h-2 rounded-full ${isFull ? 'bg-red-500' : isEmpty ? 'bg-gray-400' : 'bg-green-500'}" style="width: ${maxPlayers > 0 ? (playerCount / maxPlayers * 100) : 0}%"></div>
+                  </div>
+                </div>
+              </td>
+              <td>${getMapName(server.map)}</td>
+              <td>${getGamemodeName(server.playlist)}</td>
+              <td class="max-w-32 truncate" title="${modsText}">${modsCount}</td>
+              <td class="font-mono text-sm">${server.ip}:${server.port}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      
+      updatePager();
+      
+    } catch (error) {
+      console.error('Failed to fetch servers:', error);
+      notify('error', 'Error', 'Failed to load servers');
+    }
+  }
+
+  // Update statistics display
+  function updateStats(stats) {
+    document.getElementById('total-servers').textContent = stats.total || 0;
+    document.getElementById('active-servers').textContent = stats.active || 0;
+    document.getElementById('total-players').textContent = stats.totalPlayers || 0;
+    document.getElementById('total-capacity').textContent = `${stats.totalPlayers || 0}/${stats.totalMaxPlayers || 0}`;
+  }
+
+  // Refresh servers
+  document.getElementById('refresh-servers')?.addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Refreshing...
+    `;
+    
+    try {
+      const response = await fetch('/api/admin/servers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'refresh' })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        notify('success', 'Success', `Server list refreshed (${data.serverCount} servers)`);
+        fetchServers();
+      } else {
+        notify('error', 'Error', 'Failed to refresh server list');
+      }
+    } catch (error) {
+      console.error('Refresh failed:', error);
+      notify('error', 'Error', 'Failed to refresh server list');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  });
+
+  // Show detailed statistics
+  document.getElementById('stats-btn')?.addEventListener('click', async function() {
+    try {
+      const response = await fetch('/api/admin/servers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stats' })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        displayDetailedStats(data);
+        statsModal?.classList.remove('hidden');
+      } else {
+        notify('error', 'Error', 'Failed to load detailed statistics');
+      }
+    } catch (error) {
+      console.error('Stats failed:', error);
+      notify('error', 'Error', 'Failed to load detailed statistics');
+    }
+  });
+
+  // Display detailed statistics
+  function displayDetailedStats(data) {
+    const regionStats = document.getElementById('region-stats');
+    const gamemodeStats = document.getElementById('gamemode-stats');
+    
+    if (regionStats) {
+      regionStats.innerHTML = Object.entries(data.regionStats || {})
+        .sort(([,a], [,b]) => b.count - a.count)
+        .map(([region, stats]) => `
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span class="font-medium">${region}</span>
+            <div class="text-sm text-gray-600">
+              ${stats.count} servers, ${stats.players} players
+            </div>
+          </div>
+        `).join('');
+    }
+    
+    if (gamemodeStats) {
+      gamemodeStats.innerHTML = Object.entries(data.gamemodeStats || {})
+        .sort(([,a], [,b]) => b.count - a.count)
+        .map(([gamemode, stats]) => `
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span class="font-medium">${getGamemodeName(gamemode)}</span>
+            <div class="text-sm text-gray-600">
+              ${stats.count} servers, ${stats.players} players
+            </div>
+          </div>
+        `).join('');
+    }
+  }
+
+  // Modal handlers
+  document.getElementById('close-stats-modal')?.addEventListener('click', function() {
+    statsModal?.classList.add('hidden');
+  });
+
+  statsModal?.addEventListener('click', function(e) {
+    if (e.target === statsModal) {
+      statsModal.classList.add('hidden');
+    }
+  });
+
+  // Pagination handlers
+  document.getElementById('prev-page')?.addEventListener('click', function() {
+    if (currentPage > 1) {
+      currentPage--;
+      fetchServers();
+    }
+  });
+
+  document.getElementById('next-page')?.addEventListener('click', function() {
+    currentPage++;
+    fetchServers();
+  });
+
+  // Quick filter handlers
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const filter = this.dataset.filter;
+      
+      // Update button states
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('active');
+      });
+      this.classList.add('active');
+      
+      // Update filter and reset to page 1
+      currentFilter = filter;
+      currentPage = 1;
+      fetchServers();
+    });
+  });
+
+  // Initial load
+  fetchServers();
+});
+</script>
+</Dashboard>

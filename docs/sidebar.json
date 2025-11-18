@@ -1,0 +1,18 @@
+{
+    "startPage": "welcome",
+    "sidebar": [
+        {
+            "title": "Introduction",
+            "pages": [
+                {
+                    "title": "Welcome",
+                    "slug": "welcome"
+                },
+                {
+                    "title": "Getting Started",
+                    "slug": "getting-started"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Contributor Name",
+        "avatar": "https://github.com/github.png",
+        "description": "This is a short description of the contributor and their role in the project."
+    },
+    {
+        "name": "Another Contributor",
+        "avatar": "https://github.com/github.png",
+        "description": "Here is another contributor who has helped make this project possible."
+    }
+]

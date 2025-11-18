@@ -1,0 +1,124 @@
+import type { APIRoute } from 'astro';
+import { getPool } from '../../../lib/db';
+
+export const GET: APIRoute = async ({ request }) => {
+    try {
+        const url = new URL(request.url);
+        const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10)));
+        
+        const pool = getPool();
+        if (!pool) throw new Error("Database not initialized");
+
+        // Get recent activities from different sources
+        const activities = [];
+
+        // 1. Recent user logins (last 24 hours)
+        const [recentLogins] = await pool.execute(`
+            SELECT 
+                'login' as activity_type,
+                steam_id,
+                name,
+                last_seen as timestamp,
+                'User logged in' as description
+            FROM users 
+            WHERE last_seen >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            ORDER BY last_seen DESC 
+            LIMIT ?
+        `, [Math.floor(limit * 0.4)]);
+
+        // 2. Recent bans (last 7 days) 
+        const [recentBans] = await pool.execute(`
+            SELECT 
+                'ban' as activity_type,
+                b.identifier as steam_id,
+                COALESCE(u.name, 'Unknown User') as name,
+                b.created_at as timestamp,
+                CONCAT('User banned: ', COALESCE(b.ban_reason, 'No reason specified')) as description,
+                b.ban_reason
+            FROM banned_users b
+            LEFT JOIN users u ON u.steam_id COLLATE utf8mb4_unicode_ci = b.identifier COLLATE utf8mb4_unicode_ci
+            WHERE b.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            ORDER BY b.created_at DESC 
+            LIMIT ?
+        `, [Math.floor(limit * 0.3)]);
+
+        // 3. Recent username changes (last 3 days)
+        const [recentNameChanges] = await pool.execute(`
+            SELECT 
+                'name_change' as activity_type,
+                h.steam_id,
+                h.name,
+                h.last_seen as timestamp,
+                CONCAT('Username updated to: ', h.name) as description
+            FROM username_history h
+            WHERE h.last_seen >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+            AND h.steam_id IS NOT NULL 
+            AND h.name IS NOT NULL
+            ORDER BY h.last_seen DESC 
+            LIMIT ?
+        `, [Math.floor(limit * 0.2)]);
+
+        // 4. New user registrations (last 7 days)
+        const [newUsers] = await pool.execute(`
+            SELECT 
+                'registration' as activity_type,
+                steam_id,
+                name,
+                first_seen as timestamp,
+                'New user registered' as description
+            FROM users 
+            WHERE first_seen >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            ORDER BY first_seen DESC 
+            LIMIT ?
+        `, [Math.floor(limit * 0.1)]);
+
+        // Combine all activities
+        activities.push(...(recentLogins as any[]));
+        activities.push(...(recentBans as any[]));
+        activities.push(...(recentNameChanges as any[]));
+        activities.push(...(newUsers as any[]));
+
+        // Sort by timestamp descending and limit
+        activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        const limitedActivities = activities.slice(0, limit);
+
+        // Format the response
+        const formattedActivities = limitedActivities.map(activity => ({
+            id: `${activity.activity_type}_${activity.steam_id}_${new Date(activity.timestamp).getTime()}`,
+            type: activity.activity_type,
+            user: {
+                steam_id: activity.steam_id,
+                name: activity.name
+            },
+            description: activity.description,
+            timestamp: activity.timestamp,
+            metadata: {
+                ban_reason: activity.ban_reason || null
+            }
+        }));
+
+        return new Response(JSON.stringify({
+            success: true,
+            activities: formattedActivities,
+            total: formattedActivities.length
+        }), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+    } catch (error) {
+        console.error('Recent Activity API Error:', error);
+        return new Response(JSON.stringify({
+            success: false,
+            message: 'Failed to fetch recent activity',
+            activities: []
+        }), {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    }
+};

@@ -1,0 +1,497 @@
+---
+import DashboardLayout from '../../layouts/Dashboard.astro';
+import ModernChart from '../../components/admin/ModernChart.astro';
+---
+<DashboardLayout>
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon primary">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value" id="totalUsers">-</div>
+        <div class="stat-change" id="totalUsersChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon primary">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Online Players</div>
+        <div class="stat-value" id="currentPlayers">-</div>
+        <div class="stat-change" id="currentPlayersChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">New Users Today</div>
+        <div class="stat-value" id="newUsersToday">-</div>
+        <div class="stat-change" id="newUsersTodayChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Servers</div>
+        <div class="stat-value" id="totalServers">-</div>
+        <div class="stat-change" id="totalServersChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Master Server Uptime</div>
+        <div class="stat-value" id="serverUptime">-</div>
+        <div class="stat-change" id="serverUptimeChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" id="systemHealthIcon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">System Health</div>
+        <div class="stat-value" id="systemHealthStatus">-</div>
+        <div class="stat-change" id="systemHealthChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Bans Today</div>
+        <div class="stat-value" id="bansToday">-</div>
+        <div class="stat-change" id="bansTodayChange">Loading...</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon error">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636"></path>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Active Bans</div>
+        <div class="stat-value" id="activeBans">-</div>
+        <div class="stat-change" id="activeBansChange">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-2">
+    <ModernChart chartId="players" title="Players Over Time" timeRange={14} />
+    <ModernChart chartId="bans" title="Bans Over Time" timeRange={120} />
+  </div>
+
+
+
+  <!-- Recent Activity -->
+  <div class="card mt-lg">
+    <div class="card-header">
+      <h3 class="card-title">Recent Activity</h3>
+      <button class="btn btn-outline btn-sm" id="refreshActivity">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Refresh
+      </button>
+    </div>
+    <div class="card-content">
+      <div id="activity-feed" class="space-y-4">
+        <!-- Activity items will be loaded here -->
+        <div class="text-center text-gray-500 py-8">
+          <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p>Loading recent activity...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+// @ts-nocheck
+(function(){
+  // Role permissions
+  let role = '';
+  try {
+    const bodyRole = document.querySelector('[data-role]')?.getAttribute('data-role');
+    role = bodyRole || '';
+  } catch {}
+
+  // Load dashboard stats
+  async function loadDashboardStats() {
+    try {
+      // These would typically come from dedicated API endpoints
+      // For now, using existing endpoints to gather stats
+      
+      // Load user count (placeholder - would need dedicated endpoint)
+      document.getElementById('totalUsers').textContent = '0';
+      document.getElementById('totalUsersChange').textContent = 'No data available';
+      
+      // Load active bans
+      const bansResponse = await fetch('/api/admin/banlist?page=1&limit=1');
+      const bansData = await bansResponse.json();
+      document.getElementById('activeBans').textContent = bansData.total || '0';
+      document.getElementById('activeBansChange').textContent = `${bansData.total || 0} active`;
+      
+      // Placeholder for other stats
+      document.getElementById('currentPlayers').textContent = '0';
+      document.getElementById('currentPlayersChange').textContent = 'No data available';
+      
+      document.getElementById('totalServers').textContent = '0';
+      document.getElementById('totalServersChange').textContent = 'No data available';
+      
+      // Load server uptime
+      await loadServerUptime();
+      
+      // Load new stats
+      await loadPlayerStats();
+      await loadBanStats();
+      await loadUserGrowthStats();
+      await loadSystemHealth();
+      
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+    }
+  }
+
+  // Load server uptime
+  async function loadServerUptime() {
+    try {
+      const response = await fetch('/api/admin/uptime');
+      const data = await response.json();
+      
+      if (data.success && data.uptime) {
+        document.getElementById('serverUptime').textContent = data.uptime.formatted;
+        document.getElementById('serverUptimeChange').textContent = 'Since last restart';
+      } else {
+        document.getElementById('serverUptime').textContent = 'Error';
+        document.getElementById('serverUptimeChange').textContent = 'Failed to load';
+      }
+    } catch (error) {
+      console.error('Failed to load server uptime:', error);
+      document.getElementById('serverUptime').textContent = 'Error';
+      document.getElementById('serverUptimeChange').textContent = 'Connection failed';
+    }
+  }
+
+  // Load player statistics
+  async function loadPlayerStats() {
+    try {
+      const response = await fetch('/api/admin/playerStats');
+      const data = await response.json();
+      
+      if (data.success && data.playerStats) {
+        const stats = data.playerStats;
+        document.getElementById('currentPlayers').textContent = stats.current.onlinePlayers.toString();
+        document.getElementById('currentPlayersChange').textContent = `Peak today: ${stats.peaks.todayPeak}`;
+        
+        // Update servers count
+        document.getElementById('totalServers').textContent = stats.current.activeServers.toString();
+        document.getElementById('totalServersChange').textContent = `${stats.current.capacityUsed}% capacity used`;
+      } else {
+        document.getElementById('currentPlayers').textContent = 'Error';
+        document.getElementById('currentPlayersChange').textContent = 'Failed to load';
+      }
+    } catch (error) {
+      console.error('Failed to load player stats:', error);
+      document.getElementById('currentPlayers').textContent = 'Error';
+      document.getElementById('currentPlayersChange').textContent = 'Connection failed';
+    }
+  }
+
+  // Load ban statistics
+  async function loadBanStats() {
+    try {
+      const response = await fetch('/api/admin/banStats');
+      const data = await response.json();
+      
+      if (data.success && data.banStats) {
+        const stats = data.banStats;
+        document.getElementById('bansToday').textContent = stats.current.last24Hours.toString();
+        document.getElementById('bansTodayChange').textContent = `${stats.trends.averageDaily}/day avg`;
+        
+        // Update existing active bans stat
+        document.getElementById('activeBans').textContent = stats.current.last30Days.toString();
+        document.getElementById('activeBansChange').textContent = `${stats.current.last7Days} this week`;
+      } else {
+        document.getElementById('bansToday').textContent = 'Error';
+        document.getElementById('bansTodayChange').textContent = 'Failed to load';
+      }
+    } catch (error) {
+      console.error('Failed to load ban stats:', error);
+      document.getElementById('bansToday').textContent = 'Error';
+      document.getElementById('bansTodayChange').textContent = 'Connection failed';
+    }
+  }
+
+  // Load user growth statistics
+  async function loadUserGrowthStats() {
+    try {
+      const response = await fetch('/api/admin/userGrowth');
+      const data = await response.json();
+      
+      if (data.success && data.userGrowth) {
+        const stats = data.userGrowth;
+        document.getElementById('newUsersToday').textContent = stats.current.newToday.toString();
+        document.getElementById('newUsersTodayChange').textContent = `${stats.current.newThisWeek} this week`;
+        
+        // Update existing total users stat
+        document.getElementById('totalUsers').textContent = stats.current.totalUsers.toString();
+        document.getElementById('totalUsersChange').textContent = `${stats.current.activeUsers} active (7d)`;
+      } else {
+        document.getElementById('newUsersToday').textContent = 'Error';
+        document.getElementById('newUsersTodayChange').textContent = 'Failed to load';
+      }
+    } catch (error) {
+      console.error('Failed to load user growth stats:', error);
+      document.getElementById('newUsersToday').textContent = 'Error';
+      document.getElementById('newUsersTodayChange').textContent = 'Connection failed';
+    }
+  }
+
+  // Load system health
+  async function loadSystemHealth() {
+    try {
+      const response = await fetch('/api/admin/systemHealth');
+      const data = await response.json();
+      
+      if (data.success && data.systemHealth) {
+        const health = data.systemHealth;
+        const isHealthy = health.overallStatus === 'healthy';
+        
+        document.getElementById('systemHealthStatus').textContent = isHealthy ? 'Healthy' : 'Degraded';
+        document.getElementById('systemHealthChange').textContent = `DB: ${health.database.status}, Redis: ${health.redis.status}`;
+        
+        // Update icon color based on health
+        const icon = document.getElementById('systemHealthIcon');
+        if (icon) {
+          icon.className = isHealthy ? 'stat-icon success' : 'stat-icon error';
+        }
+      } else {
+        document.getElementById('systemHealthStatus').textContent = 'Unknown';
+        document.getElementById('systemHealthChange').textContent = 'Health check failed';
+        
+        const icon = document.getElementById('systemHealthIcon');
+        if (icon) {
+          icon.className = 'stat-icon warning';
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load system health:', error);
+      document.getElementById('systemHealthStatus').textContent = 'Error';
+      document.getElementById('systemHealthChange').textContent = 'Connection failed';
+      
+      const icon = document.getElementById('systemHealthIcon');
+      if (icon) {
+        icon.className = 'stat-icon error';
+      }
+    }
+  }
+
+  // Recent Activity - Real data from database
+  async function loadRecentActivity() {
+    const feed = document.getElementById('activity-feed');
+    if (!feed) return;
+    
+    try {
+      // Show loading state
+      feed.innerHTML = `
+        <div class="text-center py-4 text-gray-500">
+          <svg class="w-8 h-8 mx-auto mb-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <p class="text-sm">Loading recent activity...</p>
+        </div>
+      `;
+
+      const response = await fetch('/api/admin/recentActivity?limit=15');
+      const data = await response.json();
+      
+      if (!data.success || !data.activities || data.activities.length === 0) {
+        feed.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p>No recent activity</p>
+          </div>
+        `;
+        return;
+      }
+
+      const activities = data.activities;
+      
+      feed.innerHTML = activities.map(activity => {
+        const timeAgo = getTimeAgo(new Date(activity.timestamp));
+        const { bgColor, textColor, icon } = getActivityIcon(activity.type);
+        
+        return `
+          <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-${bgColor} flex items-center justify-center">
+              <svg class="w-4 h-4 text-${textColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"></path>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900">${activity.description}</p>
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <span>${activity.user.name}</span>
+                <span>•</span>
+                <span>${timeAgo}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+    } catch (error) {
+      console.error('Failed to load recent activity:', error);
+      feed.innerHTML = `
+        <div class="text-center py-8 text-error-500">
+          <svg class="w-12 h-12 mx-auto text-error-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L5.36 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <p>Failed to load activity</p>
+        </div>
+      `;
+    }
+  }
+
+  // Helper function to get activity icon and colors
+  function getActivityIcon(type) {
+    switch (type) {
+      case 'ban':
+        return {
+          bgColor: 'error-100',
+          textColor: 'error-600',
+          icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636'
+        };
+      case 'login':
+        return {
+          bgColor: 'primary-100',
+          textColor: 'primary-600',
+          icon: 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
+        };
+      case 'registration':
+        return {
+          bgColor: 'success-100',
+          textColor: 'success-600',
+          icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z'
+        };
+      case 'name_change':
+        return {
+          bgColor: 'warning-100',
+          textColor: 'warning-600',
+          icon: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'
+        };
+      default:
+        return {
+          bgColor: 'gray-100',
+          textColor: 'gray-600',
+          icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+        };
+    }
+  }
+
+  // Helper function to format relative time
+  function getTimeAgo(date) {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} day${days === 1 ? '' : 's'} ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+
+  // Auto-refresh uptime every 30 seconds
+  let uptimeRefreshInterval;
+  
+  function startUptimeRefresh() {
+    // Clear any existing interval
+    if (uptimeRefreshInterval) {
+      clearInterval(uptimeRefreshInterval);
+    }
+    
+    // Set up new interval to refresh uptime every 30 seconds
+    uptimeRefreshInterval = setInterval(async () => {
+      await loadServerUptime();
+    }, 30000); // 30 seconds
+  }
+
+  function stopUptimeRefresh() {
+    if (uptimeRefreshInterval) {
+      clearInterval(uptimeRefreshInterval);
+      uptimeRefreshInterval = null;
+    }
+  }
+
+  // Event listeners
+  document.getElementById('refreshActivity')?.addEventListener('click', loadRecentActivity);
+
+  // Initialize dashboard
+  function initDashboard() {
+    loadDashboardStats();
+    loadRecentActivity();
+    startUptimeRefresh();
+  }
+
+  // Clean up intervals when page is unloaded
+  window.addEventListener('beforeunload', () => {
+    stopUptimeRefresh();
+  });
+
+  // Start when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  } else {
+    initDashboard();
+  }
+})();
+</script>

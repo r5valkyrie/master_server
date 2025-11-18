@@ -1,0 +1,482 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+<Dashboard>
+  <!-- Banlist Management -->
+  <div id="banlist-list">
+    <!-- Header Actions -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div class="search-container">
+        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input type="text" id="search-bar" class="search-input" placeholder="Search banned users..." />
+      </div>
+      <button class="btn btn-primary" id="add-ban-btn">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Ban
+      </button>
+    </div>
+
+    <!-- Banlist Table -->
+    <div class="card">
+      <div class="table-container">
+        <table class="table" id="banlist-table">
+          <thead>
+            <tr>
+              <th>Identifier</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Reason</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="banlist-table-body">
+            <!-- Rows will be inserted here by script -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pagination-info">
+          <span id="page-info">Loading...</span>
+        </div>
+        <div class="pagination-controls">
+          <button class="btn btn-outline btn-sm" id="prev-page">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Previous
+          </button>
+          <span id="page-number" class="px-3 py-2 text-sm text-gray-700">Page 1</span>
+          <button class="btn btn-outline btn-sm" id="next-page">
+            Next
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Ban Modal -->
+  <div id="banlist-add" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Ban</h3>
+        <button class="modal-close" id="close-add-modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <form id="banlist-add-form">
+          <div class="form-group">
+            <label class="form-label" for="banTypeInput">Ban Type</label>
+            <select id="banTypeInput" class="form-select">
+              <option value="0">Steam ID</option>
+              <option value="1">Origin ID</option>
+              <option value="2">IP Address</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="identifierInput">Identifier</label>
+            <input type="text" id="identifierInput" class="form-input" required placeholder="Enter Steam ID, Origin ID, or IP address">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="reasonInput">Reason</label>
+            <input type="text" id="reasonInput" class="form-input" required placeholder="Reason for ban">
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="permabanInput" class="form-checkbox">
+              <span class="form-label mb-0">Permanent Ban</span>
+            </label>
+          </div>
+          
+          <div class="form-group" id="end-date-group">
+            <label class="form-label" for="end-date-input">End Date</label>
+            <input type="datetime-local" id="end-date-input" class="form-input">
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-add-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Ban</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Ban Modal -->
+  <div id="banlist-edit" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Ban</h3>
+        <button class="modal-close" id="close-edit-modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <form id="banlist-edit-form">
+          <div class="form-group">
+            <label class="form-label" for="edit-identifier">Identifier</label>
+            <input type="text" id="edit-identifier" class="form-input" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="edit-reason">Reason</label>
+            <input type="text" id="edit-reason" class="form-input" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="edit-permanent" class="form-checkbox">
+              <span class="form-label mb-0">Permanent Ban</span>
+            </label>
+          </div>
+          
+          <div class="form-group" id="edit-end-date-group">
+            <label class="form-label" for="edit-end-date">End Date</label>
+            <input type="datetime-local" id="edit-end-date" class="form-input">
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Ban</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</Dashboard>
+
+<script>
+// @ts-nocheck
+document.addEventListener('DOMContentLoaded', function () {
+  let currentPage = 1;
+  const pageSize = 50;
+  let total = 0;
+  let query = '';
+
+  // Modal elements
+  const addModal = document.getElementById('banlist-add');
+  const editModal = document.getElementById('banlist-edit');
+  const addBtn = document.getElementById('add-ban-btn');
+  const searchBar = document.getElementById('search-bar');
+
+  // Pagination update
+  function updatePager() {
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const pageInfo = document.getElementById('page-info');
+    const pageNumber = document.getElementById('page-number');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    if (pageInfo) {
+      const start = (currentPage - 1) * pageSize + 1;
+      const end = Math.min(currentPage * pageSize, total);
+      pageInfo.textContent = `Showing ${start}-${end} of ${total} results`;
+    }
+    
+    if (pageNumber) pageNumber.textContent = `Page ${currentPage} of ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+  }
+
+  // Show success notification
+  function showSuccess(message) {
+    window.showNotification?.('success', 'Success', message);
+  }
+
+  function showError(message) {
+    window.showNotification?.('error', 'Error', message);
+  }
+
+  // Modal management
+  function openModal(modal) {
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function closeModal(modal) {
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // Search functionality
+  if (searchBar) {
+    let debounceTimer;
+    searchBar.addEventListener('input', function(){
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function(){
+        query = searchBar.value.trim();
+        currentPage = 1;
+        fetchBanList();
+      }, 300);
+    });
+  }
+
+  // Fetch and display ban list
+  async function fetchBanList() {
+    try {
+      const url = `/api/admin/banlist?page=${currentPage}&limit=${pageSize}${query ? '&q=' + encodeURIComponent(query) : ''}`;
+      const response = await fetch(url);
+      const payload = await response.json();
+      const banlist = payload.data || [];
+      total = payload.total || 0;
+      
+      const tableBody = document.getElementById('banlist-table-body');
+      if (!tableBody) return;
+
+      if (banlist.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-8 text-gray-500">
+              <div class="flex flex-col items-center">
+                <svg class="w-12 h-12 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p>No bans found</p>
+                ${query ? '<p class="text-sm">Try adjusting your search criteria</p>' : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = banlist.map(bannedUser => {
+          const startTime = bannedUser.ban_date ? new Date(bannedUser.ban_date).toLocaleString() : '';
+          const endTime = bannedUser.ban_expiry_date ? new Date(bannedUser.ban_expiry_date).toLocaleString() : 'Permanent';
+          
+          return `
+            <tr>
+              <td class="font-mono text-sm">${bannedUser.identifier || ''}</td>
+              <td class="text-sm">${startTime}</td>
+              <td class="text-sm">${endTime}</td>
+              <td class="text-sm">${bannedUser.ban_reason || ''}</td>
+              <td class="text-sm">${bannedUser.notes || ''}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="btn btn-outline btn-sm btn-edit" data-identifier="${bannedUser.identifier}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Edit
+                  </button>
+                  <button class="btn btn-danger btn-sm btn-unban" data-identifier="${bannedUser.identifier}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Unban
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Attach event handlers
+        attachRowHandlers();
+      }
+
+      updatePager();
+    } catch (error) {
+      console.error('Failed to fetch ban list:', error);
+      showError('Failed to load ban list');
+    }
+  }
+
+  // Attach handlers to table rows
+  function attachRowHandlers() {
+    const tableBody = document.getElementById('banlist-table-body');
+    if (!tableBody) return;
+
+    // Unban buttons
+    tableBody.querySelectorAll('.btn-unban').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const identifier = this.dataset.identifier;
+        if (!identifier) return;
+        
+        if (!confirm(`Are you sure you want to unban ${identifier}?`)) return;
+        
+        try {
+          const res = await fetch(`/api/admin/banlist?identifier=${encodeURIComponent(identifier)}`, { 
+            method: 'DELETE' 
+          });
+          
+          if (res.ok) {
+            showSuccess('User unbanned successfully');
+            fetchBanList();
+          } else {
+            showError('Failed to unban user');
+          }
+        } catch (error) {
+          console.error('Unban error:', error);
+          showError('Failed to unban user');
+        }
+      });
+    });
+
+    // Edit buttons
+    tableBody.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const cells = row.querySelectorAll('td');
+        
+        const identifier = cells[0].textContent.trim();
+        const reason = cells[3].textContent.trim();
+        const endTime = cells[2].textContent.trim();
+        const isPermanent = endTime === 'Permanent';
+
+        // Populate edit form
+        document.getElementById('edit-identifier').value = identifier;
+        document.getElementById('edit-reason').value = reason;
+        document.getElementById('edit-permanent').checked = isPermanent;
+        
+        const endDateInput = document.getElementById('edit-end-date');
+        const endDateGroup = document.getElementById('edit-end-date-group');
+        
+        if (isPermanent) {
+          endDateInput.value = '';
+          endDateGroup.style.display = 'none';
+        } else {
+          endDateGroup.style.display = 'block';
+          // Convert display date back to datetime-local format if needed
+        }
+
+        openModal(editModal);
+      });
+    });
+  }
+
+  // Add ban modal handlers
+  if (addBtn) {
+    addBtn.addEventListener('click', () => openModal(addModal));
+  }
+
+  // Permanent ban checkbox handlers
+  function setupPermanentBanToggle(checkboxId, dateGroupId) {
+    const checkbox = document.getElementById(checkboxId);
+    const dateGroup = document.getElementById(dateGroupId);
+    
+    if (checkbox && dateGroup) {
+      checkbox.addEventListener('change', function() {
+        dateGroup.style.display = this.checked ? 'none' : 'block';
+      });
+    }
+  }
+
+  setupPermanentBanToggle('permabanInput', 'end-date-group');
+  setupPermanentBanToggle('edit-permanent', 'edit-end-date-group');
+
+  // Form submissions
+  const addForm = document.getElementById('banlist-add-form');
+  if (addForm) {
+    addForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        banType: parseInt(document.getElementById('banTypeInput').value),
+        identifier: document.getElementById('identifierInput').value.trim(),
+        reason: document.getElementById('reasonInput').value.trim(),
+        permanent: document.getElementById('permabanInput').checked,
+        endDate: document.getElementById('permabanInput').checked ? null : document.getElementById('end-date-input').value
+      };
+
+      try {
+        const response = await fetch('/api/admin/banlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          showSuccess('Ban added successfully');
+          closeModal(addModal);
+          addForm.reset();
+          fetchBanList();
+        } else {
+          showError('Failed to add ban');
+        }
+      } catch (error) {
+        console.error('Add ban error:', error);
+        showError('Failed to add ban');
+      }
+    });
+  }
+
+  const editForm = document.getElementById('banlist-edit-form');
+  if (editForm) {
+    editForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        identifier: document.getElementById('edit-identifier').value,
+        reason: document.getElementById('edit-reason').value.trim(),
+        endDate: document.getElementById('edit-permanent').checked ? null : document.getElementById('edit-end-date').value
+      };
+
+      try {
+        const response = await fetch('/api/admin/banlist', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          showSuccess('Ban updated successfully');
+          closeModal(editModal);
+          fetchBanList();
+        } else {
+          showError('Failed to update ban');
+        }
+      } catch (error) {
+        console.error('Edit ban error:', error);
+        showError('Failed to update ban');
+      }
+    });
+  }
+
+  // Modal close handlers
+  document.querySelectorAll('.modal-close, #cancel-add-btn, #cancel-edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      closeModal(addModal);
+      closeModal(editModal);
+    });
+  });
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        closeModal(overlay);
+      }
+    });
+  });
+
+  // Pagination handlers
+  document.getElementById('prev-page')?.addEventListener('click', function() {
+    if (currentPage > 1) {
+      currentPage--;
+      fetchBanList();
+    }
+  });
+
+  document.getElementById('next-page')?.addEventListener('click', function() {
+    currentPage++;
+    fetchBanList();
+  });
+
+  // Initial load
+  fetchBanList();
+});
+</script>

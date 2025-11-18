@@ -1,0 +1,336 @@
+---
+import AuthLayout from '../../layouts/Auth.astro';
+---
+<AuthLayout>
+  <!-- Login Form -->
+  <form id="login-form" class="auth-form">
+    <div id="login-panel" class="auth-panel">
+      <div class="form-group">
+        <label for="username" class="form-label">
+          <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          Username
+        </label>
+        <input id="username" name="username" type="text" class="form-input" autocomplete="username" placeholder="Enter your username" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">
+          <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          Password
+        </label>
+        <div class="password-field">
+          <input id="password" name="password" type="password" class="form-input" autocomplete="current-password" placeholder="Enter your password" required />
+          <button type="button" id="toggle-password" class="password-toggle">
+            <svg class="toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <button type="submit" id="login-btn" class="btn btn-primary btn-full">
+        <span class="btn-text">Sign in</span>
+        <svg class="btn-spinner hidden" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="login-error" class="alert alert-error hidden">
+      <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L5.36 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      <div class="alert-content">
+        <div class="alert-title">Authentication Failed</div>
+        <div class="alert-message"></div>
+      </div>
+    </div>
+
+    <!-- Password Change Panel -->
+    <div id="change-panel" class="auth-panel hidden">
+      <div class="change-header">
+        <svg class="change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        <div>
+          <h3 class="change-title">Set New Password</h3>
+          <p class="change-subtitle">Please create a new password to continue.</p>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="newpass" class="form-label">New Password</label>
+        <input id="newpass" name="newpass" type="password" class="form-input" autocomplete="new-password" placeholder="Enter new password" />
+      </div>
+      
+      <div class="form-group">
+        <label for="newpass2" class="form-label">Confirm Password</label>
+        <input id="newpass2" name="newpass2" type="password" class="form-input" autocomplete="new-password" placeholder="Confirm new password" />
+      </div>
+      
+      <button type="button" id="change-pass-btn" class="btn btn-primary btn-full">
+        <span class="btn-text">Update Password & Sign In</span>
+        <svg class="btn-spinner hidden" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </button>
+    </div>
+  </form>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('Login page JavaScript loaded'); // Debug log
+  
+  // Elements
+  const form = document.getElementById('login-form');
+  const errorEl = document.getElementById('login-error');
+  const loginPanel = document.getElementById('login-panel');
+  const changePanel = document.getElementById('change-panel');
+  const loginBtn = document.getElementById('login-btn');
+  const changeBtn = document.getElementById('change-pass-btn');
+  const togglePassword = document.getElementById('toggle-password');
+  const passwordInput = document.getElementById('password');
+  
+  console.log('Form element found:', !!form); // Debug log
+  console.log('Login button found:', !!loginBtn); // Debug log
+  
+  if (!form) {
+    console.error('Login form not found!');
+    return;
+  }
+  
+  // Password visibility toggle
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+      
+      const icon = togglePassword.querySelector('.toggle-icon');
+      if (type === 'text') {
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+        `;
+      } else {
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        `;
+      }
+    });
+  }
+  
+  // Show error function
+  function showError(message, title = 'Authentication Failed') {
+    if (!errorEl) return;
+    
+    const titleEl = errorEl.querySelector('.alert-title');
+    const messageEl = errorEl.querySelector('.alert-message');
+    
+    if (titleEl) titleEl.textContent = title;
+    if (messageEl) messageEl.textContent = message;
+    
+    errorEl.classList.remove('hidden');
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  
+  // Hide error function
+  function hideError() {
+    if (errorEl) errorEl.classList.add('hidden');
+  }
+  
+  // Set loading state
+  function setLoading(button, loading) {
+    if (!button) return;
+    
+    const text = button.querySelector('.btn-text');
+    const spinner = button.querySelector('.btn-spinner');
+    
+    if (loading) {
+      button.disabled = true;
+      if (text) text.style.opacity = '0.5';
+      if (spinner) spinner.classList.remove('hidden');
+    } else {
+      button.disabled = false;
+      if (text) text.style.opacity = '1';
+      if (spinner) spinner.classList.add('hidden');
+    }
+  }
+  
+  // Panel transition
+  function switchPanel(hidePanel, showPanel) {
+    if (hidePanel) {
+      hidePanel.style.opacity = '0';
+      setTimeout(() => hidePanel.classList.add('hidden'), 200);
+    }
+    if (showPanel) {
+      setTimeout(() => {
+        showPanel.classList.remove('hidden');
+        showPanel.style.opacity = '1';
+      }, hidePanel ? 200 : 0);
+    }
+  }
+  
+  // Test button click first
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function(e) {
+      console.log('Login button clicked!'); // Debug log
+    });
+  }
+
+  // Main login form submission
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    console.log('Form submitted!'); // Debug log
+    hideError();
+    
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const username = (usernameInput?.value || '').trim();
+    const password = passwordInput?.value || '';
+    
+    console.log('Login attempt for username:', username); // Debug log
+    
+    if (!username || !password) {
+      showError('Please enter both username and password');
+      return;
+    }
+    
+    setLoading(loginBtn, true);
+    
+    try {
+      console.log('Sending login request to:', '/api/admin/auth/login'); // Debug log
+      
+      const res = await fetch('/api/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      console.log('Login response status:', res.status); // Debug log
+      
+      let data = {};
+      try { 
+        data = await res.json(); 
+        console.log('Login response data:', data); // Debug log
+      } catch (e) {
+        console.error('Failed to parse response JSON:', e); // Debug log
+        throw new Error('Invalid server response');
+      }
+      
+      if (!res.ok || !data.success) {
+        console.error('Login failed:', data.error); // Debug log
+        throw new Error(data.error || 'Login failed');
+      }
+      
+      if (data.mustChangePassword) {
+        console.log('Password change required'); // Debug log
+        // Switch to password change panel
+        switchPanel(loginPanel, changePanel);
+        setupPasswordChange(username);
+      } else {
+        console.log('Login successful, redirecting to dashboard'); // Debug log
+        // Successful login
+        window.location.href = '/admin/dashboard';
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error); // Debug log
+      showError(error.message || 'Network error occurred');
+    } finally {
+      setLoading(loginBtn, false);
+    }
+  });
+  
+  // Password change setup
+  function setupPasswordChange(username: string) {
+    if (!changeBtn) return;
+    
+    // Remove any existing event listeners by cloning the element (safer approach)
+    const parent = changeBtn.parentNode;
+    if (!parent) {
+      console.error('Change button parent node is null');
+      return;
+    }
+    
+    const newChangeBtn = changeBtn.cloneNode(true);
+    parent.replaceChild(newChangeBtn, changeBtn);
+    
+    // Update the reference to the new button
+    const updatedChangeBtn = document.getElementById('change-pass-btn');
+    if (!updatedChangeBtn) {
+      console.error('Could not find updated change button');
+      return;
+    }
+    
+    updatedChangeBtn.addEventListener('click', async function() {
+      hideError();
+      
+      const newpass = (document.getElementById('newpass') as HTMLInputElement)?.value || '';
+      const newpass2 = (document.getElementById('newpass2') as HTMLInputElement)?.value || '';
+      
+      if (!newpass.trim()) {
+        showError('Please enter a new password', 'Validation Error');
+        document.getElementById('newpass')?.focus();
+        return;
+      }
+      
+      if (newpass.length < 8) {
+        showError('Password must be at least 8 characters long', 'Validation Error');
+        document.getElementById('newpass')?.focus();
+        return;
+      }
+      
+      if (!newpass2.trim()) {
+        showError('Please confirm your password', 'Validation Error');
+        document.getElementById('newpass2')?.focus();
+        return;
+      }
+      
+      if (newpass !== newpass2) {
+        showError('Passwords do not match', 'Validation Error');
+        document.getElementById('newpass2')?.focus();
+        return;
+      }
+      
+      setLoading(updatedChangeBtn, true);
+      
+      try {
+        const res = await fetch('/api/admin/auth/changePassword', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, newPassword: newpass })
+        });
+        
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error('Invalid server response');
+        }
+        
+        if (!res.ok || !(data as any).success) {
+          throw new Error((data as any).error || 'Failed to change password');
+        }
+        
+        // Success - redirect to dashboard
+        window.location.href = '/admin/dashboard';
+        
+      } catch (error) {
+        showError((error as any).message || 'Network error occurred');
+      } finally {
+        setLoading(updatedChangeBtn, false);
+      }
+    });
+  }
+});
+  </script>
+</AuthLayout>
+
