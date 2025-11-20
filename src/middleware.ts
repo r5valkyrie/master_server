@@ -1,7 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getPlayerBanStatus } from './lib/bansystem';
 import { getSessionCookieName, verifyAdminSessionToken } from './lib/session';
-import { initializeStartup } from './lib/startup';
 import { addSecurityHeaders } from './lib/security-headers';
 
 export async function ipFilter(request: Request) {
@@ -22,9 +21,6 @@ export async function ipFilter(request: Request) {
 
 export const onRequest = defineMiddleware(async (context, next) => {
     const { request, url } = context;
-    
-    // Initialize background tasks on first request
-    await initializeStartup();
     
     // IP Filtering for specific endpoint
     if (url.pathname === '/api/servers/add') {
