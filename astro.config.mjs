@@ -19,6 +19,10 @@ const startupIntegration = {
           console.error('[ERROR] Failed to initialize startup tasks:', err);
         }
       });
+    },
+    'astro:build:done': async () => {
+      // For production builds, we'll initialize on first request via middleware
+      // This ensures proper timing after database connection is established
     }
   }
 };

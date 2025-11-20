@@ -3,6 +3,24 @@ import { getPlayerBanStatus } from './lib/bansystem';
 import { getSessionCookieName, verifyAdminSessionToken } from './lib/session';
 import { addSecurityHeaders } from './lib/security-headers';
 
+let startupTasksInitialized = false;
+
+// Initialize startup tasks on first request (for production builds)
+async function ensureStartupTasksInitialized() {
+    if (startupTasksInitialized) return;
+    startupTasksInitialized = true;
+    
+    try {
+        const { initializeStartup } = await import('./lib/startup.ts');
+        const { logger } = await import('./lib/logger.ts');
+        logger.info('Initializing background tasks on first request', { prefix: 'SERVER' });
+        await initializeStartup();
+    } catch (err) {
+        const { logger } = await import('./lib/logger.ts');
+        logger.error(`Failed to initialize startup tasks: ${err}`, { prefix: 'SERVER' });
+    }
+}
+
 export async function ipFilter(request: Request) {
     const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for');
     if (ip) {
@@ -20,6 +38,9 @@ export async function ipFilter(request: Request) {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
+    // Ensure startup tasks are initialized (especially important for production)
+    await ensureStartupTasksInitialized();
+    
     const { request, url } = context;
     
     // IP Filtering for specific endpoint
