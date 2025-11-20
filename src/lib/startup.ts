@@ -3,10 +3,10 @@
  * Runs once when the server starts to initialize all background tasks
  */
 
-import { startBanCleanupScheduler } from './banCleanupScheduler';
-import { startServerPresenceTracker, startServerCountUpdater, startActiveServersListUpdater } from './serverPresenceTracker';
-import { startPrefixCommandListener } from './discord';
-import { startThunderstoreWatcher } from './thunderstoreWatcher';
+import { startBanCleanupScheduler } from './banCleanupScheduler.ts';
+import { startServerPresenceTracker, startServerCountUpdater, startActiveServersListUpdater } from './serverPresenceTracker.ts';
+import { startPrefixCommandListener } from './discord.ts';
+import { startThunderstoreWatcher } from './thunderstoreWatcher.ts';
 
 let initialized = false;
 
