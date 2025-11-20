@@ -4,6 +4,7 @@ import { getServers } from '../../lib/servers';
 import { IsVersionFlagSet, IsVersionSupported, flags, GetLatestVersion, initializeVersions } from '../../lib/versions';
 import { ValidateLanguage } from '../../lib/utils';
 import { logger } from '../../lib/logger';
+import { verifyApiKey } from '../../lib/db';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -19,7 +20,8 @@ export const POST: APIRoute = async ({ request }) => {
         let useRealTypes = await IsVersionFlagSet(body.version, flags.VF_REAL_TYPES);
         let servers = (await getServers(useRealTypes)) || [];
 
-        if (!body.password || body.password != process.env.API_KEY) {
+        const isValidKey = await verifyApiKey(body.password || '');
+        if (!isValidKey) {
             if (body.version) {
                 servers = servers.filter(s => (body.version == s.version));
             }

@@ -128,10 +128,8 @@ DISABLE_REDIS=
 # Server Time-To-Live in Redis (in seconds)
 SERVER_TTL=35
 
-# API Key for Client/Programmatic Access (Required)
-# Used by game clients and external tools to authenticate API requests
-# This is NOT for the admin web panel - that uses user accounts from the database
-API_KEY=your_secure_api_key_here
+# Note: API keys are managed through the admin panel at `/admin/apiKeys` and stored in the database
+# No API_KEY environment variable is needed
 
 # Admin Session Secret (Required)
 # Used for admin web panel JWT session tokens
@@ -168,6 +166,8 @@ ALLOWED_HOSTS=
 ```
 
 **Important:** Discord configuration (bot token and channel IDs) is now managed through the admin panel at `/admin/discordConfig` and stored in the database. No environment variables are needed for Discord settings.
+
+**Important:** API keys are now managed exclusively through the admin panel at `/admin/apiKeys` and stored securely in the database with bcrypt hashing. Create, manage, and revoke API keys directly from the admin interface. No environment variable configuration is required.
 
 **Important Security Notes:**
 - **Never commit** the `.env` file, `auth.key`, `auth.key.pub`, or `auth.pem` to version control

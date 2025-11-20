@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { addBan, removeBan, updateBanReason } from '../../lib/bansystem';
 import { logAdminEvent } from '../../lib/discord';
 import { logger } from '../../lib/logger';
+import { verifyApiKey } from '../../lib/db';
 
 async function SendDiscordLog(msg: string) {
     await logAdminEvent(msg);
@@ -12,7 +13,8 @@ export const POST: APIRoute = async ({ request }) => {
         const body = await request.json();
         const { type, ip, id, password, banType, reason, silent } = body;
 
-        if (password !== process.env.API_KEY) {
+        const isValidKey = await verifyApiKey(password || '');
+        if (!isValidKey) {
             return new Response(JSON.stringify({ 
                 success: false, 
                 error: "Invalid credentials" 

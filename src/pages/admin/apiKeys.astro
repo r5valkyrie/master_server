@@ -1,0 +1,757 @@
+---
+import DashboardLayout from '../../layouts/Dashboard.astro';
+---
+
+<DashboardLayout>
+  <div class="content-container">
+    <div class="page-header">
+      <h1>API Key Management</h1>
+      <p>Create and manage API keys for external integrations</p>
+    </div>
+
+    <div class="config-section">
+      <div class="section-header">
+        <h2>Active API Keys</h2>
+        <p>Manage your API keys for server integrations</p>
+      </div>
+
+      <button id="newKeyBtn" class="btn btn-primary">+ Generate New Key</button>
+
+      <div id="keysContainer" class="keys-table-container" style="margin-top: 1.5rem;">
+        <div class="loading">Loading API keys...</div>
+      </div>
+
+      <div id="statusMessage" class="status-message" style="display: none;"></div>
+    </div>
+
+    <div class="modal" id="newKeyModal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Generate New API Key</h2>
+          <button class="modal-close" id="closeModal">&times;</button>
+        </div>
+        
+        <form id="newKeyForm" class="modal-form">
+          <div class="form-group">
+            <label for="keyName">Key Name</label>
+            <input
+              type="text"
+              id="keyName"
+              name="keyName"
+              placeholder="e.g., Discord Bot, Game Server Client"
+              required
+            />
+            <div class="field-hint">A descriptive name for this API key</div>
+          </div>
+
+          <div class="form-group">
+            <label for="keyDescription">Description (Optional)</label>
+            <textarea
+              id="keyDescription"
+              name="keyDescription"
+              placeholder="What is this key used for?"
+              rows="3"
+            ></textarea>
+            <div class="field-hint">Additional notes about this key's purpose</div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Generate Key</button>
+            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="displayKeyModal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>API Key Generated</h2>
+          <button class="modal-close" id="closeDisplayModal">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <p style="color: rgba(255, 255, 255, 0.8); margin: 0 0 1rem 0;">
+            <strong>Save this key somewhere safe.</strong> You won't be able to view it again!
+          </p>
+          
+          <div class="key-display">
+            <input
+              type="text"
+              id="displayedKey"
+              class="key-input"
+              readonly
+              style="margin-bottom: 1rem;"
+            />
+            <button type="button" class="btn btn-primary" id="copyKeyBtn">Copy to Clipboard</button>
+          </div>
+
+          <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin-top: 1rem;">
+            This key has been added to your active keys list and can now be used for API requests.
+          </p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="closeDisplayKeyBtn">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>How to use API Keys</h3>
+      <p>Include your API key in the authorization header of API requests:</p>
+      <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+      
+      <h3>Key Management</h3>
+      <ul>
+        <li>Each key can be enabled or disabled without deleting it</li>
+        <li>Keys show their last usage timestamp for audit purposes</li>
+        <li>Keys are stored securely with bcrypt hashing</li>
+        <li>Delete keys you no longer use</li>
+      </ul>
+
+      <h3>Security Best Practices</h3>
+      <ul>
+        <li>Never share your API keys with untrusted services</li>
+        <li>Regenerate keys periodically for security</li>
+        <li>Disable keys immediately if you suspect they've been compromised</li>
+        <li>Use descriptive names to track which system is using each key</li>
+      </ul>
+    </div>
+  </div>
+
+  <style>
+    .content-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+
+    .page-header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .page-header p {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    .config-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    .section-header p {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .keys-table-container {
+      overflow-x: auto;
+    }
+
+    .keys-table {
+      width: 100%;
+      border-collapse: collapse;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .keys-table th {
+      text-align: left;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .keys-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .keys-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .key-prefix {
+      font-family: 'Monaco', 'Courier New', monospace;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .status-inactive {
+      background: rgba(107, 114, 128, 0.2);
+      color: #9ca3af;
+    }
+
+    .key-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 2rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .empty-state p {
+      margin: 0;
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .status-message.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .status-message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #1f2937;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #fff;
+      font-size: 1.5rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:hover,
+    .form-group textarea:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .field-hint {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .key-display {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+
+    .key-input {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
+
+    .info-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2rem;
+    }
+
+    .info-section h3 {
+      margin: 0 0 1rem 0;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .info-section h3:not(:first-child) {
+      margin-top: 2rem;
+    }
+
+    .info-section p,
+    .info-section ul {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+    }
+
+    .info-section ul {
+      padding-left: 1.5rem;
+    }
+
+    .info-section li {
+      margin-bottom: 0.75rem;
+    }
+
+    .info-section pre {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 0.5rem 0;
+    }
+
+    .info-section code {
+      font-family: 'Monaco', 'Courier New', monospace;
+      color: #a1d8ff;
+      font-size: 0.85rem;
+    }
+  </style>
+
+  <script>
+    interface ApiKey {
+      id: number;
+      key_name: string;
+      key_prefix: string;
+      description: string;
+      active: number;
+      last_used: string | null;
+      created_at: string;
+    }
+
+    interface ApiResponse {
+      success: boolean;
+      keys?: ApiKey[];
+      key?: string;
+      error?: string;
+    }
+
+    const newKeyBtn = document.getElementById('newKeyBtn');
+    const newKeyModal = document.getElementById('newKeyModal');
+    const displayKeyModal = document.getElementById('displayKeyModal');
+    const newKeyForm = document.getElementById('newKeyForm') as HTMLFormElement;
+    const statusMessage = document.getElementById('statusMessage');
+
+    function showMessage(message: string, isSuccess: boolean) {
+      if (!statusMessage) return;
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+      statusMessage.style.display = 'block';
+
+      setTimeout(() => {
+        if (statusMessage) statusMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    async function loadApiKeys() {
+      try {
+        const response = await fetch('/api/admin/apiKeys');
+        const data = (await response.json()) as ApiResponse;
+
+        if (!data.success || !data.keys) {
+          showMessage('Failed to load API keys', false);
+          return;
+        }
+
+        const container = document.getElementById('keysContainer');
+        if (!container) return;
+
+        if (data.keys.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>No API keys yet. Create one to get started.</p></div>';
+          return;
+        }
+
+        const table = document.createElement('table');
+        table.className = 'keys-table';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Key Name</th>
+              <th>Prefix</th>
+              <th>Status</th>
+              <th>Last Used</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+
+        data.keys.forEach((key: ApiKey) => {
+          const row = document.createElement('tr');
+          const lastUsed = key.last_used ? new Date(key.last_used).toLocaleDateString() : 'Never';
+          const created = new Date(key.created_at).toLocaleDateString();
+          const statusClass = key.active ? 'status-active' : 'status-inactive';
+          const statusText = key.active ? 'Active' : 'Inactive';
+
+          row.innerHTML = `
+            <td><strong>${key.key_name}</strong>${key.description ? `<div style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">${key.description}</div>` : ''}</td>
+            <td><span class="key-prefix">${key.key_prefix}...</span></td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>${lastUsed}</td>
+            <td>${created}</td>
+            <td>
+              <div class="key-actions">
+                <button class="btn btn-sm btn-secondary toggle-btn" data-id="${key.id}" data-active="${key.active}">
+                  ${key.active ? 'Disable' : 'Enable'}
+                </button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${key.id}">Delete</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(table);
+
+        // Attach event listeners
+        attachEventListeners();
+      } catch (err) {
+        console.error('Error loading API keys:', err);
+        showMessage('Error loading API keys', false);
+      }
+    }
+
+    function attachEventListeners() {
+      document.querySelectorAll('.toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = (btn as HTMLButtonElement).dataset.id;
+          const currentActive = (btn as HTMLButtonElement).dataset.active === '1';
+
+          try {
+            const response = await fetch('/api/admin/apiKeys', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: parseInt(id as string), active: !currentActive })
+            });
+
+            const data = (await response.json()) as ApiResponse;
+
+            if (data.success) {
+              showMessage(`Key ${!currentActive ? 'enabled' : 'disabled'} successfully`, true);
+              loadApiKeys();
+            } else {
+              showMessage(data.error || 'Failed to update key', false);
+            }
+          } catch (err) {
+            console.error('Error updating key:', err);
+            showMessage('Error updating key', false);
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = (btn as HTMLButtonElement).dataset.id;
+
+          if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) {
+            return;
+          }
+
+          try {
+            const response = await fetch('/api/admin/apiKeys', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: parseInt(id as string) })
+            });
+
+            const data = (await response.json()) as ApiResponse;
+
+            if (data.success) {
+              showMessage('Key deleted successfully', true);
+              loadApiKeys();
+            } else {
+              showMessage(data.error || 'Failed to delete key', false);
+            }
+          } catch (err) {
+            console.error('Error deleting key:', err);
+            showMessage('Error deleting key', false);
+          }
+        });
+      });
+    }
+
+    // Modal handlers
+    newKeyBtn?.addEventListener('click', () => {
+      if (newKeyModal) newKeyModal.style.display = 'flex';
+    });
+
+    document.getElementById('closeModal')?.addEventListener('click', () => {
+      if (newKeyModal) newKeyModal.style.display = 'none';
+      newKeyForm.reset();
+    });
+
+    document.getElementById('cancelBtn')?.addEventListener('click', () => {
+      if (newKeyModal) newKeyModal.style.display = 'none';
+      newKeyForm.reset();
+    });
+
+    document.getElementById('closeDisplayModal')?.addEventListener('click', () => {
+      if (displayKeyModal) displayKeyModal.style.display = 'none';
+    });
+
+    document.getElementById('closeDisplayKeyBtn')?.addEventListener('click', () => {
+      if (displayKeyModal) displayKeyModal.style.display = 'none';
+      loadApiKeys();
+    });
+
+    document.getElementById('copyKeyBtn')?.addEventListener('click', () => {
+      const keyInput = document.getElementById('displayedKey') as HTMLInputElement;
+      if (keyInput) {
+        keyInput.select();
+        document.execCommand('copy');
+        showMessage('API key copied to clipboard', true);
+      }
+    });
+
+    // Close modals on background click
+    [newKeyModal, displayKeyModal].forEach((modal) => {
+      modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          newKeyForm.reset();
+        }
+      });
+    });
+
+    // Form submission
+    newKeyForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const keyName = (document.getElementById('keyName') as HTMLInputElement).value;
+      const keyDescription = (document.getElementById('keyDescription') as HTMLTextAreaElement).value;
+
+      if (!keyName.trim()) {
+        showMessage('Key name is required', false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/apiKeys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyName: keyName.trim(),
+            description: keyDescription.trim()
+          })
+        });
+
+        const data = (await response.json()) as ApiResponse;
+
+        if (data.success && data.key) {
+          // Hide create modal, show display modal
+          if (newKeyModal) newKeyModal.style.display = 'none';
+          const displayedKeyInput = document.getElementById('displayedKey') as HTMLInputElement;
+          if (displayedKeyInput) displayedKeyInput.value = data.key;
+          if (displayKeyModal) displayKeyModal.style.display = 'flex';
+          newKeyForm.reset();
+        } else {
+          showMessage(data.error || 'Failed to create API key', false);
+        }
+      } catch (err) {
+        console.error('Error creating key:', err);
+        showMessage('Error creating API key', false);
+      }
+    });
+
+    // Load keys on page load
+    loadApiKeys();
+  </script>
+</DashboardLayout>

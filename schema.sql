@@ -364,6 +364,26 @@ INSERT INTO `discord_config` (`config_key`, `config_value`, `description`) VALUE
 ON DUPLICATE KEY UPDATE `config_key`=`config_key`;
 
 -- ============================================================================
+-- API KEYS TABLE
+-- Stores API keys for client and programmatic access
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `api_keys` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `key_name` VARCHAR(255) NOT NULL COMMENT 'Friendly name for the API key',
+    `key_hash` VARCHAR(255) NOT NULL UNIQUE COMMENT 'Hashed API key (bcrypt)',
+    `key_prefix` VARCHAR(10) NOT NULL COMMENT 'First 10 chars of key for identification',
+    `description` TEXT COMMENT 'Description of what this key is used for',
+    `active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this key is active',
+    `last_used` DATETIME COMMENT 'Last time this key was used',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the key was created',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
+    
+    INDEX `idx_key_prefix` (`key_prefix`) COMMENT 'For quick key lookup',
+    INDEX `idx_active` (`active`) COMMENT 'For finding active keys',
+    INDEX `idx_created_at` (`created_at` DESC) COMMENT 'For recent keys'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='API key management for client and programmatic access';
+
+-- ============================================================================
 -- SCHEMA VERSION INFO
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `schema_version` (
@@ -374,7 +394,8 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
 
 INSERT INTO `schema_version` (`version`, `description`) VALUES 
 ('1.0.0', 'Initial schema for R5Valkyrie Master Server'),
-('1.1.0', 'Added discord_config table for storing Discord bot channel IDs')
+('1.1.0', 'Added discord_config table for storing Discord bot channel IDs'),
+('1.2.0', 'Added api_keys table for API key management')
 ON DUPLICATE KEY UPDATE `version`=`version`;
 
 -- ============================================================================

@@ -8,7 +8,6 @@ interface EnvironmentConfig {
     MYSQL_USER: string;
     MYSQL_PASS: string;
     MYSQL_DB: string;
-    API_KEY: string;
     STEAM_API_KEY?: string;
     STEAM_WEB_API_KEY?: string;
     STEAM_APP_ID?: string;
@@ -29,7 +28,7 @@ interface EnvironmentConfig {
  * Validates that all required environment variables are present
  */
 export function validateEnvironment(): EnvironmentConfig {
-    const requiredVars = ['MYSQL_HOST', 'MYSQL_USER', 'MYSQL_DB', 'API_KEY'];
+    const requiredVars = ['MYSQL_HOST', 'MYSQL_USER', 'MYSQL_DB'];
     const missing = requiredVars.filter(varName => !process.env[varName]);
     
     if (missing.length > 0) {
@@ -41,7 +40,6 @@ export function validateEnvironment(): EnvironmentConfig {
         MYSQL_USER: process.env.MYSQL_USER!,
         MYSQL_PASS: process.env.MYSQL_PASS || '',
         MYSQL_DB: process.env.MYSQL_DB!,
-        API_KEY: process.env.API_KEY!,
         STEAM_API_KEY: process.env.STEAM_API_KEY,
         STEAM_WEB_API_KEY: process.env.STEAM_WEB_API_KEY,
         STEAM_APP_ID: process.env.STEAM_APP_ID,
@@ -67,7 +65,6 @@ export function logEnvironmentStatus(): void {
     
     logger.info(`NODE_ENV: ${config.NODE_ENV}`, { prefix: 'ENV' });
     logger.info(`MYSQL: ${config.MYSQL_HOST}/${config.MYSQL_DB} as ${config.MYSQL_USER}`, { prefix: 'ENV' });
-    logger.info(`API_KEY: ${config.API_KEY ? 'Set' : 'Missing'}`, { prefix: 'ENV' });
     logger.info(`STEAM_API_KEY: ${config.STEAM_API_KEY ? 'Set' : 'Not set'}`, { prefix: 'ENV' });
 }
 

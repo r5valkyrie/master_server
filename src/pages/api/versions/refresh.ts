@@ -1,12 +1,14 @@
 import type { APIRoute } from 'astro';
 import { refreshVersions } from '../../../lib/versionsystem';
 import { logger } from '../../../lib/logger';
+import { verifyApiKey } from '../../../lib/db';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
         const { password } = await request.json();
 
-        if (password !== process.env.API_KEY) {
+        const isValidKey = await verifyApiKey(password || '');
+        if (!isValidKey) {
             return new Response(JSON.stringify({ 
                 success: false, 
                 error: "Invalid credentials" 

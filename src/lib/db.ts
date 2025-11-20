@@ -203,3 +203,110 @@ export async function getDiscordBotToken(): Promise<string | null> {
         return process.env.DISCORD_BOT_TOKEN || null;
     }
 }
+
+// ============================================================================
+// API KEY FUNCTIONS
+// ============================================================================
+
+export interface ApiKey {
+    id: number;
+    key_name: string;
+    key_hash: string;
+    key_prefix: string;
+    description: string | null;
+    active: number;
+    last_used: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export async function getAllApiKeys(): Promise<ApiKey[]> {
+    try {
+        const pool = getPool();
+        if (!pool) return [];
+        const [rows] = await pool.execute("SELECT * FROM `api_keys` ORDER BY `created_at` DESC");
+        const packets = rows as RowDataPacket[];
+        if (Array.isArray(packets)) {
+            return packets as ApiKey[];
+        }
+        return [];
+    } catch (err) {
+        logger.error(`getAllApiKeys error: ${err}`, { prefix: 'DB' });
+        return [];
+    }
+}
+
+export async function verifyApiKey(key: string): Promise<boolean> {
+    try {
+        if (!key || typeof key !== 'string') return false;
+        
+        const pool = getPool();
+        if (!pool) return false;
+        
+        // Get the key prefix (first 10 chars)
+        const prefix = key.substring(0, 10);
+        const [rows] = await pool.execute(
+            "SELECT id, key_hash FROM `api_keys` WHERE `key_prefix`=? AND `active`=1",
+            [prefix]
+        );
+        
+        if (!Array.isArray(rows) || rows.length === 0) {
+            return false;
+        }
+        
+        const bcrypt = await import('bcrypt');
+        const match = await bcrypt.compare(key, (rows[0] as any).key_hash);
+        
+        if (match) {
+            // Update last_used timestamp
+            await pool.execute(
+                "UPDATE `api_keys` SET `last_used`=NOW() WHERE `id`=?",
+                [(rows[0] as any).id]
+            );
+        }
+        
+        return match;
+    } catch (err) {
+        logger.error(`verifyApiKey error: ${err}`, { prefix: 'DB' });
+        return false;
+    }
+}
+
+export async function createApiKey(keyName: string, keyHash: string, keyPrefix: string, description?: string): Promise<boolean> {
+    try {
+        const pool = getPool();
+        if (!pool) return false;
+        await pool.execute(
+            "INSERT INTO `api_keys` (`key_name`, `key_hash`, `key_prefix`, `description`) VALUES (?, ?, ?, ?)",
+            [keyName, keyHash, keyPrefix, description || null]
+        );
+        return true;
+    } catch (err) {
+        logger.error(`createApiKey error: ${err}`, { prefix: 'DB' });
+        return false;
+    }
+}
+
+export async function deleteApiKey(id: number): Promise<boolean> {
+    try {
+        const pool = getPool();
+        if (!pool) return false;
+        await pool.execute("DELETE FROM `api_keys` WHERE `id`=?", [id]);
+        return true;
+    } catch (err) {
+        logger.error(`deleteApiKey error: ${err}`, { prefix: 'DB' });
+        return false;
+    }
+}
+
+export async function toggleApiKey(id: number, active: boolean): Promise<boolean> {
+    try {
+        const pool = getPool();
+        if (!pool) return false;
+        await pool.execute("UPDATE `api_keys` SET `active`=? WHERE `id`=?", [active ? 1 : 0, id]);
+        return true;
+    } catch (err) {
+        logger.error(`toggleApiKey error: ${err}`, { prefix: 'DB' });
+        return false;
+    }
+}

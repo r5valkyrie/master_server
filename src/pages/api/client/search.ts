@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getPool } from '../../../lib/db';
+import { getPool, verifyApiKey } from '../../../lib/db';
 import { logger } from '../../../lib/logger';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -7,7 +7,8 @@ export const POST: APIRoute = async ({ request }) => {
         const body = await request.json();
         const { id: userId, name: userName, password } = body;
 
-        if (password !== process.env.API_KEY) {
+        const isValidKey = await verifyApiKey(password || '');
+        if (!isValidKey) {
             return new Response(JSON.stringify({ 
                 success: false, 
                 error: "Invalid credentials" 
