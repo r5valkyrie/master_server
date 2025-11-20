@@ -2381,3 +2381,116 @@ body {
 .config-field input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
+
+/* API Keys Table Styling */
+.keys-table-container {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  margin-top: 1.5rem;
+}
+
+.keys-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.keys-table thead {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.keys-table th {
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.keys-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.keys-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.keys-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.keys-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Key Prefix Badge */
+.key-prefix {
+  display: inline-block;
+  font-family: 'Monaco', 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #a1d8ff;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
+.status-inactive {
+  background: rgba(107, 114, 128, 0.2);
+  border: 1px solid rgba(107, 114, 128, 0.4);
+  color: #9ca3af;
+}
+
+/* Key Actions */
+.key-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.key-actions .btn-sm {
+  white-space: nowrap;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Loading State */
+.keys-table-container .loading {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
