@@ -1,5 +1,6 @@
 // Discord rate limit tracking per endpoint
 import { logger } from './logger.ts';
+import { getDiscordConfig, getDiscordBotToken } from './db.ts';
 
 interface RateLimitInfo {
     remaining: number;
@@ -126,6 +127,7 @@ async function queueDiscordRequest(
     });
 }
 
+
 export async function postDiscordWebhook(webhookUrl: string, content: string): Promise<void> {
     if (!webhookUrl) return;
     try {
@@ -143,7 +145,7 @@ export async function postDiscordWebhook(webhookUrl: string, content: string): P
 }
 
 async function postDiscordBotMessage(channelId: string, body: any): Promise<void> {
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken) return;
     try {
         const endpoint = `channels:${channelId}:messages`;
@@ -172,7 +174,7 @@ async function postDiscordBotMessage(channelId: string, body: any): Promise<void
 }
 
 export async function deleteAllChannelMessages(channelId: string): Promise<void> {
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken) return;
     try {
         const endpoint = `channels:${channelId}:messages:list`;
@@ -209,7 +211,7 @@ export async function deleteAllChannelMessages(channelId: string): Promise<void>
 }
 
 export async function deleteOtherChannelMessages(channelId: string, keepMessageId: string): Promise<void> {
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken || !keepMessageId) return;
     try {
         const endpoint = `channels:${channelId}:messages:list`;
@@ -247,7 +249,7 @@ export async function deleteOtherChannelMessages(channelId: string, keepMessageI
 }
 
 export async function postBotMessage(channelId: string, body: any): Promise<string | null> {
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken) return null;
     try {
         const endpoint = `channels:${channelId}:messages`;
@@ -274,7 +276,7 @@ export async function postBotMessage(channelId: string, body: any): Promise<stri
 }
 
 export async function editBotMessage(channelId: string, messageId: string, body: any): Promise<void> {
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken || !messageId) return;
     try {
         const endpoint = `channels:${channelId}:messages:${messageId}`;
@@ -314,12 +316,13 @@ let commandListenerStarted = false;
 export function startPrefixCommandListener(): void {
     if (commandListenerStarted) return;
     commandListenerStarted = true;
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
-    if (!botToken) return;
 
     // Use dynamic ESM import to load discord.js under ESM environment
     (async () => {
         try {
+            const botToken = await getDiscordBotToken();
+            if (!botToken) return;
+
             const mod: any = await import('discord.js');
             const { Client, GatewayIntentBits, Partials, Events } = mod;
             const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent], partials: [Partials.Channel] });
@@ -364,34 +367,34 @@ export async function postDiscordEmbed(webhookUrl: string, embed: any): Promise<
 }
 
 export async function postBotEmbed(channelId: string, embed: any): Promise<void> {
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken) return;
     await postDiscordBotMessage(channelId, { embeds: [embed] });
 }
 
 export async function logAdminEvent(message: string): Promise<void> {
-    const channelId = process.env.DISCORD_ADMIN_LOG_CHANNEL_ID || '';
+    const channelId = await getDiscordConfig('DISCORD_ADMIN_LOG_CHANNEL_ID');
     if (!channelId) return;
     await postDiscordBotMessage(channelId, { content: message });
 }
 
 export async function logGeneralEvent(message: string): Promise<void> {
-    const channelId = process.env.DISCORD_ADMIN_LOG_CHANNEL_ID || '';
+    const channelId = await getDiscordConfig('DISCORD_ADMIN_LOG_CHANNEL_ID');
     if (!channelId) return;
     await postDiscordBotMessage(channelId, { content: message });
 }
 
 export async function logGeneralEmbed(embed: any): Promise<void> {
-    const channelId = process.env.DISCORD_SERVER_BROWSER_CHANNEL_ID || '';
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const channelId = await getDiscordConfig('DISCORD_SERVER_BROWSER_CHANNEL_ID');
+    const botToken = await getDiscordBotToken();
     if (channelId && botToken) {
         await postDiscordBotMessage(channelId, { embeds: [embed] });
     }
 }
 
 export async function logServersEmbed(embed: any): Promise<void> {
-    const channelId = process.env.DISCORD_SERVER_BROWSER_CHANNEL_ID || '';
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const channelId = await getDiscordConfig('DISCORD_SERVER_BROWSER_CHANNEL_ID');
+    const botToken = await getDiscordBotToken();
     if (channelId && botToken) {
         await postDiscordBotMessage(channelId, { embeds: [embed] });
     }
@@ -399,8 +402,8 @@ export async function logServersEmbed(embed: any): Promise<void> {
 
 let lastServersChannelName = '';
 export async function updateServersCountChannel(count: number): Promise<void> {
-    const channelId = process.env.DISCORD_SERVER_COUNT_CHANNEL_ID || '';
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const channelId = await getDiscordConfig('DISCORD_SERVER_COUNT_CHANNEL_ID');
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken) return;
     const desiredName = `servers online: ${count}`;
     if (desiredName === lastServersChannelName) return;
@@ -432,8 +435,8 @@ export async function updateServersCountChannel(count: number): Promise<void> {
 
 let lastPlayersChannelName = '';
 export async function updatePlayersCountChannel(count: number): Promise<void> {
-    const channelId = process.env.DISCORD_PLAYER_COUNT_CHANNEL_ID || '';
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const channelId = await getDiscordConfig('DISCORD_PLAYER_COUNT_CHANNEL_ID');
+    const botToken = await getDiscordBotToken();
     if (!channelId || !botToken) return;
     const desiredName = `players online: ${count}`;
     if (desiredName === lastPlayersChannelName) return;

@@ -1,0 +1,380 @@
+---
+import DashboardLayout from '../../layouts/Dashboard.astro';
+---
+
+<DashboardLayout>
+  <div class="content-container">
+    <div class="page-header">
+      <h1>Discord Bot Configuration</h1>
+      <p>Manage Discord bot channels and settings</p>
+    </div>
+
+    <div class="config-section">
+      <div class="section-header">
+        <h2>Channel Configuration</h2>
+        <p>Set the Discord channel IDs where the bot should send notifications</p>
+      </div>
+
+      <form id="discordConfigForm" class="config-form">
+        <div id="configFields" class="config-fields">
+          <!-- Fields will be loaded dynamically -->
+          <div class="loading">Loading configuration...</div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Configuration</button>
+          <button type="button" class="btn btn-secondary" id="resetBtn">Reset to Defaults</button>
+        </div>
+
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+      </form>
+
+      <div class="security-notice">
+        <strong>⚠️ Security Notice:</strong> Keep your bot token secure. Never share it publicly. The token is encrypted in transit and only used for Discord API communication.
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>How to use</h3>
+      <ol>
+        <li>Create or find Discord channels where you want bot notifications</li>
+        <li>Right-click each channel and copy its ID (Developer Mode must be enabled)</li>
+        <li>Paste the IDs in the corresponding fields below</li>
+        <li>Click "Save Configuration"</li>
+      </ol>
+      
+      <h3>Channel Types</h3>
+      <ul>
+        <li><strong>Admin Log Channel:</strong> Server startup messages and admin events</li>
+        <li><strong>Server Browser Channel:</strong> Active servers list (updates every 5 minutes)</li>
+        <li><strong>Server Count Channel:</strong> Channel name shows active server count</li>
+        <li><strong>Player Count Channel:</strong> Channel name shows total online players</li>
+        <li><strong>Mod Updates Channel:</strong> Thunderstore mod release notifications</li>
+        <li><strong>Command Allow IDs:</strong> Comma-separated list of Discord user IDs allowed to run bot commands</li>
+      </ul>
+    </div>
+  </div>
+
+  <style>
+    .content-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+
+    .page-header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .page-header p {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    .config-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-header h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    .section-header p {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
+
+    .config-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .config-fields {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .config-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .config-field label {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .config-field .field-description {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .config-field input {
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .config-field input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .config-field input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .status-message.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .status-message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .loading {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 2rem;
+    }
+
+    .info-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2rem;
+    }
+
+    .info-section h3 {
+      margin: 0 0 1rem 0;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .info-section h3:not(:first-child) {
+      margin-top: 2rem;
+    }
+
+    .info-section ol,
+    .info-section ul {
+      margin: 0;
+      padding-left: 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+    }
+
+    .info-section li {
+      margin-bottom: 0.75rem;
+    }
+
+    .info-section strong {
+      color: #fff;
+    }
+
+    .security-notice {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 4px;
+      color: #fcd34d;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .security-notice strong {
+      color: #fbbf24;
+    }
+  </style>
+
+  <script>
+    async function loadConfig() {
+      try {
+        const response = await fetch('/api/admin/discordConfig');
+        const data = await response.json() as any;
+
+        if (!data.success) {
+          showError('Failed to load configuration');
+          return;
+        }
+
+        const fieldsContainer = document.getElementById('configFields');
+        if (!fieldsContainer) return;
+        fieldsContainer.innerHTML = '';
+
+        (data.config as any[]).forEach((item: any) => {
+          const fieldDiv = document.createElement('div');
+          fieldDiv.className = 'config-field';
+          const isTokenField = item.config_key === 'DISCORD_BOT_TOKEN';
+          const inputType = isTokenField ? 'password' : 'text';
+          fieldDiv.innerHTML = `
+            <label for="${item.config_key}">${formatLabel(item.config_key)}</label>
+            <input
+              type="${inputType}"
+              id="${item.config_key}"
+              name="${item.config_key}"
+              placeholder="${isTokenField ? 'Enter your Discord bot token' : 'Enter channel ID (18+ digits)'}"
+              value="${item.config_value || ''}"
+              data-key="${item.config_key}"
+            />
+            <div class="field-description">${item.description || ''}</div>
+          `;
+          fieldsContainer.appendChild(fieldDiv);
+        });
+      } catch (err) {
+        console.error('Error loading config:', err);
+        showError('Error loading configuration');
+      }
+    }
+
+    function formatLabel(key: string) {
+      return key
+        .replace('DISCORD_', '')
+        .replace('_CHANNEL_ID', '')
+        .replace('_TOKEN', '')
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map((word: string) => word.charAt(0) + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    function showMessage(message: string, isSuccess: boolean) {
+      const statusDiv = document.getElementById('statusMessage');
+      if (!statusDiv) return;
+      statusDiv.textContent = message;
+      statusDiv.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+      statusDiv.style.display = 'block';
+
+      setTimeout(() => {
+        if (statusDiv) statusDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function showError(message: string) {
+      showMessage(message, false);
+    }
+
+    const form = document.getElementById('discordConfigForm');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const inputs = document.querySelectorAll('.config-field input');
+        const updates = Array.from(inputs).map(input => ({
+          key: (input as HTMLInputElement).dataset.key,
+          value: (input as HTMLInputElement).value
+        }));
+
+        try {
+          const response = await fetch('/api/admin/discordConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates })
+          });
+
+          const data = await response.json() as any;
+
+          if (data.success) {
+            showMessage(`Successfully saved ${data.updated} configuration(s)`, true);
+          } else {
+            showError(data.error || 'Failed to save configuration');
+          }
+        } catch (err) {
+          console.error('Error saving config:', err);
+          showError('Error saving configuration');
+        }
+      });
+    }
+
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all channel IDs?')) {
+          document.querySelectorAll('.config-field input').forEach(input => {
+            (input as HTMLInputElement).value = '';
+          });
+        }
+      });
+    }
+
+    // Load config on page load
+    loadConfig();
+  </script>
+</DashboardLayout>

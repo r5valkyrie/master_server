@@ -219,7 +219,23 @@ The `schema.sql` file includes:
 - Optimized indexes for fast queries
 - Cleanup procedures for expired bans and stale servers
 - Default data (MOTD, EULA)
+- **Default admin account** (see below)
 - Detailed comments and documentation
+
+#### Default Admin Account
+
+The schema creates a default admin account for initial setup:
+
+- **Username**: `admin`
+- **Password**: `changeme`
+- **Role**: `master` (full access)
+- **Status**: Must change password on first login
+
+**IMPORTANT SECURITY STEPS:**
+1. Log in to the admin panel immediately after first deployment
+2. Change the default password to a strong, unique password
+3. Create additional admin/moderator accounts as needed
+4. Delete or disable the default admin account once you have other accounts set up
 
 **Optional**: Create a dedicated MySQL user for better security:
 

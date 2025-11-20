@@ -84,6 +84,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
+        // Discord config - master only
+        if (url.pathname.startsWith('/admin/discordConfig') || url.pathname.startsWith('/api/admin/discordConfig')) {
+            if (!isMaster) {
+                if (url.pathname.startsWith('/api/')) {
+                    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
+                }
+                return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });
+            }
+        }
+
         // Moderators: allow dashboard, users list, banlist, userQuery, servers, content; deny MOTD admin API
         if (isModerator) {
             const allowedPages = ['/admin/dashboard', '/admin/users', '/admin/banlist', '/admin/userQuery', '/admin/servers', '/admin/content', '/admin/verifiedMods'];

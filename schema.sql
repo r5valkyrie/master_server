@@ -164,6 +164,13 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
     INDEX `idx_role` (`role`) COMMENT 'For role-based queries'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Admin panel user accounts';
 
+-- Insert default admin account: username="admin" password="changeme"
+-- Password hash is bcrypt hash of "changeme" (cost factor 10)
+-- IMPORTANT: Change this password on first login!
+INSERT INTO `admin_users` (`username`, `password_hash`, `role`, `must_change_password`) VALUES 
+('admin', '$2b$10$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUmmXmIm', 'master', 1)
+ON DUPLICATE KEY UPDATE `username`=`username`;
+
 -- ============================================================================
 -- ADMIN ACTIVITY LOG TABLE (Optional)
 -- Tracks admin actions for audit trail
@@ -333,6 +340,30 @@ END$$
 DELIMITER ;
 
 -- ============================================================================
+-- DISCORD CONFIG TABLE
+-- Stores Discord bot channel IDs and configuration
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `discord_config` (
+    `config_key` VARCHAR(100) NOT NULL PRIMARY KEY COMMENT 'Configuration key identifier',
+    `config_value` VARCHAR(500) NOT NULL COMMENT 'Configuration value (usually channel ID)',
+    `description` TEXT COMMENT 'Human-readable description of what this config does',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
+    
+    INDEX `idx_updated_at` (`updated_at` DESC) COMMENT 'For tracking recent changes'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Discord bot configuration and channel IDs';
+
+-- Insert default Discord config keys
+INSERT INTO `discord_config` (`config_key`, `config_value`, `description`) VALUES 
+('DISCORD_BOT_TOKEN', '', 'Discord bot token for API authentication'),
+('DISCORD_ADMIN_LOG_CHANNEL_ID', '', 'Channel for admin log events and server startup messages'),
+('DISCORD_SERVER_BROWSER_CHANNEL_ID', '', 'Channel for active server browser embed'),
+('DISCORD_SERVER_COUNT_CHANNEL_ID', '', 'Channel name that displays server count'),
+('DISCORD_PLAYER_COUNT_CHANNEL_ID', '', 'Channel name that displays total player count'),
+('DISCORD_MOD_UPDATES_CHANNEL_ID', '', 'Channel for Thunderstore mod update notifications'),
+('DISCORD_COMMAND_ALLOW_IDS', '', 'Comma-separated list of Discord user IDs allowed to run bot commands')
+ON DUPLICATE KEY UPDATE `config_key`=`config_key`;
+
+-- ============================================================================
 -- SCHEMA VERSION INFO
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `schema_version` (
@@ -342,7 +373,8 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `schema_version` (`version`, `description`) VALUES 
-('1.0.0', 'Initial schema for R5Valkyrie Master Server')
+('1.0.0', 'Initial schema for R5Valkyrie Master Server'),
+('1.1.0', 'Added discord_config table for storing Discord bot channel IDs')
 ON DUPLICATE KEY UPDATE `version`=`version`;
 
 -- ============================================================================

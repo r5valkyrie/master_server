@@ -1,5 +1,6 @@
 import { gunzipSync } from 'node:zlib';
 import { logger } from './logger.ts';
+import { getDiscordConfig, getDiscordBotToken } from './db.ts';
 /*
   Thunderstore watcher for R5Valkyrie
   - Polls Thunderstore community packages
@@ -130,7 +131,7 @@ function buildEmbed(
 
 async function postDiscordEmbeds(channelId: string, embeds: any[]): Promise<void> {
     if (!channelId || embeds.length === 0) return;
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const botToken = await getDiscordBotToken();
     if (!botToken) return;
     
     const chunks: any[][] = [];
@@ -228,7 +229,7 @@ function getLatestVersion(mod: ThunderstorePackage): NonNullable<ThunderstorePac
 
 async function runOnce(): Promise<void> {
     const community = getEnvString('THUNDERSTORE_COMMUNITY', DEFAULT_COMMUNITY);
-    const channelId = process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
+    const channelId = await getDiscordConfig('DISCORD_MOD_UPDATES_CHANNEL_ID') || process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
     if (!channelId) return;
 
     try {
@@ -266,7 +267,7 @@ export async function startThunderstoreWatcher(): Promise<void> {
     watcherStarted = true;
 
     const intervalMs = getEnvNumber('THUNDERSTORE_CHECK_INTERVAL_MS', DEFAULT_INTERVAL_MS);
-    const channelId = process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
+    const channelId = await getDiscordConfig('DISCORD_MOD_UPDATES_CHANNEL_ID') || process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
     if (!channelId) {
         logger.warn('No Discord mod updates channel configured; watcher not started', { prefix: 'THUNDERSTORE' });
         return;

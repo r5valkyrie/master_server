@@ -142,3 +142,64 @@ export async function SearchSteamIdsByUsername(name: string, limit = 5): Promise
         return [];
     }
 }
+
+export async function getDiscordConfig(key: string): Promise<string | null> {
+    try {
+        const pool = getPool();
+        if (!pool) return null;
+        const [rows] = await pool.execute("SELECT config_value FROM `discord_config` WHERE `config_key`=?", [key]);
+        const packets = rows as RowDataPacket[];
+        if (Array.isArray(packets) && packets.length > 0) {
+            return (packets[0].config_value as string) || null;
+        }
+        return null;
+    } catch (err) {
+        logger.error(`getDiscordConfig error: ${err}`, { prefix: 'DB' });
+        return null;
+    }
+}
+
+export async function getAllDiscordConfig(): Promise<Array<{ config_key: string, config_value: string, description: string }>> {
+    try {
+        const pool = getPool();
+        if (!pool) return [];
+        const [rows] = await pool.execute("SELECT config_key, config_value, description FROM `discord_config` ORDER BY config_key");
+        const packets = rows as RowDataPacket[];
+        if (Array.isArray(packets)) {
+            return packets as Array<{ config_key: string, config_value: string, description: string }>;
+        }
+        return [];
+    } catch (err) {
+        logger.error(`getAllDiscordConfig error: ${err}`, { prefix: 'DB' });
+        return [];
+    }
+}
+
+export async function setDiscordConfig(key: string, value: string): Promise<boolean> {
+    try {
+        const pool = getPool();
+        if (!pool) return false;
+        await pool.execute("UPDATE `discord_config` SET `config_value`=?, `updated_at`=NOW() WHERE `config_key`=?", [value, key]);
+        return true;
+    } catch (err) {
+        logger.error(`setDiscordConfig error: ${err}`, { prefix: 'DB' });
+        return false;
+    }
+}
+
+export async function getDiscordBotToken(): Promise<string | null> {
+    try {
+        const pool = getPool();
+        if (!pool) return process.env.DISCORD_BOT_TOKEN || null;
+        const [rows] = await pool.execute("SELECT config_value FROM `discord_config` WHERE `config_key`='DISCORD_BOT_TOKEN'");
+        const packets = rows as RowDataPacket[];
+        if (Array.isArray(packets) && packets.length > 0) {
+            const value = packets[0].config_value as string;
+            return value && value.trim() !== '' ? value.trim() : process.env.DISCORD_BOT_TOKEN || null;
+        }
+        return process.env.DISCORD_BOT_TOKEN || null;
+    } catch (err) {
+        logger.error(`getDiscordBotToken error: ${err}`, { prefix: 'DB' });
+        return process.env.DISCORD_BOT_TOKEN || null;
+    }
+}
