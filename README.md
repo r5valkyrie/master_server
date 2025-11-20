@@ -144,25 +144,6 @@ AUTH_KEY_PASSPHRASE=
 STEAM_WEB_API_KEY=your_steam_api_key_here
 STEAM_APP_ID=480
 
-# Discord Bot Configuration (Optional - for logging and notifications)
-# A single Discord bot token is used for all messaging features
-DISCORD_BOT_TOKEN=
-
-# Discord Channel IDs (Optional - where the bot sends messages)
-# Admin log channel for administrative actions and general system notifications (bans, checksums, versions, security alerts, user cleanups, etc.)
-DISCORD_ADMIN_LOG_CHANNEL_ID=
-# Server browser channel for server browser embed updates
-DISCORD_SERVER_BROWSER_CHANNEL_ID=
-# Server count channel - bot renames this channel to show live server count (e.g., "servers online: 42")
-DISCORD_SERVER_COUNT_CHANNEL_ID=
-# Player count channel - bot renames this channel to show live player count (e.g., "players online: 128")
-DISCORD_PLAYER_COUNT_CHANNEL_ID=
-# Mod updates channel for all Thunderstore mod update notifications
-DISCORD_MOD_UPDATES_CHANNEL_ID=
-
-# Discord Command Authorization (Optional - comma-separated user IDs allowed to run bot commands)
-DISCORD_COMMAND_ALLOW_IDS=
-
 # Thunderstore watcher (Optional)
 # Community key on Thunderstore (default: r5valkyrie)
 THUNDERSTORE_COMMUNITY=r5valkyrie
@@ -185,6 +166,8 @@ NODE_ENV=development
 # Allowed Hosts (Optional - comma-separated list for Vite server)
 ALLOWED_HOSTS=
 ```
+
+**Important:** Discord configuration (bot token and channel IDs) is now managed through the admin panel at `/admin/discordConfig` and stored in the database. No environment variables are needed for Discord settings.
 
 **Important Security Notes:**
 - **Never commit** the `.env` file, `auth.key`, `auth.key.pub`, or `auth.pem` to version control
