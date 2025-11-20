@@ -329,7 +329,6 @@ export function startPrefixCommandListener(): void {
             
             client.on(Events.ClientReady, async () => {
                 const env = process.env.NODE_ENV || 'development';
-                logger.info(`Master server online (env: ${env})`, { prefix: 'DISCORD' });
                 await logGeneralEvent(`Master server online (env: ${env})`).catch(() => {});
             });
             

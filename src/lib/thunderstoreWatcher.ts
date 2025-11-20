@@ -274,7 +274,6 @@ export async function startThunderstoreWatcher(): Promise<void> {
     }
 
     memorySeenVersions = await loadSeenVersions();
-    logger.info(`Watching community: ${getEnvString('THUNDERSTORE_COMMUNITY', DEFAULT_COMMUNITY)} (every ${Math.round(intervalMs/1000)}s)`, { prefix: 'THUNDERSTORE' });
 
     // Run once on startup
     if (!inFlight) {
