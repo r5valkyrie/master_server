@@ -159,7 +159,8 @@ async function postDiscordBotMessage(channelId: string, body: any): Promise<void
         );
 
         if (!response.ok) {
-            console.error(`Discord bot message failed: ${response.status}`);
+            const errorText = await response.text();
+            console.error(`Discord bot message failed: ${response.status} - ${errorText}`);
         }
     } catch (err) {
         if (err instanceof Error && err.name !== 'TimeoutError' && err.name !== 'AbortError') {
@@ -410,7 +411,8 @@ export async function updateServersCountChannel(count: number): Promise<void> {
         );
 
         if (!resp.ok) {
-            console.error('Failed to update Discord channel name:', resp.status, await resp.text());
+            const errorText = await resp.text();
+            console.error('Failed to update Discord channel name:', resp.status, errorText);
             return;
         }
         lastServersChannelName = desiredName;
@@ -442,7 +444,8 @@ export async function updatePlayersCountChannel(count: number): Promise<void> {
         );
 
         if (!resp.ok) {
-            console.error('Failed to update Discord players channel name:', resp.status, await resp.text());
+            const errorText = await resp.text();
+            console.error('Failed to update Discord players channel name:', resp.status, errorText);
             return;
         }
         lastPlayersChannelName = desiredName;

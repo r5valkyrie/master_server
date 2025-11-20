@@ -70,7 +70,12 @@ export function startServerPresenceTracker(intervalSeconds = 15): void {
     setInterval(() => { tick().catch(() => {}); }, intervalMs);
 }
 
+let serverCountUpdaterStarted = false;
+
 export function startServerCountUpdater(intervalSeconds = 600): void {
+    if (serverCountUpdaterStarted) return;
+    serverCountUpdaterStarted = true;
+    
     const intervalMs = intervalSeconds * 1000;
     const tick = async () => {
         try {
@@ -85,7 +90,12 @@ export function startServerCountUpdater(intervalSeconds = 600): void {
     setInterval(() => { tick().catch(() => {}); }, intervalMs);
 }
 
+let activeServersListUpdaterStarted = false;
+
 export function startActiveServersListUpdater(intervalSeconds = 300): void {
+    if (activeServersListUpdaterStarted) return;
+    activeServersListUpdaterStarted = true;
+    
     const channelId = process.env.DISCORD_SERVER_BROWSER_CHANNEL_ID || '';
     const botToken = process.env.DISCORD_BOT_TOKEN || '';
     if (!channelId || !botToken) {
