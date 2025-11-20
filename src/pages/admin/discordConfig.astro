@@ -22,8 +22,7 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Save Configuration</button>
-          <button type="button" class="btn btn-secondary" id="resetBtn">Reset to Defaults</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
 
         <div id="statusMessage" class="status-message" style="display: none;"></div>
@@ -132,24 +131,31 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
 
     .config-field input {
       padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
       color: #fff;
       font-family: 'Monaco', 'Courier New', monospace;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       transition: all 0.2s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .config-field input:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.4);
     }
 
     .config-field input:focus {
       outline: none;
       background: rgba(255, 255, 255, 0.15);
       border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
     .config-field input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.5);
     }
 
     .form-actions {
@@ -265,6 +271,12 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
   </style>
 
   <script>
+    interface ConfigItem {
+      config_key: string;
+      config_value: string;
+      description: string;
+    }
+
     async function loadConfig() {
       try {
         const response = await fetch('/api/admin/discordConfig');
@@ -279,18 +291,46 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         if (!fieldsContainer) return;
         fieldsContainer.innerHTML = '';
 
-        (data.config as any[]).forEach((item: any) => {
+        // Define field order: bot token first, then command allow IDs, then channels
+        const fieldOrder = [
+          'DISCORD_BOT_TOKEN',
+          'DISCORD_COMMAND_ALLOW_IDS',
+          'DISCORD_ADMIN_LOG_CHANNEL_ID',
+          'DISCORD_SERVER_BROWSER_CHANNEL_ID',
+          'DISCORD_SERVER_COUNT_CHANNEL_ID',
+          'DISCORD_PLAYER_COUNT_CHANNEL_ID',
+          'DISCORD_MOD_UPDATES_CHANNEL_ID'
+        ];
+
+        // Create a map of config items
+        const configMap = new Map(data.config.map((item: ConfigItem) => [item.config_key, item]));
+
+        // Render in specified order
+        fieldOrder.forEach((key: string) => {
+          const item = configMap.get(key) as ConfigItem | undefined;
+          if (!item) return;
+
           const fieldDiv = document.createElement('div');
           fieldDiv.className = 'config-field';
           const isTokenField = item.config_key === 'DISCORD_BOT_TOKEN';
           const inputType = isTokenField ? 'password' : 'text';
+          let placeholder = 'Enter value';
+          
+          if (isTokenField) {
+            placeholder = 'Enter your Discord bot token';
+          } else if (item.config_key === 'DISCORD_COMMAND_ALLOW_IDS') {
+            placeholder = 'Enter user IDs (comma-separated)';
+          } else {
+            placeholder = 'Enter channel ID (18+ digits)';
+          }
+
           fieldDiv.innerHTML = `
             <label for="${item.config_key}">${formatLabel(item.config_key)}</label>
             <input
               type="${inputType}"
               id="${item.config_key}"
               name="${item.config_key}"
-              placeholder="${isTokenField ? 'Enter your Discord bot token' : 'Enter channel ID (18+ digits)'}"
+              placeholder="${placeholder}"
               value="${item.config_value || ''}"
               data-key="${item.config_key}"
             />
@@ -309,6 +349,7 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         .replace('DISCORD_', '')
         .replace('_CHANNEL_ID', '')
         .replace('_TOKEN', '')
+        .replace('_IDS', '')
         .replace(/_/g, ' ')
         .split(' ')
         .map((word: string) => word.charAt(0) + word.slice(1).toLowerCase())
@@ -359,17 +400,6 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         } catch (err) {
           console.error('Error saving config:', err);
           showError('Error saving configuration');
-        }
-      });
-    }
-
-    const resetBtn = document.getElementById('resetBtn');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear all channel IDs?')) {
-          document.querySelectorAll('.config-field input').forEach(input => {
-            (input as HTMLInputElement).value = '';
-          });
         }
       });
     }
