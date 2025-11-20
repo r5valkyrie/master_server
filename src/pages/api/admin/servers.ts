@@ -170,7 +170,7 @@ export const POST: APIRoute = async ({ request }) => {
         if (action === 'refresh') {
             // Force refresh server list
             const serverKeys = await getServerKeys();
-            await logAdminEvent(`🔄 Server list refreshed (${serverKeys.length} servers)`);
+            await logAdminEvent(`Server list refreshed (${serverKeys.length} servers)`);
             
             return new Response(JSON.stringify({ 
                 success: true, 

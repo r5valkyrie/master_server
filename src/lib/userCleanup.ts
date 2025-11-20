@@ -15,7 +15,7 @@ export async function cleanupInactiveUsers(hours: number = 24): Promise<number> 
 
         const removed = (result && typeof result.affectedRows === 'number') ? result.affectedRows : 0;
         if (removed > 0) {
-            await logGeneralEvent(`🧹 Cleaned up ${removed} users inactive > ${hours}h`);
+            await logGeneralEvent(`Cleaned up ${removed} users inactive > ${hours}h`);
         }
         return removed;
     } catch (err) {

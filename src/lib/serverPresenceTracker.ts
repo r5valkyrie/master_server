@@ -121,7 +121,7 @@ export function startActiveServersListUpdater(intervalSeconds = 300): void {
         const maxLines = 30;
         const lines: string[] = servers.slice(0, maxLines).map((s: any) => {
             const flag = toFlag((s.region || 'XX').toString());
-            const lock = s.hasPassword ? '🔒' : '';
+            const lock = s.hasPassword ? '[LOCKED]' : '';
             const name = s.name || 'Unnamed';
             const mode = s.playlist || 'unknown';
             const map = s.map || '';

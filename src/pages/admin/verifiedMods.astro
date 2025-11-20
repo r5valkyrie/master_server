@@ -227,14 +227,14 @@ import Dashboard from '../../layouts/Dashboard.astro';
             <tr>
               <td>
                 ${mod.isVerified ? 
-                  '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Verified</span>' :
+                  '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">[OK] Verified</span>' :
                   '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unverified</span>'
                 }
               </td>
               <td class="font-medium">
                 <div>
                   <div class="font-semibold">${escapeHtml(mod.name)}</div>
-                  ${mod.is_deprecated ? '<span class="text-xs text-red-600">⚠ Deprecated</span>' : ''}
+                  ${mod.is_deprecated ? '<span class="text-xs text-red-600">[DEPRECATED]</span>' : ''}
                 </div>
               </td>
               <td>${escapeHtml(mod.owner)}</td>
@@ -242,7 +242,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
               <td class="text-sm">${downloads.toLocaleString()}</td>
               <td class="text-sm">
                 ${mod.rating_score > 0 ? 
-                  `<span class="text-yellow-600">★ ${mod.rating_score}</span>` : 
+                  `<span class="text-yellow-600">[★] ${mod.rating_score}</span>` : 
                   '<span class="text-gray-400">No rating</span>'
                 }
               </td>

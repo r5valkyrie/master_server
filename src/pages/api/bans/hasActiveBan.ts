@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         if (player.isBanned) {
             try {
-                await logGeneralEvent(`🚫 Blocked connection: banned user ${id || ip} (type ${player.banType})`);
+                await logGeneralEvent(`Blocked connection: banned user ${id || ip} (type ${player.banType})`);
             } catch {}
         }
 
@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     } catch (error) {
         logger.error(`API error: ${error}`, { prefix: 'API' });
-        try { await logGeneralEvent(`❗ Error in /api/bans/hasActiveBan: ${String(error)}`); } catch {}
+        try { await logGeneralEvent(`Error in /api/bans/hasActiveBan: ${String(error)}`); } catch {}
         
         return new Response(JSON.stringify({ 
             success: false, 

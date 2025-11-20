@@ -54,7 +54,7 @@ export const POST: APIRoute = async ({ request }) => {
             'INSERT INTO versions (name, flags, checksums_enabled, supported) VALUES (?,?,?,?)',
             [name, flags, checksums_enabled, supported]
         );
-        await logAdminEvent(`➕ Version added: ${name} (checksums ${checksums_enabled ? 'on' : 'off'}, supported ${supported ? 'yes' : 'no'})`);
+        await logAdminEvent(`Version added: ${name} (checksums ${checksums_enabled ? 'on' : 'off'}, supported ${supported ? 'yes' : 'no'})`);
 
         await RefreshVersions();
         return new Response(JSON.stringify({ success: true }), { status: 201 });
@@ -88,7 +88,7 @@ export const PUT: APIRoute = async ({ request }) => {
         if (!pool) throw new Error('Database not initialized');
 
         await pool.execute(`UPDATE versions SET ${updates.join(', ')} WHERE name=?`, params);
-        await logAdminEvent(`✏️ Version updated: ${name}`);
+        await logAdminEvent(`Version updated: ${name}`);
         await RefreshVersions();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
@@ -106,7 +106,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         const pool = getPool();
         if (!pool) throw new Error('Database not initialized');
         await pool.execute('DELETE FROM versions WHERE name=?', [name]);
-        await logAdminEvent(`🗑️ Version deleted: ${name}`);
+        await logAdminEvent(`Version deleted: ${name}`);
         await RefreshVersions();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {

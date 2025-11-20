@@ -111,7 +111,7 @@ function buildEmbed(
     const downloadDisplay = totalDownloads > 0 ? totalDownloads.toLocaleString('en-US') : 'Not available';
     const categories = (mod.categories || []).join(', ') || 'Uncategorized';
     const iconUrl = latest?.icon || '';
-    const titlePrefix = updateType === 'new' ? '🆕 Mod Release! -' : '🔄 Mod Update! -';
+    const titlePrefix = updateType === 'new' ? 'Mod Release! -' : 'Mod Update! -';
 
     return {
         title: `${titlePrefix} ${mod.name || 'Unknown'} v${latest?.version_number || '?'}`,

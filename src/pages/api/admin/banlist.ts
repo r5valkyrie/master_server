@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ request }) => {
             "INSERT INTO banned_users (identifier, identifier_type, ban_reason, ban_type, ban_expiry_date) VALUES (?,?,?,?,?)",
             [identifier, identifierType, reason, banType, permanent ? null : endDate]
         );
-        await logAdminEvent(`🔨 Ban added: ${identifier} (type ${banType})${reason ? ` – ${reason}` : ''}`);
+        await logAdminEvent(`Ban added: ${identifier} (type ${banType})${reason ? ` – ${reason}` : ''}`);
 
         return new Response(JSON.stringify({ success: true }), { status: 201 });
     } catch (error) {
@@ -108,7 +108,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
         params.push(identifier);
         await pool.execute(`UPDATE banned_users SET ${sets.join(', ')} WHERE identifier=?`, params);
-        await logAdminEvent(`✏️ Ban updated: ${identifier}${reason !== undefined ? ` reason→${reason || '(none)'}` : ''}${endDate !== undefined ? ` expiry→${endDate || 'Permanent'}` : ''}`);
+        await logAdminEvent(`Ban updated: ${identifier}${reason !== undefined ? ` reason→${reason || '(none)'}` : ''}${endDate !== undefined ? ` expiry→${endDate || 'Permanent'}` : ''}`);
 
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
@@ -129,7 +129,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         if (!pool) throw new Error('Database not initialized');
 
         await pool.execute('DELETE FROM banned_users WHERE identifier=?', [identifier]);
-        await logAdminEvent(`🧹 Unbanned: ${identifier}`);
+        await logAdminEvent(`Unbanned: ${identifier}`);
 
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {

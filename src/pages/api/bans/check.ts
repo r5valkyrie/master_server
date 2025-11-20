@@ -23,13 +23,13 @@ export const POST: APIRoute = async ({ request }) => {
         const bannedPlayers = await getBulkBanStatusArray(players);
         if (Array.isArray(bannedPlayers) && bannedPlayers.length > 0) {
             const sample = bannedPlayers.slice(0, 3).map(p => `${p.id || p.ip}`).join(', ');
-            await logGeneralEvent(`🚫 Bulk check: ${bannedPlayers.length} banned player(s) detected${sample ? ` (e.g. ${sample})` : ''}`);
+            await logGeneralEvent(`Bulk check: ${bannedPlayers.length} banned player(s) detected${sample ? ` (e.g. ${sample})` : ''}`);
         }
         return new Response(JSON.stringify({ success: true, bannedPlayers }), { status: 200 });
 
     } catch (error) {
         logger.error(`API error: ${error}`, { prefix: 'API' });
-        try { await logGeneralEvent(`❗ Error in /api/bans/check: ${String(error)}`); } catch {}
+        try { await logGeneralEvent(`Error in /api/bans/check: ${String(error)}`); } catch {}
         
         return new Response(JSON.stringify({ 
             success: false, 

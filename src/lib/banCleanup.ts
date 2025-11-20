@@ -13,7 +13,7 @@ export async function cleanupExpiredBans(): Promise<number> {
 
         const removed = (result && typeof result.affectedRows === 'number') ? result.affectedRows : 0;
         if (removed > 0) {
-            await logGeneralEvent(`🧹 Cleaned up ${removed} expired bans`);
+            await logGeneralEvent(`Cleaned up ${removed} expired bans`);
         }
         return removed;
     } catch (err) {

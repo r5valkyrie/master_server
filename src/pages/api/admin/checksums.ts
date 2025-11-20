@@ -81,7 +81,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
         
         await pool.execute('INSERT INTO checksums (checksum, sdkversion, description) VALUES (?,?,?)', [checksum, sdkversion, description]);
-        await logAdminEvent(`➕ Checksum added: ${checksum} (v ${sdkversion})`);
+        await logAdminEvent(`Checksum added: ${checksum} (v ${sdkversion})`);
         await RefreshChecksums();
         return new Response(JSON.stringify({ success: true, message: 'Checksum added successfully' }), { status: 201 });
     } catch (error) {
@@ -102,7 +102,7 @@ export const POST: APIRoute = async ({ request }) => {
         return new Response(JSON.stringify({ 
             success: false, 
             error: errorMessage,
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
         }), { status: 500 });
     }
 };
@@ -123,7 +123,7 @@ export const PUT: APIRoute = async ({ request }) => {
         const pool = getPool();
         if (!pool) throw new Error('Database not initialized');
         await pool.execute(`UPDATE checksums SET ${updates.join(', ')} WHERE checksum=?`, params);
-        await logAdminEvent(`✏️ Checksum updated: ${checksum}`);
+        await logAdminEvent(`Checksum updated: ${checksum}`);
         await RefreshChecksums();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
@@ -141,7 +141,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         const pool = getPool();
         if (!pool) throw new Error('Database not initialized');
         await pool.execute('DELETE FROM checksums WHERE checksum=?', [checksum]);
-        await logAdminEvent(`🗑️ Checksum deleted: ${checksum}`);
+        await logAdminEvent(`Checksum deleted: ${checksum}`);
         await RefreshChecksums();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
