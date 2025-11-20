@@ -327,7 +327,22 @@ export function startPrefixCommandListener(): void {
             client.on(Events.ClientReady, async () => {
                 const env = process.env.NODE_ENV || 'development';
                 logger.info(`Master server online (env: ${env})`, { prefix: 'DISCORD' });
-                await logGeneralEvent(`Master server online (env: ${env})`).catch(() => {});
+                try {
+                    await logGeneralEvent(`Master server online (env: ${env})`);
+                } catch (err) {
+                    logger.error(`Failed to send startup message: ${err}`, { prefix: 'DISCORD' });
+                }
+            });
+            
+            // Also handle 'ready' event as fallback
+            client.on('ready', async () => {
+                const env = process.env.NODE_ENV || 'development';
+                logger.info(`Discord bot ready (env: ${env})`, { prefix: 'DISCORD' });
+                try {
+                    await logGeneralEvent(`Master server online (env: ${env})`);
+                } catch (err) {
+                    logger.error(`Failed to send startup message: ${err}`, { prefix: 'DISCORD' });
+                }
             });
             
             client.on(Events.MessageCreate, async (message: any) => {
