@@ -222,14 +222,8 @@ npm run dev
 ```
 
 The application will be available at:
-- Main site: `http://localhost:4321`
-- Admin panel: `http://localhost:4321/admin/dashboard`
-
-Use the `--host` flag to make it accessible on your local network:
-
-```bash
-npm run dev -- --host
-```
+- Main site: `http://localhost:3000`
+- Admin panel: `http://localhost:3000/admin/login`
 
 ### 6. Building for Production
 
@@ -274,8 +268,6 @@ This project implements multiple security measures:
 - **Rate Limiting**: Protection against abuse (implementation varies by endpoint)
 - **Session Management**: Secure JWT sessions for admin panel
 - **Encryption**: AES-128-GCM for server communication
-
-See `SECURITY.md` for more detailed information.
 
 ---
 
