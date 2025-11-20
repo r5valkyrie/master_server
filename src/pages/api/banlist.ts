@@ -10,8 +10,25 @@ async function SendDiscordLog(msg: string) {
 
 export const POST: APIRoute = async ({ request }) => {
     try {
-        const body = await request.json();
+        let body;
+        try {
+            body = await request.json();
+        } catch (e) {
+            return new Response(JSON.stringify({ 
+                success: false, 
+                error: "Invalid JSON request" 
+            }), { status: 400 });
+        }
+
+        // Validate input types
         const { type, ip, id, password, banType, reason, silent } = body;
+        
+        if (typeof type !== 'string' && type !== undefined) {
+            return new Response(JSON.stringify({ 
+                success: false, 
+                error: "Invalid type parameter" 
+            }), { status: 400 });
+        }
 
         const keyResult = await verifyApiKey(password || '');
         if (!keyResult.valid) {
