@@ -5,7 +5,7 @@ let redisClient: RedisClientInstance | null = null;
 
 async function initializeRedis() {
     const redisUrl = process.env.REDIS_URL;
-    const noRedis = process.env.NO_REDIS === "1";
+    const noRedis = process.env.DISABLE_REDIS === "1";
 
     if (noRedis || !redisUrl || redisUrl.trim() === '') {
         return null;

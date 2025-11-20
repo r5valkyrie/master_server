@@ -86,9 +86,12 @@ export function startServerCountUpdater(intervalSeconds = 600): void {
 }
 
 export function startActiveServersListUpdater(intervalSeconds = 300): void {
-    const channelId = process.env.DISCORD_SERVERS_LOG_CHANNEL_ID || '';
+    const channelId = process.env.DISCORD_SERVER_BROWSER_CHANNEL_ID || '';
     const botToken = process.env.DISCORD_BOT_TOKEN || '';
-    if (!channelId || !botToken) return;
+    if (!channelId || !botToken) {
+        console.warn('[serverPresenceTracker] DISCORD_SERVER_BROWSER_CHANNEL_ID not configured; server browser updater not started');
+        return;
+    }
     const intervalMs = intervalSeconds * 1000;
 
     const render = (servers: any[]): { content?: string; embeds?: any[] } => {
@@ -136,23 +139,46 @@ export function startActiveServersListUpdater(intervalSeconds = 300): void {
             const servers = await getServers(true) as any[];
             const publicServers = (servers || []).filter(s => s && (s.hidden === false || s.hidden === 'false'));
             const body = render(publicServers);
+            
             let msgId = await getActiveServersListMessageId();
+            
             if (!msgId) {
-                // First run: purge and post a new message
-                await deleteAllChannelMessages(channelId);
+                // First run: delete all messages in the channel and post the embed
+                try {
+                    await deleteAllChannelMessages(channelId);
+                } catch (err) {
+                    console.error('[serverPresenceTracker] Error deleting old messages:', err);
+                }
+                
                 msgId = await postBotMessage(channelId, body);
-                if (msgId) await setActiveServersListMessageId(msgId);
+                if (msgId) {
+                    await setActiveServersListMessageId(msgId);
+                    console.log('[serverPresenceTracker] Posted new server browser embed:', msgId);
+                } else {
+                    console.error('[serverPresenceTracker] Failed to post server browser embed');
+                }
             } else {
-                await editBotMessage(channelId, msgId, body);
-                // Ensure only one message remains (in case of manual messages posted)
-                await deleteOtherChannelMessages(channelId, msgId);
+                // Update existing message and clean up any other messages
+                try {
+                    await editBotMessage(channelId, msgId, body);
+                    // Ensure only one message remains (cleanup any manually posted messages)
+                    await deleteOtherChannelMessages(channelId, msgId);
+                } catch (err) {
+                    console.error('[serverPresenceTracker] Error updating embed:', err);
+                    // If edit fails, delete and repost
+                    msgId = '';
+                    await setActiveServersListMessageId('');
+                }
             }
-        } catch {}
+        } catch (err) {
+            console.error('[serverPresenceTracker] Error in tick:', err);
+        }
     };
 
-    // Kick off
+    // Kick off immediately, then on interval
     tick().catch(() => {});
     setInterval(() => { tick().catch(() => {}); }, intervalMs);
+    console.log(`[serverPresenceTracker] Server browser updater started (refresh every ${intervalSeconds}s)`);
 }
 
 // Register simple ban/unban commands using existing bansystem

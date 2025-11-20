@@ -1,4 +1,5 @@
 import { getPool } from './db';
+import { logAdminEvent } from './discord';
 import axios from 'axios';
 
 const NO_BAN_REASON_PROVIDED = "You have been banned.";
@@ -21,9 +22,7 @@ async function getUsernameBySteamID(id: number | string) {
 }
 
 async function SendDiscordLog(msg: string) {
-    if (process.env.DISCORD_WEBHOOK_ADMIN) {
-        axios.post(process.env.DISCORD_WEBHOOK_ADMIN, { content: msg });
-    }
+    await logAdminEvent(msg);
 }
 
 export async function getPlayerBanStatus(id: number | string | null, ip: string | null) {

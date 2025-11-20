@@ -1,15 +1,10 @@
 import type { APIRoute } from 'astro';
 import { addBan, removeBan, updateBanReason } from '../../../lib/bansystem';
 import { checkRateLimit, isValidSteamId, isValidBanReason, validateBanDuration } from '../../../lib/security';
+import { logAdminEvent } from '../../../lib/discord';
 
 async function SendDiscordLog(msg: string) {
-    if (process.env.DISCORD_WEBHOOK_ADMIN) {
-        await fetch(process.env.DISCORD_WEBHOOK_ADMIN, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: msg }),
-        });
-    }
+    await logAdminEvent(msg);
 }
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {

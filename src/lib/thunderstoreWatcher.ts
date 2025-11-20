@@ -49,7 +49,7 @@ async function loadSeenVersions(): Promise<SeenVersionsMap> {
     try {
         const { createClient } = await import('redis');
         const redisUrl = process.env.REDIS_URL;
-        const noRedis = process.env.NO_REDIS === '1';
+        const noRedis = process.env.DISABLE_REDIS === '1';
         if (!noRedis && redisUrl && redisUrl.trim() !== '') {
             const client = createClient({ url: redisUrl, password: process.env.REDIS_PASSWORD });
             client.on('error', () => {});
@@ -79,7 +79,7 @@ async function saveSeenVersions(map: SeenVersionsMap): Promise<void> {
     try {
         const { createClient } = await import('redis');
         const redisUrl = process.env.REDIS_URL;
-        const noRedis = process.env.NO_REDIS === '1';
+        const noRedis = process.env.DISABLE_REDIS === '1';
         if (!noRedis && redisUrl && redisUrl.trim() !== '') {
             const client = createClient({ url: redisUrl, password: process.env.REDIS_PASSWORD });
             client.on('error', () => {});
@@ -127,23 +127,28 @@ function buildEmbed(
     };
 }
 
-async function postDiscordEmbeds(webhookUrl: string, embeds: any[]): Promise<void> {
-    if (!webhookUrl || embeds.length === 0) return;
+async function postDiscordEmbeds(channelId: string, embeds: any[]): Promise<void> {
+    if (!channelId || embeds.length === 0) return;
+    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    if (!botToken) return;
+    
     const chunks: any[][] = [];
     for (let i = 0; i < embeds.length; i += 10) chunks.push(embeds.slice(i, i + 10));
     for (const batch of chunks) {
         try {
-            const resp = await fetch(webhookUrl, {
+            const resp = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Bot ${botToken}`,
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ embeds: batch })
             });
             if (!resp.ok) {
-                // Log once per batch error
-                console.error('[thunderstore] Discord webhook failed:', resp.status, await resp.text());
+                console.error('[thunderstore] Discord bot send failed:', resp.status, await resp.text());
             }
         } catch (e) {
-            console.error('[thunderstore] Discord webhook error:', e);
+            console.error('[thunderstore] Discord bot error:', e);
         }
     }
 }
@@ -222,8 +227,8 @@ function getLatestVersion(mod: ThunderstorePackage): NonNullable<ThunderstorePac
 
 async function runOnce(): Promise<void> {
     const community = getEnvString('THUNDERSTORE_COMMUNITY', DEFAULT_COMMUNITY);
-    const webhook = process.env.THUNDERSTORE_DISCORD_WEBHOOK || '';
-    if (!webhook) return;
+    const channelId = process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
+    if (!channelId) return;
 
     try {
         const mods = await fetchPackages(community);
@@ -246,7 +251,7 @@ async function runOnce(): Promise<void> {
 
         if (updates.length > 0) {
             const embeds = updates.map(u => buildEmbed(u.mod, u.latest, community, u.type));
-            await postDiscordEmbeds(webhook, embeds);
+            await postDiscordEmbeds(channelId, embeds);
             await saveSeenVersions(memorySeenVersions);
             console.log(`[thunderstore] Posted ${updates.length} update(s)`);
         }
@@ -260,9 +265,9 @@ export async function startThunderstoreWatcher(): Promise<void> {
     watcherStarted = true;
 
     const intervalMs = getEnvNumber('THUNDERSTORE_CHECK_INTERVAL_MS', DEFAULT_INTERVAL_MS);
-    const webhook = process.env.THUNDERSTORE_DISCORD_WEBHOOK || '';
-    if (!webhook) {
-        console.warn('[thunderstore] No webhook configured; watcher not started');
+    const channelId = process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
+    if (!channelId) {
+        console.warn('[thunderstore] No Discord mod updates channel configured; watcher not started');
         return;
     }
 

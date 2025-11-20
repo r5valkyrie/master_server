@@ -122,6 +122,8 @@ MYSQL_DB=r5
 # Redis (Optional - the app will run without it)
 REDIS_URL="redis://localhost:6379"
 REDIS_PASSWORD=
+# Disable Redis even if configured (set to "1" to disable)
+DISABLE_REDIS=
 
 # Server Time-To-Live in Redis (in seconds)
 SERVER_TTL=35
@@ -142,18 +144,21 @@ AUTH_KEY_PASSPHRASE=
 STEAM_WEB_API_KEY=your_steam_api_key_here
 STEAM_APP_ID=480
 
-# Discord Bot Token (Optional - for bot features like channel management)
+# Discord Bot Configuration (Optional - for logging and notifications)
+# A single Discord bot token is used for all messaging features
 DISCORD_BOT_TOKEN=
 
-# Discord Webhook URLs (Optional - for logging/notifications)
-DISCORD_WEBHOOK_ADMIN=
-DISCORD_WEBHOOK_GENERAL=
-DISCORD_WEBHOOK_SERVERS=
-
-# Discord Channel IDs (Optional - for bot features)
-DISCORD_SERVERS_CHANNEL_ID=
-DISCORD_SERVERS_LOG_CHANNEL_ID=
-DISCORD_PLAYERS_CHANNEL_ID=
+# Discord Channel IDs (Optional - where the bot sends messages)
+# Admin log channel for administrative actions and general system notifications (bans, checksums, versions, security alerts, user cleanups, etc.)
+DISCORD_ADMIN_LOG_CHANNEL_ID=
+# Server browser channel for server browser embed updates
+DISCORD_SERVER_BROWSER_CHANNEL_ID=
+# Server count channel - bot renames this channel to show live server count (e.g., "servers online: 42")
+DISCORD_SERVER_COUNT_CHANNEL_ID=
+# Player count channel - bot renames this channel to show live player count (e.g., "players online: 128")
+DISCORD_PLAYER_COUNT_CHANNEL_ID=
+# Mod updates channel for all Thunderstore mod update notifications
+DISCORD_MOD_UPDATES_CHANNEL_ID=
 
 # Discord Command Authorization (Optional - comma-separated user IDs allowed to run bot commands)
 DISCORD_COMMAND_ALLOW_IDS=
@@ -161,10 +166,18 @@ DISCORD_COMMAND_ALLOW_IDS=
 # Thunderstore watcher (Optional)
 # Community key on Thunderstore (default: r5valkyrie)
 THUNDERSTORE_COMMUNITY=r5valkyrie
-# Discord webhook to post mod updates (or set DISCORD_WEBHOOK)
-THUNDERSTORE_DISCORD_WEBHOOK=
 # Poll interval in milliseconds (default 300000 = 5 minutes)
 THUNDERSTORE_CHECK_INTERVAL_MS=300000
+
+# Ban and User Cleanup Configuration (optional)
+# Interval for expired ban cleanup in hours (default: 12)
+BAN_CLEANUP_INTERVAL_HOURS=12
+# Inactivity threshold for user cleanup in hours (default: 24)
+USER_CLEANUP_INACTIVE_HOURS=24
+
+# Game Server Configuration (optional)
+# Default server port for authentication fallback (default: 37015)
+DEFAULT_SERVER_PORT=37015
 
 # Application Environment
 NODE_ENV=development
