@@ -280,10 +280,13 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
             .map((word: string) => word.charAt(0) + word.slice(1).toLowerCase())
             .join(' ');
 
+          // Use password input for Steam Web API Key
+          const inputType = field.key === 'STEAM_WEB_API_KEY' ? 'password' : 'text';
+
           fieldDiv.innerHTML = `
             <label for="${item.setting_key}">${label}</label>
             <input
-              type="text"
+              type="${inputType}"
               id="${item.setting_key}"
               name="${item.setting_key}"
               placeholder="Enter value"
