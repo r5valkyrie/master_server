@@ -93,12 +93,13 @@ export function startServerCountUpdater(intervalSeconds = 600): void {
 
 let activeServersListUpdaterStarted = false;
 
-export function startActiveServersListUpdater(intervalSeconds = 300): void {
+export async function startActiveServersListUpdater(intervalSeconds = 300): Promise<void> {
     if (activeServersListUpdaterStarted) return;
     activeServersListUpdaterStarted = true;
     
-    const channelId = process.env.DISCORD_SERVER_BROWSER_CHANNEL_ID || '';
-    const botToken = process.env.DISCORD_BOT_TOKEN || '';
+    const { getDiscordConfig } = await import('./db.ts');
+    const channelId = await getDiscordConfig('DISCORD_SERVER_BROWSER_CHANNEL_ID');
+    const botToken = await import('./db.ts').then(m => m.getDiscordBotToken());
     if (!channelId || !botToken) {
         logger.warn('DISCORD_SERVER_BROWSER_CHANNEL_ID not configured; server browser updater not started', { prefix: 'SERVER-BROWSER' });
         return;
