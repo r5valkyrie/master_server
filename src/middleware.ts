@@ -1,10 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getPlayerBanStatus } from './lib/bansystem';
 import { getSessionCookieName, verifyAdminSessionToken } from './lib/session';
-import { startBanCleanupScheduler } from './lib/banCleanupScheduler';
-import { startServerPresenceTracker, startServerCountUpdater, startActiveServersListUpdater } from './lib/serverPresenceTracker';
-import { startPrefixCommandListener } from './lib/discord';
-import { startThunderstoreWatcher } from './lib/thunderstoreWatcher';
+import { initializeStartup } from './lib/startup';
 import { addSecurityHeaders } from './lib/security-headers';
 
 export async function ipFilter(request: Request) {
@@ -25,18 +22,9 @@ export async function ipFilter(request: Request) {
 
 export const onRequest = defineMiddleware(async (context, next) => {
     const { request, url } = context;
-    // Ensure ban cleanup scheduler is running
-    startBanCleanupScheduler();
-    // Ensure server presence tracker is running
-    startServerPresenceTracker();
-    // Periodically update the servers online channel name based on latest list
-    startServerCountUpdater();
-    // Maintain a single active servers list message in the logs channel
-    startActiveServersListUpdater();
-    // Start prefix command listener for bot commands
-    startPrefixCommandListener();
-    // Start Thunderstore watcher for mod updates -> Discord
-    startThunderstoreWatcher();
+    
+    // Initialize background tasks on first request
+    await initializeStartup();
     
     // IP Filtering for specific endpoint
     if (url.pathname === '/api/servers/add') {
