@@ -1,5 +1,5 @@
-import { getPool } from './db';
-import { RefreshChecksums as refreshLib } from './checksums';
+import { getPool } from './db.ts';
+import { RefreshChecksums as refreshLib } from './checksums.ts';
 
 export async function refreshChecksums() {
     try {

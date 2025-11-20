@@ -1,5 +1,5 @@
-import { getPool } from './db';
-import { logAdminEvent } from './discord';
+import { getPool } from './db.ts';
+import { logAdminEvent } from './discord.ts';
 import axios from 'axios';
 
 const NO_BAN_REASON_PROVIDED = "You have been banned.";

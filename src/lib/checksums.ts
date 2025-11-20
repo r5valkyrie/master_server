@@ -1,4 +1,4 @@
-import { getPool } from './db';
+import { getPool } from './db.ts';
 
 let CHECKSUMS_TABLE: any[] = [];
 

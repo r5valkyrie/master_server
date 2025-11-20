@@ -1,4 +1,4 @@
-import { getPool } from './db';
+import { getPool } from './db.ts';
 import type { RowDataPacket } from 'mysql2/promise';
 
 export interface VerifiedMod {

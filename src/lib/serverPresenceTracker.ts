@@ -1,6 +1,6 @@
-import { getServerKeys, getKnownServerKeys, replaceKnownServerKeys, getServerByIPAndPort, upsertServerMeta, getServerMeta, removeServerMeta } from './servers';
-import { logGeneralEmbed, logServersEmbed, updateServersCountChannel, updatePlayersCountChannel, deleteAllChannelMessages, deleteOtherChannelMessages, postBotMessage, editBotMessage, startPrefixCommandListener, registerCommand } from './discord';
-import { getServers, getActiveServersListMessageId, setActiveServersListMessageId } from './servers';
+import { getServerKeys, getKnownServerKeys, replaceKnownServerKeys, getServerByIPAndPort, upsertServerMeta, getServerMeta, removeServerMeta } from './servers.ts';
+import { logGeneralEmbed, logServersEmbed, updateServersCountChannel, updatePlayersCountChannel, deleteAllChannelMessages, deleteOtherChannelMessages, postBotMessage, editBotMessage, startPrefixCommandListener, registerCommand } from './discord.ts';
+import { getServers, getActiveServersListMessageId, setActiveServersListMessageId } from './servers.ts';
 
 let trackerStarted = false;
 
@@ -192,8 +192,8 @@ export function startActiveServersListUpdater(intervalSeconds = 300): void {
 }
 
 // Register simple ban/unban commands using existing bansystem
-import { addBan, removeBan } from './bansystem';
-import { GetSteamIdByUsername, SearchSteamIdsByUsername } from './db';
+import { addBan, removeBan } from './bansystem.ts';
+import { GetSteamIdByUsername, SearchSteamIdsByUsername } from './db.ts';
 
 function isNumericString(s: string): boolean { return /^\d+$/.test(s); }
 

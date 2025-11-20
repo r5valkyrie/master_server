@@ -1,6 +1,6 @@
-import { cleanupExpiredBans } from './banCleanup';
-import { cleanupInactiveUsers } from './userCleanup';
-import { logGeneralEvent } from './discord';
+import { cleanupExpiredBans } from './banCleanup.ts';
+import { cleanupInactiveUsers } from './userCleanup.ts';
+import { logGeneralEvent } from './discord.ts';
 
 let schedulerStarted = false;
 

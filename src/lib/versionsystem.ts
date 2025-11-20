@@ -1,5 +1,5 @@
-import { getPool } from './db';
-import { RefreshVersions as refreshLib } from './versions';
+import { getPool } from './db.ts';
+import { RefreshVersions as refreshLib } from './versions.ts';
 
 export async function refreshVersions() {
     try {

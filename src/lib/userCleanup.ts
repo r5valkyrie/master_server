@@ -1,5 +1,5 @@
-import { getPool } from './db';
-import { logGeneralEvent } from './discord';
+import { getPool } from './db.ts';
+import { logGeneralEvent } from './discord.ts';
 
 export async function cleanupInactiveUsers(hours: number = 24): Promise<number> {
     try {

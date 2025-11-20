@@ -1,4 +1,4 @@
-import { getPool } from './db';
+import { getPool } from './db.ts';
 
 export let VERSION_TABLE: any[] = [];
 
