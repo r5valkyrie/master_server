@@ -80,8 +80,8 @@ Follow these instructions to get the project up and running on your local machin
 Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/r5valkyrie/r5valk-ms-astro.git
-cd r5valk-ms-astro
+git clone https://github.com/r5valkyrie/master_server.git
+cd master_server
 npm install
 ```
 
@@ -128,11 +128,14 @@ DISABLE_REDIS=
 # Server Time-To-Live in Redis (in seconds)
 SERVER_TTL=35
 
-# Note: API keys are managed through the admin panel at `/admin/apiKeys` and stored in the database
-# No API_KEY environment variable is needed
-
 # Admin Session Secret (Required)
-# Used for admin web panel JWT session tokens
+# Secret key used to sign and verify admin web panel session tokens (JWT)
+# Can be any strong password or random string of your choice
+# Examples:
+#   - Use a strong password: MyP@ssw0rd!SecureAdminKey2024
+#   - Generate random: openssl rand -base64 32
+#   - Simple memorable string: admin_secret_key_12345
+# Minimum 16 characters recommended for security
 ADMIN_SESSION_SECRET=your_secure_session_secret_here
 
 # JWT Private Key Passphrase (Required if auth.key is passphrase-protected)
