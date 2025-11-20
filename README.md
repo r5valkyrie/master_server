@@ -141,7 +141,7 @@ ADMIN_SESSION_SECRET=your_secure_session_secret_here
 # JWT Private Key Passphrase (Required if auth.key is passphrase-protected)
 AUTH_KEY_PASSPHRASE=
 
-# Application Environment
+# Application Environment (development or production)
 NODE_ENV=development
 
 # Allowed Hosts (Optional - comma-separated list for Vite server)
@@ -151,7 +151,6 @@ ALLOWED_HOSTS=
 **Important Security Notes:**
 - **Never commit** the `.env` file, `auth.key`, `auth.key.pub`, or `auth.pem` to version control
 - The admin web panel uses **database user accounts** (managed via `/admin/userManagement`), not environment variables
-- The `API_KEY` is for **game clients and programmatic API access**, not for web panel login
 - Change all default secrets before deploying to production
 - Use strong, randomly generated secrets (at least 32 characters)
 - Obtain your Steam Web API key from https://steamcommunity.com/dev/apikey
@@ -251,8 +250,6 @@ npm run preview
 ## API Documentation
 
 ### Authentication
-
-**Game Client API**: Include `x-r5v-key` header with your `API_KEY` value for all client endpoints.
 
 **Admin Panel**: Uses session-based authentication with database user accounts (master/admin/moderator roles).
 

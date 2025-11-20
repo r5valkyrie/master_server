@@ -1,12 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import fs from 'fs';
-import type { APIContext } from 'astro';
 import { logger } from './logger.ts';
-
-const AUTH_TYPE_NONE = 0;
-const AUTH_TYPE_KEY  = 1; // auth using firstparty token
-const AUTH_TYPE_USER = 2; // auth using the admin user database
 
 // sign JWT using private key
 // this key MUST be kept private as otherwise JWTs can be issued by unauthorized
@@ -44,51 +39,4 @@ export function CreateAuthToken(userId: string, userName: string, serverIp: stri
     };
 
     return jwt.sign(tokenData, { key: PRIVATE_KEY, passphrase: process.env.AUTH_KEY_PASSPHRASE }, signOptions);
-}
-
-export function RequireAuth(req: Request, type = AUTH_TYPE_USER): boolean {
-    switch(type) {
-        case AUTH_TYPE_NONE:
-            return true;
-        case AUTH_TYPE_KEY:
-        {
-            const key = req.headers.get("x-r5v-key");
-            if (!key) return false;
-            
-            const expectedKey = process.env.API_KEY;
-            if (!expectedKey) {
-                logger.error('API_KEY not configured', { prefix: 'AUTH' });
-                return false;
-            }
-            
-            // Use crypto.timingSafeEqual for constant-time comparison to prevent timing attacks
-            try {
-                const keyBuffer = Buffer.from(key, 'utf8');
-                const expectedBuffer = Buffer.from(expectedKey, 'utf8');
-                
-                // Ensure buffers are same length to prevent length-based attacks
-                if (keyBuffer.length !== expectedBuffer.length) {
-                    return false;
-                }
-                
-                return crypto.timingSafeEqual(keyBuffer, expectedBuffer);
-            } catch (error) {
-                logger.error(`Auth comparison error: ${error}`, { prefix: 'AUTH' });
-                return false;
-            }
-        }
-        case AUTH_TYPE_USER:
-            logger.error('Attempted to auth with AUTH_TYPE_USER, however this auth type is not implemented', { prefix: 'AUTH' });
-            return false;
-    }
-
-    return false;
-}
-
-export function RequireKeyAuth({ request, clientAddress }: APIContext): boolean {
-    if (!RequireAuth(request, AUTH_TYPE_KEY)) {
-        logger.warn(`Unauthorized access from '${clientAddress}' to endpoint '${new URL(request.url).pathname}'`, { prefix: 'AUTH' });
-        return false;
-    }
-    return true;
 }
