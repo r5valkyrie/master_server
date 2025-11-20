@@ -7,11 +7,11 @@ import node from '@astrojs/node';
 const startupIntegration = {
   name: 'startup-integration',
   hooks: {
-    'astro:server:setup': async ({ }) => {
+    'astro:server:setup': async () => {
       // Schedule initialization for next tick to ensure everything is ready
       setImmediate(async () => {
         try {
-          const { initializeStartup } = await import('./src/lib/startup.js');
+          const { initializeStartup } = await import('./src/lib/startup.ts');
           await initializeStartup();
         } catch (err) {
           console.error('Failed to initialize startup tasks:', err);
