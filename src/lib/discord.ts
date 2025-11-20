@@ -323,6 +323,13 @@ export function startPrefixCommandListener(): void {
             const mod: any = await import('discord.js');
             const { Client, GatewayIntentBits, Partials, Events } = mod;
             const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent], partials: [Partials.Channel] });
+            
+            client.on(Events.ClientReady, async () => {
+                const env = process.env.NODE_ENV || 'development';
+                logger.info(`Master server online (env: ${env})`, { prefix: 'DISCORD' });
+                await logGeneralEvent(`Master server online (env: ${env})`).catch(() => {});
+            });
+            
             client.on(Events.MessageCreate, async (message: any) => {
                 try {
                     if (!message || message.author?.bot) return;

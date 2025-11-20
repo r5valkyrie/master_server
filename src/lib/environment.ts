@@ -1,6 +1,7 @@
 /**
  * Secure environment variable handling
  */
+import { logger } from './logger.ts';
 
 interface EnvironmentConfig {
     MYSQL_HOST: string;
@@ -64,11 +65,10 @@ export function validateEnvironment(): EnvironmentConfig {
 export function logEnvironmentStatus(): void {
     const config = validateEnvironment();
     
-    console.log('[Environment] Configuration:');
-    console.log(`   NODE_ENV: ${config.NODE_ENV}`);
-    console.log(`   MYSQL: ${config.MYSQL_HOST}/${config.MYSQL_DB} as ${config.MYSQL_USER}`);
-    console.log(`   API_KEY: ${config.API_KEY ? 'Set' : 'Missing'}`);
-    console.log(`   STEAM_API_KEY: ${config.STEAM_API_KEY ? 'Set' : 'Not set'}`);
+    logger.info(`NODE_ENV: ${config.NODE_ENV}`, { prefix: 'ENV' });
+    logger.info(`MYSQL: ${config.MYSQL_HOST}/${config.MYSQL_DB} as ${config.MYSQL_USER}`, { prefix: 'ENV' });
+    logger.info(`API_KEY: ${config.API_KEY ? 'Set' : 'Missing'}`, { prefix: 'ENV' });
+    logger.info(`STEAM_API_KEY: ${config.STEAM_API_KEY ? 'Set' : 'Not set'}`, { prefix: 'ENV' });
 }
 
 /**

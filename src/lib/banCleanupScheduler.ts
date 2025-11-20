@@ -1,6 +1,5 @@
 import { cleanupExpiredBans } from './banCleanup.ts';
 import { cleanupInactiveUsers } from './userCleanup.ts';
-import { logGeneralEvent } from './discord.ts';
 import { logger } from './logger.ts';
 
 let schedulerStarted = false;
@@ -11,12 +10,6 @@ export function startBanCleanupScheduler(): void {
 
     const hours = parseInt(process.env.BAN_CLEANUP_INTERVAL_HOURS || '12', 10) || 12;
     const intervalMs = Math.max(1, hours) * 60 * 60 * 1000;
-
-    // One-time startup notification
-    try {
-        const env = process.env.NODE_ENV || 'development';
-        logGeneralEvent(`Master server online (env: ${env})`).catch(() => {});
-    } catch {}
 
     // Run once on startup
     cleanupExpiredBans().then((removed) => {
