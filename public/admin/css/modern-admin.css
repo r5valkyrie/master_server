@@ -2494,3 +2494,115 @@ body {
   color: rgba(255, 255, 255, 0.6);
   margin: 0;
 }
+
+/* Select/Dropdown Styling */
+.form-select,
+.role-select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-md) center;
+  padding-right: 2.25rem;
+  background-size: 12px;
+}
+
+.role-select {
+  min-width: 120px;
+  padding: 0.375rem 0.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  padding-right: 1.75rem;
+  background-size: 10px;
+}
+
+.form-select:hover,
+.role-select:hover {
+  border-color: var(--primary-400);
+  background-color: var(--gray-75);
+}
+
+.form-select:focus,
+.role-select:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+  background-color: var(--gray-50);
+}
+
+.form-select:active,
+.role-select:active {
+  border-color: var(--primary-600);
+}
+
+.form-select:disabled,
+.role-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--gray-100);
+}
+
+.form-select option,
+.role-select option {
+  background: var(--gray-100);
+  color: var(--gray-900);
+  padding: var(--space-sm);
+}
+
+.form-select option:checked,
+.role-select option:checked {
+  background: linear-gradient(var(--primary-500), var(--primary-500));
+  background-color: var(--primary-500) !important;
+  color: white;
+}
+
+.form-select option:hover,
+.role-select option:hover {
+  background: var(--primary-100);
+  color: var(--gray-900);
+}
+
+/* Dark theme select styling for admin pages */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Ensure select elements in modals have proper styling */
+.modal .form-select,
+.modal .role-select {
+  background-color: var(--gray-50);
+  color: var(--gray-900);
+  border-color: var(--gray-300);
+}
+
+.modal .form-select:focus,
+.modal .role-select:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+}
+
+/* Responsive select on mobile */
+@media (max-width: 640px) {
+  .form-select,
+  .role-select {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+  }
+  
+  .role-select {
+    min-width: 100px;
+    padding: 0.375rem 0.5rem;
+    padding-right: 1.5rem;
+  }
+}
