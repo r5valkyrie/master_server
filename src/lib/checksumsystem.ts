@@ -1,12 +1,13 @@
 import { getPool } from './db.ts';
 import { RefreshChecksums as refreshLib } from './checksums.ts';
+import { logger } from './logger.ts';
 
 export async function refreshChecksums() {
     try {
         await refreshLib();
         return { success: true, message: "Checksum were successfully refreshed" };
     } catch (err) {
-        console.error(err);
+        logger.error(`Checksum refresh error: ${err}`, { prefix: 'CHECKSUMS' });
         return { success: false, message: "An error occurred. Please check logs" };
     }
 }
@@ -27,7 +28,7 @@ export async function addChecksum(checksum: number, description: string | null, 
         await pool.execute("INSERT INTO `checksums` (`checksum`, `description`, `sdkversion`) VALUES (?,?,?)", [checksum, description, sdkversion]);
         return { success: true, message: "Checksum was successfully added" };
     } catch (err) {
-        console.error(err);
+        logger.error(`Add checksum error: ${err}`, { prefix: 'CHECKSUMS' });
         return { success: false, message: "An error occurred" };
     }
 }
@@ -48,7 +49,7 @@ export async function updateChecksum(checksum: number, description: string | nul
         await pool.execute("UPDATE `checksums` SET `description`=?, `sdkversion`=? WHERE `checksum`=?", [description, sdkversion, "" + checksum]);
         return { success: true, message: `Checksum was successfully updated` };
     } catch (err) {
-        console.error(err);
+        logger.error(`Update checksum error: ${err}`, { prefix: 'CHECKSUMS' });
         return { success: false, message: "An error occurred" };
     }
 }
@@ -68,7 +69,7 @@ export async function removeChecksum(checksum: number) {
         await pool.execute("DELETE FROM `checksums` WHERE `checksum`=?", ["" + checksum]);
         return { success: true, message: "Checksum was successfully removed" };
     } catch (err) {
-        console.error(err);
+        logger.error(`Remove checksum error: ${err}`, { prefix: 'CHECKSUMS' });
         return { success: false, message: "An error occurred" };
     }
 }

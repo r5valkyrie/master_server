@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { addBan, removeBan, updateBanReason } from '../../../lib/bansystem';
 import { checkRateLimit, isValidSteamId, isValidBanReason, validateBanDuration } from '../../../lib/security';
 import { logAdminEvent } from '../../../lib/discord';
+import { logger } from '../../../lib/logger.ts';
 
 async function SendDiscordLog(msg: string) {
     await logAdminEvent(msg);
@@ -85,7 +86,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
             }), { status: 400 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`Ban API error: ${error}`, { prefix: 'ADMIN' });
         
         return new Response(JSON.stringify({ 
             success: false, 

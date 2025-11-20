@@ -1,4 +1,5 @@
 import { getPool } from './db.ts';
+import { logger } from './logger.ts';
 
 let CHECKSUMS_TABLE: any[] = [];
 
@@ -13,7 +14,7 @@ export async function RefreshChecksums() {
             CHECKSUMS_TABLE = rows;
         }
     } catch (err) {
-        console.log(err);
+        logger.error(`Refresh checksums error: ${err}`, { prefix: 'CHECKSUMS' });
     }
 }
 

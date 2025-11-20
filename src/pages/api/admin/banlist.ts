@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { logger } from '../../../lib/logger.ts';
 import { logAdminEvent } from '../../../lib/discord';
 
 export const GET: APIRoute = async ({ request }) => {

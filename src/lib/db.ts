@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import type { RowDataPacket } from 'mysql2/promise';
+import { logger } from './logger.ts';
 
 let pool: mysql.Pool | null = null;
 
@@ -22,7 +23,7 @@ export function getPool() {
         });
         return pool;
     } catch (err) {
-        console.error(err);
+        logger.error(`Connection pool error: ${err}`, { prefix: 'DB' });
         return null;
     }
 }
@@ -39,7 +40,7 @@ export async function GetUserFlags(id: number | string) {
         }
         return 0;
     } catch (err) {
-        console.log(err);
+        logger.error(`LogUser error: ${err}`, { prefix: 'DB' });
         return 0;
     }
 }
@@ -94,7 +95,7 @@ export async function LogUserAuth(id: number | string, success: boolean, msg = "
         const idStr = String(id);
         await pool.execute("INSERT INTO `user_auth_history` (`steam_id`, `successful`, `msg`) VALUES (?, ?, ?)", [idStr, success, msg]);
     } catch (err) {
-        console.log("LogUserAuth error:", err);
+        logger.error(`LogUserAuth error: ${err}`, { prefix: 'DB' });
     }
 }
 
@@ -104,7 +105,7 @@ export async function AddUserAuthCountryMetric(code: string) {
         if (!pool) return;
         await pool.execute("INSERT INTO `country_metrics` VALUES (?,?) ON DUPLICATE KEY UPDATE `count`=`count`+1", [code, 1]);
     } catch (err) {
-        console.log("AddUserAuthCountryMetric error:", err);
+        logger.error(`AddUserAuthCountryMetric error: ${err}`, { prefix: 'DB' });
     }
 }
 
@@ -120,7 +121,7 @@ export async function GetSteamIdByUsername(name: string): Promise<string | null>
         }
         return null;
     } catch (err) {
-        console.log("GetSteamIdByUsername error:", err);
+        logger.error(`GetSteamIdByUsername error: ${err}`, { prefix: 'DB' });
         return null;
     }
 }
@@ -137,7 +138,7 @@ export async function SearchSteamIdsByUsername(name: string, limit = 5): Promise
         }
         return [];
     } catch (err) {
-        console.log("SearchSteamIdsByUsername error:", err);
+        logger.error(`SearchSteamIdsByUsername error: ${err}`, { prefix: 'DB' });
         return [];
     }
 }

@@ -1,6 +1,7 @@
 import { getServerKeys, getKnownServerKeys, replaceKnownServerKeys, getServerByIPAndPort, upsertServerMeta, getServerMeta, removeServerMeta } from './servers.ts';
 import { logGeneralEmbed, logServersEmbed, updateServersCountChannel, updatePlayersCountChannel, deleteAllChannelMessages, deleteOtherChannelMessages, postBotMessage, editBotMessage, startPrefixCommandListener, registerCommand } from './discord.ts';
 import { getServers, getActiveServersListMessageId, setActiveServersListMessageId } from './servers.ts';
+import { logger } from './logger.ts';
 
 let trackerStarted = false;
 
@@ -99,7 +100,7 @@ export function startActiveServersListUpdater(intervalSeconds = 300): void {
     const channelId = process.env.DISCORD_SERVER_BROWSER_CHANNEL_ID || '';
     const botToken = process.env.DISCORD_BOT_TOKEN || '';
     if (!channelId || !botToken) {
-        console.warn('[serverPresenceTracker] DISCORD_SERVER_BROWSER_CHANNEL_ID not configured; server browser updater not started');
+        logger.warn('DISCORD_SERVER_BROWSER_CHANNEL_ID not configured; server browser updater not started', { prefix: 'SERVER-BROWSER' });
         return;
     }
     const intervalMs = intervalSeconds * 1000;
@@ -157,15 +158,15 @@ export function startActiveServersListUpdater(intervalSeconds = 300): void {
                 try {
                     await deleteAllChannelMessages(channelId);
                 } catch (err) {
-                    console.error('[serverPresenceTracker] Error deleting old messages:', err);
+                    logger.error(`Error deleting old messages: ${err}`, { prefix: 'SERVER-BROWSER' });
                 }
                 
                 msgId = await postBotMessage(channelId, body);
                 if (msgId) {
                     await setActiveServersListMessageId(msgId);
-                    console.log('[serverPresenceTracker] Posted new server browser embed:', msgId);
+                    logger.info(`Posted new server browser embed (${msgId})`, { prefix: 'SERVER-BROWSER' });
                 } else {
-                    console.error('[serverPresenceTracker] Failed to post server browser embed');
+                    logger.error('Failed to post server browser embed', { prefix: 'SERVER-BROWSER' });
                 }
             } else {
                 // Update existing message and clean up any other messages
@@ -174,21 +175,20 @@ export function startActiveServersListUpdater(intervalSeconds = 300): void {
                     // Ensure only one message remains (cleanup any manually posted messages)
                     await deleteOtherChannelMessages(channelId, msgId);
                 } catch (err) {
-                    console.error('[serverPresenceTracker] Error updating embed:', err);
+                    logger.error(`Error updating embed: ${err}`, { prefix: 'SERVER-BROWSER' });
                     // If edit fails, delete and repost
                     msgId = '';
                     await setActiveServersListMessageId('');
                 }
             }
         } catch (err) {
-            console.error('[serverPresenceTracker] Error in tick:', err);
+            logger.error(`Error in tick: ${err}`, { prefix: 'SERVER-BROWSER' });
         }
     };
 
     // Kick off immediately, then on interval
     tick().catch(() => {});
     setInterval(() => { tick().catch(() => {}); }, intervalMs);
-    console.log(`[serverPresenceTracker] Server browser updater started (refresh every ${intervalSeconds}s)`);
 }
 
 // Register simple ban/unban commands using existing bansystem

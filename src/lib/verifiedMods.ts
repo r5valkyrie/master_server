@@ -1,4 +1,5 @@
 import { getPool } from './db.ts';
+import { logger } from './logger.ts';
 import type { RowDataPacket } from 'mysql2/promise';
 
 export interface VerifiedMod {
@@ -29,7 +30,7 @@ export async function getVerifiedMods(): Promise<VerifiedMod[]> {
             updated_at: row.updated_at
         }));
     } catch (error) {
-        console.error('Error fetching verified mods:', error);
+        logger.error(`Error fetching verified mods: ${error}`, { prefix: 'VERIFIED_MODS' });
         return [];
     }
 }
@@ -55,7 +56,7 @@ export async function searchVerifiedMods(query: string): Promise<VerifiedMod[]> 
             updated_at: row.updated_at
         }));
     } catch (error) {
-        console.error('Error searching verified mods:', error);
+        logger.error(`Error searching verified mods: ${error}`, { prefix: 'VERIFIED_MODS' });
         return [];
     }
 }
@@ -85,7 +86,7 @@ export async function addVerifiedMod(name: string, owner: string, thunderstore_l
         
         return { success: true };
     } catch (error: any) {
-        console.error('Error adding verified mod:', error);
+        logger.error(`Error adding verified mod: ${error}`, { prefix: 'VERIFIED_MODS' });
         
         if (error.code === 'ER_DUP_ENTRY') {
             return { success: false, error: "This mod already exists in the verified list" };
@@ -114,7 +115,7 @@ export async function removeVerifiedMod(id: number): Promise<{ success: boolean;
         
         return { success: true };
     } catch (error) {
-        console.error('Error removing verified mod:', error);
+        logger.error(`Error removing verified mod: ${error}`, { prefix: 'VERIFIED_MODS' });
         return { success: false, error: "Failed to remove verified mod" };
     }
 }
@@ -149,7 +150,7 @@ export async function updateVerifiedMod(id: number, name: string, owner: string,
         
         return { success: true };
     } catch (error: any) {
-        console.error('Error updating verified mod:', error);
+        logger.error(`Error updating verified mod: ${error}`, { prefix: 'VERIFIED_MODS' });
         
         if (error.code === 'ER_DUP_ENTRY') {
             return { success: false, error: "This mod name and owner combination already exists" };

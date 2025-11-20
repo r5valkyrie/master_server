@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ success: false, error: "Server not found." }), { status: 200 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

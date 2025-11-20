@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { addChecksum, removeChecksum, updateChecksum, refreshChecksums } from '../../lib/checksumsystem';
+import { logger } from '../../lib/logger';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -31,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ success: false, error: "Invalid operation type" }), { status: 400 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

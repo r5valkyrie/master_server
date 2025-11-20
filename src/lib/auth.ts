@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import fs from 'fs';
 import type { APIContext } from 'astro';
+import { logger } from './logger.ts';
 
 const AUTH_TYPE_NONE = 0;
 const AUTH_TYPE_KEY  = 1; // auth using firstparty token
@@ -14,12 +15,12 @@ let PRIVATE_KEY: Buffer | null = null;
 try {
     PRIVATE_KEY = fs.readFileSync("auth.key");
 } catch (err) {
-    console.error("CRITICAL: Error reading auth.key, JWTs will not be signed.", err);
+    logger.error('Error reading auth.key, JWTs will not be signed', { prefix: 'AUTH' });
 }
 
 export function CreateAuthToken(userId: string, userName: string, serverIp: string): string | null {
     if (!PRIVATE_KEY) {
-        console.error("CRITICAL: private key is not loaded, cannot sign auth token.");
+        logger.error('Private key is not loaded, cannot sign auth token', { prefix: 'AUTH' });
         return null;
     }
 
@@ -28,7 +29,7 @@ export function CreateAuthToken(userId: string, userName: string, serverIp: stri
     let sessionId = `${userId}-${userName}-${serverIp}`;
     
     // Log session creation without sensitive data
-    console.log(`[AUTH_TOKEN] Creating session hash for user authentication`);
+    logger.debug('Creating session hash for user authentication', { prefix: 'AUTH' });
 
     let hashedSessionId = hasher.update(sessionId).digest("hex");
     
@@ -56,7 +57,7 @@ export function RequireAuth(req: Request, type = AUTH_TYPE_USER): boolean {
             
             const expectedKey = process.env.API_KEY;
             if (!expectedKey) {
-                console.error("[Auth] API_KEY not configured");
+                logger.error('API_KEY not configured', { prefix: 'AUTH' });
                 return false;
             }
             
@@ -72,12 +73,12 @@ export function RequireAuth(req: Request, type = AUTH_TYPE_USER): boolean {
                 
                 return crypto.timingSafeEqual(keyBuffer, expectedBuffer);
             } catch (error) {
-                console.error("Auth comparison error:", error);
+                logger.error(`Auth comparison error: ${error}`, { prefix: 'AUTH' });
                 return false;
             }
         }
         case AUTH_TYPE_USER:
-            console.error("Attempted to auth with AUTH_TYPE_USER, however this auth type is not implemented.");
+            logger.error('Attempted to auth with AUTH_TYPE_USER, however this auth type is not implemented', { prefix: 'AUTH' });
             return false;
     }
 
@@ -86,7 +87,7 @@ export function RequireAuth(req: Request, type = AUTH_TYPE_USER): boolean {
 
 export function RequireKeyAuth({ request, clientAddress }: APIContext): boolean {
     if (!RequireAuth(request, AUTH_TYPE_KEY)) {
-        console.warn(`Unauthorized access from '${clientAddress}' to endpoint '${new URL(request.url).pathname}'`);
+        logger.warn(`Unauthorized access from '${clientAddress}' to endpoint '${new URL(request.url).pathname}'`, { prefix: 'AUTH' });
         return false;
     }
     return true;

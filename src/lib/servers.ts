@@ -1,4 +1,5 @@
 import { createClient } from 'redis';
+import { logger } from './logger.ts';
 
 type RedisClientInstance = ReturnType<typeof createClient>;
 let redisClient: RedisClientInstance | null = null;
@@ -16,12 +17,12 @@ async function initializeRedis() {
             url: redisUrl,
             password: process.env.REDIS_PASSWORD
         });
-        client.on('error', (err) => console.error('Redis Client Error', err));
+        client.on('error', (err) => logger.error(`Redis client error: ${err}`, { prefix: 'SERVERS' }));
         await client.connect();
-        console.log("Successfully connected to Redis.");
+        logger.info('Successfully connected to Redis', { prefix: 'SERVERS' });
         return client;
     } catch (e) {
-        console.error(`Failed to initialize or connect to Redis. Proceeding without Redis. Error: ${(e as Error).message}`);
+        logger.warn(`Failed to initialize Redis. Proceeding without Redis: ${(e as Error).message}`, { prefix: 'SERVERS' });
         return null;
     }
 }

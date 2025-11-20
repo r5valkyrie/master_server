@@ -1,4 +1,5 @@
 import { getPool } from './db.ts';
+import { logger } from './logger.ts';
 
 export let VERSION_TABLE: any[] = [];
 
@@ -16,7 +17,7 @@ export async function RefreshVersions() {
             }));
         }
     } catch (err) {
-        console.log(err);
+        logger.error(`Refresh versions error: ${err}`, { prefix: 'VERSIONS' });
     }
 }
 

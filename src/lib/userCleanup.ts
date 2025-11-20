@@ -1,4 +1,5 @@
 import { getPool } from './db.ts';
+import { logger } from './logger.ts';
 import { logGeneralEvent } from './discord.ts';
 
 export async function cleanupInactiveUsers(hours: number = 24): Promise<number> {
@@ -18,7 +19,7 @@ export async function cleanupInactiveUsers(hours: number = 24): Promise<number> 
         }
         return removed;
     } catch (err) {
-        console.error('cleanupInactiveUsers error:', err);
+        logger.error(`User cleanup error: ${err}`, { prefix: 'USER-CLEANUP' });
         return 0;
     }
 }

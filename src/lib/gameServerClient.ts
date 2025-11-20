@@ -1,3 +1,4 @@
+import { logger } from './logger.ts';
 import { BitStream } from 'bit-buffer';
 import crypto from 'crypto';
 import dgram from 'dgram';
@@ -186,7 +187,7 @@ class UdpTransport {
             if (isValidPort) {
                 this.udpSocket.send(encryptedRequest, this.serverPort, this.serverAddress);
             } else {
-                console.error('[GameServer] Port out of valid range:', this.serverPort, 'for', this.serverAddress);
+                logger.error(`Port out of valid range: ${this.serverPort} for ${this.serverAddress}`, { prefix: 'GAMESERVER' });
             }
         });
 

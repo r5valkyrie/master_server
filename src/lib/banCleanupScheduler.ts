@@ -1,6 +1,7 @@
 import { cleanupExpiredBans } from './banCleanup.ts';
 import { cleanupInactiveUsers } from './userCleanup.ts';
 import { logGeneralEvent } from './discord.ts';
+import { logger } from './logger.ts';
 
 let schedulerStarted = false;
 
@@ -14,13 +15,13 @@ export function startBanCleanupScheduler(): void {
     // One-time startup notification
     try {
         const env = process.env.NODE_ENV || 'development';
-        logGeneralEvent(`🟢 Master server online (env: ${env})`).catch(() => {});
+        logGeneralEvent(`Master server online (env: ${env})`).catch(() => {});
     } catch {}
 
     // Run once on startup
     cleanupExpiredBans().then((removed) => {
         if (removed > 0) {
-            console.log(`[ban-cleanup] Removed ${removed} expired bans on startup`);
+            logger.info(`Removed ${removed} expired bans on startup`, { prefix: 'BAN-CLEANUP' });
         }
     }).catch(() => {});
 
@@ -28,15 +29,15 @@ export function startBanCleanupScheduler(): void {
         try {
             const removed = await cleanupExpiredBans();
             if (removed > 0) {
-                console.log(`[ban-cleanup] Removed ${removed} expired bans`);
+                logger.info(`Removed ${removed} expired bans`, { prefix: 'BAN-CLEANUP' });
             }
             const userHours = parseInt(process.env.USER_CLEANUP_INACTIVE_HOURS || '24', 10) || 24;
             const removedUsers = await cleanupInactiveUsers(userHours);
             if (removedUsers > 0) {
-                console.log(`[user-cleanup] Removed ${removedUsers} inactive users (> ${userHours}h)`);
+                logger.info(`Removed ${removedUsers} inactive users (> ${userHours}h)`, { prefix: 'USER-CLEANUP' });
             }
         } catch (err) {
-            console.error('[ban-cleanup] Error during cleanup:', err);
+            logger.error(`Cleanup error: ${err}`, { prefix: 'BAN-CLEANUP' });
         }
     }, intervalMs);
 }

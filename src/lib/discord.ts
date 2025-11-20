@@ -1,4 +1,6 @@
 // Discord rate limit tracking per endpoint
+import { logger } from './logger.ts';
+
 interface RateLimitInfo {
     remaining: number;
     resetTimestamp: number;
@@ -37,7 +39,7 @@ async function waitForRateLimit(endpoint: string): Promise<void> {
     const waitTime = Math.max(0, info.resetTimestamp - now);
     
     if (waitTime > 0) {
-        console.warn(`[Discord] Rate limited on ${endpoint}. Waiting ${Math.round(waitTime / 1000)}s`);
+        logger.warn(`Rate limited on ${endpoint}. Waiting ${Math.round(waitTime / 1000)}s`, { prefix: 'DISCORD' });
         await new Promise(resolve => setTimeout(resolve, waitTime + 100)); // Add 100ms buffer
     }
 }
@@ -55,7 +57,7 @@ async function processRequestQueue(): Promise<void> {
             try {
                 await request();
             } catch (err) {
-                console.error('Error processing queued Discord request:', err);
+                logger.error(`Error processing queued request: ${err}`, { prefix: 'DISCORD' });
             }
         }
         // Small delay between queued requests to avoid bursts
@@ -93,7 +95,7 @@ async function queueDiscordRequest(
                 const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : Math.pow(2, retries) * 1000;
 
                 if (retries < MAX_RETRIES) {
-                    console.warn(`[Discord] 429 Rate limit. Retrying after ${Math.round(waitMs / 1000)}s (attempt ${retries + 1}/${MAX_RETRIES})`);
+                    logger.warn(`Request rate limited. Retrying after ${Math.round(waitMs / 1000)}s (attempt ${retries + 1}/${MAX_RETRIES})`, { prefix: 'DISCORD' });
                     await new Promise(resolve => setTimeout(resolve, waitMs));
                     return makeRequest();
                 }
@@ -103,7 +105,7 @@ async function queueDiscordRequest(
         } catch (err) {
             if (err instanceof Error && err.name === 'AbortError' && retries < MAX_RETRIES) {
                 const backoffMs = Math.pow(2, retries) * 1000;
-                console.warn(`[Discord] Request timeout. Retrying after ${Math.round(backoffMs / 1000)}s`);
+                logger.warn(`Request timeout. Retrying after ${Math.round(backoffMs / 1000)}s`, { prefix: 'DISCORD' });
                 await new Promise(resolve => setTimeout(resolve, backoffMs));
                 return makeRequest();
             }
@@ -135,7 +137,7 @@ export async function postDiscordWebhook(webhookUrl: string, content: string): P
         });
     } catch (err) {
         if (err instanceof Error && err.name !== 'TimeoutError' && err.name !== 'AbortError') {
-            console.error('Discord webhook error:', err);
+            logger.error(`Webhook error: ${err}`, { prefix: 'DISCORD' });
         }
     }
 }
@@ -160,11 +162,11 @@ async function postDiscordBotMessage(channelId: string, body: any): Promise<void
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`Discord bot message failed: ${response.status} - ${errorText}`);
+            logger.error(`Bot message failed: ${response.status} - ${errorText}`, { prefix: 'DISCORD' });
         }
     } catch (err) {
         if (err instanceof Error && err.name !== 'TimeoutError' && err.name !== 'AbortError') {
-            console.error('Discord bot send error:', err);
+            logger.error(`Bot send error: ${err}`, { prefix: 'DISCORD' });
         }
     }
 }
@@ -201,7 +203,7 @@ export async function deleteAllChannelMessages(channelId: string): Promise<void>
         }
     } catch (err) {
         if (err instanceof Error && err.name !== 'TimeoutError' && err.name !== 'AbortError') {
-            console.error('deleteAllChannelMessages error:', err);
+            logger.error(`Error deleting all messages: ${err}`, { prefix: 'DISCORD' });
         }
     }
 }
@@ -239,7 +241,7 @@ export async function deleteOtherChannelMessages(channelId: string, keepMessageI
         }
     } catch (err) {
         if (err instanceof Error && err.name !== 'TimeoutError' && err.name !== 'AbortError') {
-            console.error('deleteOtherChannelMessages error:', err);
+            logger.error(`Error deleting other messages: ${err}`, { prefix: 'DISCORD' });
         }
     }
 }
@@ -266,7 +268,7 @@ export async function postBotMessage(channelId: string, body: any): Promise<stri
         const data = await resp.json();
         return data?.id || null;
     } catch (err) {
-        console.error('postBotMessage error:', err);
+        logger.error(`Error posting message: ${err}`, { prefix: 'DISCORD' });
         return null;
     }
 }
@@ -289,7 +291,7 @@ export async function editBotMessage(channelId: string, messageId: string, body:
             endpoint
         );
     } catch (err) {
-        console.error('editBotMessage error:', err);
+        logger.error(`Error editing message: ${err}`, { prefix: 'DISCORD' });
     }
 }
 
@@ -336,7 +338,7 @@ export function startPrefixCommandListener(): void {
             });
             await client.login(botToken);
         } catch (e) {
-            console.error('Failed to start prefix command listener:', e);
+            logger.error(`Failed to start prefix command listener: ${e}`, { prefix: 'DISCORD' });
         }
     })();
 }
@@ -350,7 +352,7 @@ export async function postDiscordEmbed(webhookUrl: string, embed: any): Promise<
             body: JSON.stringify({ embeds: [embed] })
         });
     } catch (err) {
-        console.error('Discord webhook error:', err);
+        logger.error(`Webhook error: ${err}`, { prefix: 'DISCORD' });
     }
 }
 
@@ -412,12 +414,12 @@ export async function updateServersCountChannel(count: number): Promise<void> {
 
         if (!resp.ok) {
             const errorText = await resp.text();
-            console.error('Failed to update Discord channel name:', resp.status, errorText);
+            logger.error(`Failed to update Discord channel name: ${resp.status} ${errorText}`, { prefix: 'DISCORD' });
             return;
         }
         lastServersChannelName = desiredName;
     } catch (err) {
-        console.error('Discord channel rename error:', err);
+        logger.error(`Error updating channel name: ${err}`, { prefix: 'DISCORD' });
     }
 }
 
@@ -445,12 +447,12 @@ export async function updatePlayersCountChannel(count: number): Promise<void> {
 
         if (!resp.ok) {
             const errorText = await resp.text();
-            console.error('Failed to update Discord players channel name:', resp.status, errorText);
+            logger.error(`Failed to update players channel name: ${resp.status} ${errorText}`, { prefix: 'DISCORD' });
             return;
         }
         lastPlayersChannelName = desiredName;
     } catch (err) {
-        console.error('Discord players channel rename error:', err);
+        logger.error(`Error updating players channel name: ${err}`, { prefix: 'DISCORD' });
     }
 }
 

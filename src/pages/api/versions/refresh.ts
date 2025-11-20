@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { refreshVersions } from '../../../lib/versionsystem';
+import { logger } from '../../../lib/logger';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -15,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
         const res = await refreshVersions();
         return new Response(JSON.stringify(res), { status: 200 });
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

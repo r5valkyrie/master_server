@@ -1,5 +1,6 @@
 import { getPool } from './db.ts';
 import { logAdminEvent } from './discord.ts';
+import { logger } from './logger.ts';
 import axios from 'axios';
 
 const NO_BAN_REASON_PROVIDED = "You have been banned.";
@@ -16,7 +17,7 @@ async function getUsernameBySteamID(id: number | string) {
             return "(unknown)";
         }
     } catch (err) {
-        console.log(err);
+        logger.error(`Get active bans error: ${err}`, { prefix: 'BANSYSTEM' });
         return "(error)";
     }
 }
@@ -32,9 +33,9 @@ export async function getPlayerBanStatus(id: number | string | null, ip: string 
         const isValidSteamId = /^765611\d{11}$/.test(steamId);
         
         if (isValidSteamId) {
-            console.log(`[BAN_SYSTEM] Valid Steam ID detected: ${steamId} - proceeding with database check`);
+            logger.debug(`Valid Steam ID detected: ${steamId}`, { prefix: 'BANSYSTEM' });
         } else {
-            console.log(`[BAN_SYSTEM] Invalid Steam ID detected: ${steamId} - only Steam IDs are supported`);
+            logger.debug(`Invalid Steam ID detected: ${steamId} - only Steam IDs are supported`, { prefix: 'BANSYSTEM' });
             // Still proceed with database check for backwards compatibility
         }
     }
@@ -65,7 +66,7 @@ export async function getPlayerBanStatus(id: number | string | null, ip: string 
             }
         }
     } catch (err) {
-        console.error(err);
+        logger.error(`Get player ban status error: ${err}`, { prefix: 'BANSYSTEM' });
     }
 
     return { isBanned: false };

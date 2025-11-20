@@ -1,5 +1,6 @@
 import { getPool } from './db.ts';
 import { RefreshVersions as refreshLib } from './versions.ts';
+import { logger } from './logger.ts';
 
 export async function refreshVersions() {
     try {

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { gunzipSync } from 'node:zlib';
+import { logger } from '../../../lib/logger.ts';
 
 async function fetchBufferFollowRedirects(url: string): Promise<Uint8Array> {
     const headers: Record<string, string> = {
@@ -48,7 +49,7 @@ export const GET: APIRoute = async ({ url }) => {
                     const text = Buffer.from(gunzipMaybe(b)).toString('utf8');
                     const arr = JSON.parse(text);
                     if (Array.isArray(arr)) results.push(...arr);
-                } catch(e) { console.error(`Error fetching mods: ${e}`); }
+                } catch(e) { logger.error(`Error fetching mods: ${e}`, { prefix: 'CLIENT' }); }
             }
         }));
 
@@ -59,7 +60,7 @@ export const GET: APIRoute = async ({ url }) => {
         return new Response(JSON.stringify(packs), { status: 200, headers: { 'Content-Type': 'application/json' } });
     } catch (e) {
 
-        console.error(`Error fetching mods: ${e}`);
+        logger.error(`Error fetching mods: ${e}`, { prefix: 'CLIENT' });
         // Fallback to simple endpoint
         try {
             const fallbackUrl = `https://thunderstore.io/c/${community}/api/v1/package/`;

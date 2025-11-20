@@ -1,19 +1,20 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { logger } from '../../../lib/logger.ts';
 
 export const GET: APIRoute = async ({ request }) => {
     try {
         const pool = getPool();
         if (!pool) throw new Error("Database not initialized");
 
-        console.log('Testing basic users query...');
+        logger.debug('Testing basic users query', { prefix: 'ADMIN' });
         
         // Test basic query first
         const [rows] = await pool.execute(
             `SELECT * FROM users ORDER BY last_seen DESC LIMIT 10`
         );
 
-        console.log('Basic query successful, rows:', Array.isArray(rows) ? rows.length : 0);
+        logger.debug(`Basic query successful, rows: ${Array.isArray(rows) ? rows.length : 0}`, { prefix: 'ADMIN' });
 
         // Test with ban status
         const [rowsWithBan] = await pool.execute(
@@ -23,7 +24,7 @@ export const GET: APIRoute = async ({ request }) => {
              ORDER BY users.last_seen DESC LIMIT 10`
         );
 
-        console.log('Query with ban status successful, rows:', Array.isArray(rowsWithBan) ? rowsWithBan.length : 0);
+        logger.debug(`Query with ban status successful, rows: ${Array.isArray(rowsWithBan) ? rowsWithBan.length : 0}`, { prefix: 'ADMIN' });
 
         return new Response(JSON.stringify({ 
             success: true, 
@@ -32,7 +33,7 @@ export const GET: APIRoute = async ({ request }) => {
             sampleData: Array.isArray(rowsWithBan) ? rowsWithBan[0] : null
         }), { status: 200 });
     } catch (error) {
-        console.error("Test API Error:", error);
+        logger.error(`Test API error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
             error: error.message,

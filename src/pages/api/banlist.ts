@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { addBan, removeBan, updateBanReason } from '../../lib/bansystem';
 import { logAdminEvent } from '../../lib/discord';
+import { logger } from '../../lib/logger';
 
 async function SendDiscordLog(msg: string) {
     await logAdminEvent(msg);
@@ -43,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ success: false, error: "Invalid operation type" }), { status: 400 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

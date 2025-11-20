@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../lib/db';
 import { ValidateLanguage } from '../../lib/utils';
+import { logger } from '../../lib/logger';
 
 export const GET: APIRoute = async ({ request }) => {
     try {
@@ -20,7 +21,7 @@ export const GET: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ success: false, error: `Unable to find EULA text for locale '${language}'` }), { status: 404 });
         }
     } catch (error) {
-        console.error("API Error:", error);
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         return new Response(JSON.stringify({ success: false, error: "An internal server error occurred." }), { status: 500 });
     }
 }
@@ -43,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ success: false, error: `Unable to find EULA text for locale '${language}'` }), { status: 404 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

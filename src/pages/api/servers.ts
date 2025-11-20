@@ -3,6 +3,7 @@ import type { APIRoute } from 'astro';
 import { getServers } from '../../lib/servers';
 import { IsVersionFlagSet, IsVersionSupported, flags, GetLatestVersion, initializeVersions } from '../../lib/versions';
 import { ValidateLanguage } from '../../lib/utils';
+import { logger } from '../../lib/logger';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -65,7 +66,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         return new Response(JSON.stringify({ success: true, servers }), { status: 200 });
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

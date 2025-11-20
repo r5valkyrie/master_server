@@ -4,6 +4,7 @@ import { IsVersionSupported, IsChecksumsEnabled, initializeVersions } from '../.
 import { IsChecksumSupported } from '../../../lib/checksums';
 import { assertLength, isNumeric } from '../../../lib/utils';
 import { GameServerClient } from '../../../lib/gameServerClient';
+import { logger } from '../../../lib/logger';
 import { v4 as uuidv4 } from 'uuid';
 //import Filter = require('bad-words');
 
@@ -173,7 +174,7 @@ export const POST: APIRoute = async ({ request }) => {
         return new Response(JSON.stringify({ success: true, token, ip: ip, port: port }), { status: 200 });
 
     } catch (error: any) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         if (error.message === "Server verification timed out. Please check your ports.") {
             return new Response(JSON.stringify({ 

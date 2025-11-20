@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { logger } from '../../../lib/logger';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -35,7 +36,7 @@ export const POST: APIRoute = async ({ request }) => {
             }), { status: 404 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         
         return new Response(JSON.stringify({ 
             success: false, 

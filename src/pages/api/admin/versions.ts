@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { logger } from '../../../lib/logger.ts';
 import { logAdminEvent } from '../../../lib/discord';
 import { RefreshVersions } from '../../../lib/versions';
 
@@ -20,7 +21,7 @@ export const GET: APIRoute = async ({ request }) => {
             }
         });
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`Versions GET error: ${error}`, { prefix: 'ADMIN' }); 
         
         return new Response(JSON.stringify({ 
             success: false, 
@@ -58,7 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
         await RefreshVersions();
         return new Response(JSON.stringify({ success: true }), { status: 201 });
     } catch (error) {
-        console.error('API Error:', error);
+        logger.error(`Add version error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ success: false, error: 'An internal server error occurred.' }), { status: 500 });
     }
 };
@@ -91,7 +92,7 @@ export const PUT: APIRoute = async ({ request }) => {
         await RefreshVersions();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
-        console.error('API Error:', error);
+        logger.error(`Update version error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ success: false, error: 'An internal server error occurred.' }), { status: 500 });
     }
 };
@@ -109,7 +110,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         await RefreshVersions();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
-        console.error('API Error:', error);
+        logger.error(`Delete version error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ success: false, error: 'An internal server error occurred.' }), { status: 500 });
     }
 };

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { logger } from '../../../lib/logger';
 
 export const GET: APIRoute = async ({ request }) => {
     try {
@@ -14,7 +15,7 @@ export const GET: APIRoute = async ({ request }) => {
 
         const pool = getPool();
         if (!pool) {
-            console.error("Database not initialized");
+            logger.error('Database not initialized', { prefix: 'ADMIN' });
             throw new Error("Database not initialized");
         }
 
@@ -71,14 +72,14 @@ export const GET: APIRoute = async ({ request }) => {
         // Add ban status to each row
         const enrichedRows = [];
         if (Array.isArray(rows)) {
-            for (const user of rows) {
+            for (const user of rows as any[]) {
                 try {
                     const [banRows] = await pool.execute(
                         'SELECT ban_reason, created_at, ban_expiry_date FROM banned_users WHERE identifier = ? LIMIT 1',
                         [user.steam_id.toString()]
                     );
                     
-                    const banInfo = Array.isArray(banRows) && banRows.length > 0 ? banRows[0] : null;
+                    const banInfo = Array.isArray(banRows) && banRows.length > 0 ? banRows[0] as any : null;
                     
                     enrichedRows.push({
                         ...user,
@@ -114,12 +115,12 @@ export const GET: APIRoute = async ({ request }) => {
         return new Response(JSON.stringify({ data: enrichedRows, page, pageSize: limit, total }), { status: 200 });
     } catch (error) {
         console.error("Users API Error:", error);
-        console.error("Error details:", error?.message);
-        console.error("Error stack:", error?.stack);
+        console.error("Error details:", error instanceof Error ? error.message : String(error));
+        console.error("Error stack:", error instanceof Error ? error.stack : undefined);
         return new Response(JSON.stringify({ 
             success: false, 
             error: "An internal server error occurred.",
-            details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+            details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
         }), { status: 500 });
     }
 };

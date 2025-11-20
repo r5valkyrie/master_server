@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPlayerBanStatus } from '../../../lib/bansystem';
 import { logGeneralEvent } from '../../../lib/discord';
+import { logger } from '../../../lib/logger';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -32,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
         }), { status: 200 });
 
     } catch (error) {
-        console.error("API Error:", error);
+        logger.error(`API error: ${error}`, { prefix: 'API' });
         try { await logGeneralEvent(`❗ Error in /api/bans/hasActiveBan: ${String(error)}`); } catch {}
         
         return new Response(JSON.stringify({ 

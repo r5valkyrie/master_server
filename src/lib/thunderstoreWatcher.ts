@@ -1,4 +1,5 @@
 import { gunzipSync } from 'node:zlib';
+import { logger } from './logger.ts';
 /*
   Thunderstore watcher for R5Valkyrie
   - Polls Thunderstore community packages
@@ -145,10 +146,10 @@ async function postDiscordEmbeds(channelId: string, embeds: any[]): Promise<void
                 body: JSON.stringify({ embeds: batch })
             });
             if (!resp.ok) {
-                console.error('[thunderstore] Discord bot send failed:', resp.status, await resp.text());
+                logger.error(`Discord bot send failed: ${resp.status} ${await resp.text()}`, { prefix: 'THUNDERSTORE' });
             }
         } catch (e) {
-            console.error('[thunderstore] Discord bot error:', e);
+            logger.error(`Discord bot error: ${e}`, { prefix: 'THUNDERSTORE' });
         }
     }
 }
@@ -253,10 +254,10 @@ async function runOnce(): Promise<void> {
             const embeds = updates.map(u => buildEmbed(u.mod, u.latest, community, u.type));
             await postDiscordEmbeds(channelId, embeds);
             await saveSeenVersions(memorySeenVersions);
-            console.log(`[thunderstore] Posted ${updates.length} update(s)`);
+            logger.info(`Posted ${updates.length} update(s)`, { prefix: 'THUNDERSTORE' });
         }
     } catch (e) {
-        console.error('[thunderstore] runOnce error:', e);
+        logger.error(`runOnce error: ${e}`, { prefix: 'THUNDERSTORE' });
     }
 }
 
@@ -267,12 +268,12 @@ export async function startThunderstoreWatcher(): Promise<void> {
     const intervalMs = getEnvNumber('THUNDERSTORE_CHECK_INTERVAL_MS', DEFAULT_INTERVAL_MS);
     const channelId = process.env.DISCORD_MOD_UPDATES_CHANNEL_ID || '';
     if (!channelId) {
-        console.warn('[thunderstore] No Discord mod updates channel configured; watcher not started');
+        logger.warn('No Discord mod updates channel configured; watcher not started', { prefix: 'THUNDERSTORE' });
         return;
     }
 
     memorySeenVersions = await loadSeenVersions();
-    console.log(`[thunderstore] watching community: ${getEnvString('THUNDERSTORE_COMMUNITY', DEFAULT_COMMUNITY)} (every ${Math.round(intervalMs/1000)}s)`);
+    logger.info(`Watching community: ${getEnvString('THUNDERSTORE_COMMUNITY', DEFAULT_COMMUNITY)} (every ${Math.round(intervalMs/1000)}s)`, { prefix: 'THUNDERSTORE' });
 
     // Run once on startup
     if (!inFlight) {

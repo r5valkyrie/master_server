@@ -3,6 +3,7 @@ import { getPlayerBanStatus } from '../../../lib/bansystem';
 import { CreateAuthToken } from '../../../lib/auth';
 import { GetUserFlags, LogUser, LogUserAuth, AddUserAuthCountryMetric } from '../../../lib/db';
 import { authenticateSteamTicket } from '../../../lib/steam';
+import { logger } from '../../../lib/logger';
 
 /*
  * Steam Authentication System
@@ -21,9 +22,9 @@ export const POST: APIRoute = async ({ request }) => {
         const userIdString = originalUserIdDecimal;
         const userIdDecimal = parseInt(originalUserIdDecimal, 10);
         
-        console.log(`[AUTH_REQUEST] Request body user ID: ${userId} (string: ${userIdString})`);
-        console.log(`[AUTH_REQUEST] Raw body.id value: ${body.id} (type: ${typeof body.id})`);
-        console.log(`[AUTH_REQUEST] Parsed as decimal: ${userIdDecimal} (precision may be lost)`);
+        logger.info(`[AUTH_REQUEST] Request body user ID: ${userId} (string: ${userIdString})`, { prefix: 'CLIENT' });
+        logger.info(`[AUTH_REQUEST] Raw body.id value: ${body.id} (type: ${typeof body.id})`, { prefix: 'CLIENT' });
+        logger.info(`[AUTH_REQUEST] Parsed as decimal: ${userIdDecimal} (precision may be lost)`, { prefix: 'CLIENT' });
         
         // Validate that we have a valid Steam ID string
         if (!userIdString || !/^\d{17}$/.test(userIdString)) {
@@ -43,52 +44,52 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         try {
-            console.log(`[STEAM_AUTH] Attempting to validate Steam ticket for user ${userIdString}`);
-            console.log(`[STEAM_AUTH] Target server IP: ${serverIp}`);
-            console.log(`[STEAM_AUTH] Ticket length: ${steamTicket.length}, preview: ${steamTicket.substring(0, 64)}...`);
+            logger.info(`[STEAM_AUTH] Attempting to validate Steam ticket for user ${userIdString}`, { prefix: 'CLIENT' });
+            logger.info(`[STEAM_AUTH] Target server IP: ${serverIp}`, { prefix: 'CLIENT' });
+            logger.info(`[STEAM_AUTH] Ticket length: ${steamTicket.length}, preview: ${steamTicket.substring(0, 64)}...`, { prefix: 'CLIENT' });
             
             // SECURITY: Server binding validation - ensure the ticket is being used for the intended server
             // This helps prevent ticket theft attacks where stolen tickets are used on different servers
             const steam = await authenticateSteamTicket(steamTicket);
-            console.log(`[STEAM_AUTH] Successfully validated Steam ticket for user ${steam.steamid}`);
-            console.log(`[STEAM_AUTH] Server binding verified: ticket valid for server ${serverIp}`);
+            logger.info(`[STEAM_AUTH] Successfully validated Steam ticket for user ${steam.steamid}`, { prefix: 'CLIENT' });
+            logger.info(`[STEAM_AUTH] Server binding verified: ticket valid for server ${serverIp}`, { prefix: 'CLIENT' });
             
             // Check for Steam ID mismatch
             if (userIdString !== steam.steamid) {
-                console.log(`[STEAM_AUTH] WARNING: Steam ID mismatch detected!`);
-                console.log(`[STEAM_AUTH] Client claimed: ${userIdString}`);
-                console.log(`[STEAM_AUTH] Steam validated: ${steam.steamid}`);
-                console.log(`[STEAM_AUTH] Using Steam-validated ID for all operations`);
+                logger.info(`[STEAM_AUTH] WARNING: Steam ID mismatch detected!`, { prefix: 'CLIENT' });
+                logger.info(`[STEAM_AUTH] Client claimed: ${userIdString}`, { prefix: 'CLIENT' });
+                logger.info(`[STEAM_AUTH] Steam validated: ${steam.steamid}`, { prefix: 'CLIENT' });
+                logger.info(`[STEAM_AUTH] Using Steam-validated ID for all operations`, { prefix: 'CLIENT' });
                 
                 // Update userId to use the validated Steam ID
                 userId = steam.steamid;
             }
             
             // Use string Steam ID to avoid precision loss in ban check
-            console.log(`[STEAM_AUTH] Checking ban status for Steam ID: ${steam.steamid}`);
+            logger.info(`[STEAM_AUTH] Checking ban status for Steam ID: ${steam.steamid}`, { prefix: 'CLIENT' });
             
             // For now, we need to check the ban system with the string ID
             // Note: This requires updating the ban system to handle string IDs
             let player;
             try {
-                console.log(`[STEAM_AUTH] About to check ban status for Steam ID: ${steam.steamid} (as string)`);
-                console.log(`[STEAM_AUTH] Request IP: ${body.reqIp || 'undefined'}`);
+                logger.info(`[STEAM_AUTH] About to check ban status for Steam ID: ${steam.steamid} (as string)`, { prefix: 'CLIENT' });
+                logger.info(`[STEAM_AUTH] Request IP: ${body.reqIp || 'undefined'}`, { prefix: 'CLIENT' });
                 
                 player = await getPlayerBanStatus(steam.steamid, body.reqIp);
-                console.log(`[STEAM_AUTH] Ban check raw result:`, player);
-                console.log(`[STEAM_AUTH] Ban check - isBanned: ${player.isBanned}, banType: ${player.banType || 'none'}, banReason: ${player.banReason || 'none'}, banExpires: ${player.banExpires || 'none'}`);
+                logger.info(`[STEAM_AUTH] Ban check raw result:`, { prefix: 'CLIENT' });
+                logger.info(`[STEAM_AUTH] Ban check - isBanned: ${player.isBanned}, banType: ${player.banType || 'none'}, banReason: ${player.banReason || 'none'}, banExpires: ${player.banExpires || 'none'}`, { prefix: 'CLIENT' });
                 // Numeric precision loss no longer applicable as we use string IDs
             } catch (error) {
-                console.error(`[STEAM_AUTH] Ban check failed:`, error);
+                logger.error(`[STEAM_AUTH] Ban check failed:`, { prefix: 'CLIENT' });
                 // Default to not banned if ban check fails
                 player = { isBanned: false };
             }
 
             // Ban system now properly handles Steam IDs vs EA/Origin IDs
             if (player.isBanned) {
-              console.log(`[STEAM_AUTH] Banned player "${steam.persona || steamUsername || 'unknown'}" (${steam.steamid}) is attempting to join a server. (cl ip: ${body.reqIp})`);
+              logger.info(`[STEAM_AUTH] Banned player "${steam.persona || steamUsername || 'unknown'}" (${steam.steamid}) is attempting to join a server. (cl ip: ${body.reqIp})`, { prefix: 'CLIENT' });
             } else {
-              console.log(`[STEAM_AUTH] Player "${steam.persona || steamUsername || 'unknown'}" (${steam.steamid}) is not banned, proceeding with authentication`);
+              logger.info(`[STEAM_AUTH] Player "${steam.persona || steamUsername || 'unknown'}" (${steam.steamid}) is not banned, proceeding with authentication`, { prefix: 'CLIENT' });
             }
 
             // Normalize server endpoint to a canonical form expected by the gameserver verifier
@@ -126,13 +127,13 @@ export const POST: APIRoute = async ({ request }) => {
             const userIdForToken = steam.steamid;
             const displayName = steam.persona || steamUsername || 'steam_user';
             
-            console.log(`[STEAM_AUTH] Token generation - sourceId: ${userIdForToken}, displayName: ${displayName}`);
+            logger.info(`[STEAM_AUTH] Token generation - sourceId: ${userIdForToken}, displayName: ${displayName}`, { prefix: 'CLIENT' });
             
             let token = CreateAuthToken(userIdForToken, displayName, serverIp);
             
             // Log Steam username if provided by client
             if (steamUsername) {
-                console.log(`Steam auth for user ${steam.steamid} with client-provided username: ${steamUsername} (Steam API persona: ${steam.persona || 'none'})`);
+                logger.info(`Steam auth for user ${steam.steamid} with client-provided username: ${steamUsername} (Steam API persona: ${steam.persona || 'none'})`, { prefix: 'CLIENT' });
             }
 
             let authMsg = "";
@@ -143,7 +144,7 @@ export const POST: APIRoute = async ({ request }) => {
 
               if (flags & 1) {
                 authMsg = "flagged";
-                console.log(`Flagged player "${displayName}" (${steam.steamid}) (${body.reqIp}) is attempting to join a server.`);
+                logger.info(`Flagged player "${displayName}" (${steam.steamid}) (${body.reqIp}) is attempting to join a server.`, { prefix: 'CLIENT' });
               }
             }
 
@@ -155,13 +156,8 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ success: true, token }), { status: 200 });
         } catch (err: any) {
             const errorCode = String((err && (err.code || err.message)) || 'steam_auth_failed');
-            console.error(`[STEAM_AUTH] Authentication failed for user ${userIdDecimal}:`, err);
-            console.error(`[STEAM_AUTH] Error details:`, {
-                message: err?.message,
-                code: err?.code,
-                status: err?.response?.status,
-                data: err?.response?.data
-            });
+            logger.error(`[STEAM_AUTH] Authentication failed for user ${userIdDecimal}:`, { prefix: 'CLIENT' });
+            logger.error(`[STEAM_AUTH] Error details: message=${err?.message}, code=${err?.code}, status=${err?.response?.status}, data=${err?.response?.data}`, { prefix: 'CLIENT' });
             
             await LogUserAuth(userIdString, false, errorCode);
             return new Response(JSON.stringify({ 
@@ -170,7 +166,7 @@ export const POST: APIRoute = async ({ request }) => {
             }), { status: 401 });
         }
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API error: ${error}`, { prefix: 'CLIENT' }); 
         
         return new Response(JSON.stringify({ 
             success: false, 

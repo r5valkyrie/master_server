@@ -1,5 +1,6 @@
 import { getPool } from './db.ts';
 import { logGeneralEvent } from './discord.ts';
+import { logger } from './logger.ts';
 
 export async function cleanupExpiredBans(): Promise<number> {
     try {
@@ -16,7 +17,7 @@ export async function cleanupExpiredBans(): Promise<number> {
         }
         return removed;
     } catch (err) {
-        console.error('cleanupExpiredBans error:', err);
+        logger.error(`Cleanup error: ${err}`, { prefix: 'BAN-CLEANUP' });
         return 0;
     }
 }

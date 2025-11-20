@@ -12,9 +12,11 @@ const startupIntegration = {
       setImmediate(async () => {
         try {
           const { initializeStartup } = await import('./src/lib/startup.ts');
+          const { logger } = await import('./src/lib/logger.ts');
+          logger.info('Initializing background tasks', { prefix: 'SERVER' });
           await initializeStartup();
         } catch (err) {
-          console.error('Failed to initialize startup tasks:', err);
+          console.error('[ERROR] Failed to initialize startup tasks:', err);
         }
       });
     }
