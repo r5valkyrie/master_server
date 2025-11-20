@@ -138,36 +138,12 @@ ADMIN_SESSION_SECRET=your_secure_session_secret_here
 # JWT Private Key Passphrase (Required if auth.key is passphrase-protected)
 AUTH_KEY_PASSPHRASE=
 
-# Steam API Configuration (Required for Steam authentication)
-STEAM_WEB_API_KEY=your_steam_api_key_here
-STEAM_APP_ID=480
-
-# Thunderstore watcher (Optional)
-# Community key on Thunderstore (default: r5valkyrie)
-THUNDERSTORE_COMMUNITY=r5valkyrie
-# Poll interval in milliseconds (default 300000 = 5 minutes)
-THUNDERSTORE_CHECK_INTERVAL_MS=300000
-
-# Ban and User Cleanup Configuration (optional)
-# Interval for expired ban cleanup in hours (default: 12)
-BAN_CLEANUP_INTERVAL_HOURS=12
-# Inactivity threshold for user cleanup in hours (default: 24)
-USER_CLEANUP_INACTIVE_HOURS=24
-
-# Game Server Configuration (optional)
-# Default server port for authentication fallback (default: 37015)
-DEFAULT_SERVER_PORT=37015
-
 # Application Environment
 NODE_ENV=development
 
 # Allowed Hosts (Optional - comma-separated list for Vite server)
 ALLOWED_HOSTS=
 ```
-
-**Important:** Discord configuration (bot token and channel IDs) is now managed through the admin panel at `/admin/discordConfig` and stored in the database. No environment variables are needed for Discord settings.
-
-**Important:** API keys are now managed exclusively through the admin panel at `/admin/apiKeys` and stored securely in the database with bcrypt hashing. Create, manage, and revoke API keys directly from the admin interface. No environment variable configuration is required.
 
 **Important Security Notes:**
 - **Never commit** the `.env` file, `auth.key`, `auth.key.pub`, or `auth.pem` to version control

@@ -96,28 +96,6 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         </div>
       </div>
     </div>
-
-    <div class="info-section">
-      <h3>How to use API Keys</h3>
-      <p>Include your API key in the authorization header of API requests:</p>
-      <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
-      
-      <h3>Key Management</h3>
-      <ul>
-        <li>Each key can be enabled or disabled without deleting it</li>
-        <li>Keys show their last usage timestamp for audit purposes</li>
-        <li>Keys are stored securely with bcrypt hashing</li>
-        <li>Delete keys you no longer use</li>
-      </ul>
-
-      <h3>Security Best Practices</h3>
-      <ul>
-        <li>Never share your API keys with untrusted services</li>
-        <li>Regenerate keys periodically for security</li>
-        <li>Disable keys immediately if you suspect they've been compromised</li>
-        <li>Use descriptive names to track which system is using each key</li>
-      </ul>
-    </div>
   </div>
 
   <style>

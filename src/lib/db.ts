@@ -310,3 +310,60 @@ export async function toggleApiKey(id: number, active: boolean): Promise<boolean
         return false;
     }
 }
+
+// ============================================================================
+// SYSTEM SETTINGS FUNCTIONS
+// ============================================================================
+
+export interface SystemSetting {
+    setting_key: string;
+    setting_value: string;
+    description: string;
+}
+
+export async function getAllSystemSettings(): Promise<SystemSetting[]> {
+    try {
+        const pool = getPool();
+        if (!pool) return [];
+        const [rows] = await pool.execute("SELECT `setting_key`, `setting_value`, `description` FROM `system_settings` ORDER BY `setting_key`");
+        const packets = rows as RowDataPacket[];
+        if (Array.isArray(packets)) {
+            return packets as SystemSetting[];
+        }
+        return [];
+    } catch (err) {
+        logger.error(`getAllSystemSettings error: ${err}`, { prefix: 'DB' });
+        return [];
+    }
+}
+
+export async function getSystemSetting(key: string): Promise<string | null> {
+    try {
+        const pool = getPool();
+        if (!pool) return null;
+        const [rows] = await pool.execute("SELECT `setting_value` FROM `system_settings` WHERE `setting_key`=?", [key]);
+        const packets = rows as RowDataPacket[];
+        if (Array.isArray(packets) && packets.length > 0) {
+            return packets[0].setting_value as string;
+        }
+        return null;
+    } catch (err) {
+        logger.error(`getSystemSetting error: ${err}`, { prefix: 'DB' });
+        return null;
+    }
+}
+
+export async function setSystemSetting(key: string, value: string): Promise<boolean> {
+    try {
+        const pool = getPool();
+        if (!pool) return false;
+        await pool.execute(
+            "INSERT INTO `system_settings` (`setting_key`, `setting_value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `setting_value`=?",
+            [key, value, value]
+        );
+        return true;
+    } catch (err) {
+        logger.error(`setSystemSetting error: ${err}`, { prefix: 'DB' });
+        return false;
+    }
+}

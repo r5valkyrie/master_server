@@ -5,43 +5,56 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
 <DashboardLayout>
   <div class="content-container">
     <div class="page-header">
-      <h1>Discord Bot Configuration</h1>
-      <p>Manage Discord bot channels and settings</p>
+      <h1>System Settings</h1>
+      <p>Manage system configuration settings</p>
     </div>
 
     <div class="config-section">
       <div class="section-header">
-        <h2>Channel Configuration</h2>
-        <p>Set the Discord channel IDs where the bot should send notifications</p>
+        <h2>Configuration</h2>
+        <p>Update system settings that control application behavior</p>
       </div>
 
-      <form id="discordConfigForm" class="config-form">
-        <div id="configFields" class="config-fields">
+      <form id="systemSettingsForm" class="config-form">
+        <div id="settingsFields" class="config-fields">
           <!-- Fields will be loaded dynamically -->
           <div class="loading">Loading configuration...</div>
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
         </div>
 
         <div id="statusMessage" class="status-message" style="display: none;"></div>
       </form>
-
-      <div class="security-notice">
-        Keep your bot token secure. Never share it publicly.
-      </div>
     </div>
 
     <div class="info-section">
-      <h3>Channel Types</h3>
+      <h3>Available Settings</h3>
       <ul>
-        <li><strong>Admin Log Channel:</strong> Server startup messages and admin events</li>
-        <li><strong>Server Browser Channel:</strong> Active servers list (updates every 5 minutes)</li>
-        <li><strong>Server Count Channel:</strong> Channel name shows active server count</li>
-        <li><strong>Player Count Channel:</strong> Channel name shows total online players</li>
-        <li><strong>Mod Updates Channel:</strong> Thunderstore mod release notifications</li>
-        <li><strong>Command Allow IDs:</strong> Comma-separated list of Discord user IDs allowed to run bot commands</li>
+        <li><strong>STEAM_WEB_API_KEY:</strong> Your Steam Web API key for profile lookups</li>
+        <li><strong>STEAM_APP_ID:</strong> The Steam App ID (usually 1172470 for R5Valkyrie)</li>
+        <li><strong>THUNDERSTORE_COMMUNITY:</strong> Community key on Thunderstore for mod tracking</li>
+        <li><strong>THUNDERSTORE_CHECK_INTERVAL_MS:</strong> How often to check for mod updates (in milliseconds)</li>
+        <li><strong>BAN_CLEANUP_INTERVAL_HOURS:</strong> How often to clean up expired bans</li>
+        <li><strong>USER_CLEANUP_INACTIVE_HOURS:</strong> Inactivity threshold for user cleanup</li>
+        <li><strong>DEFAULT_SERVER_PORT:</strong> Default port for server authentication fallback</li>
+      </ul>
+
+      <h3>Obtaining Steam API Key</h3>
+      <ol>
+        <li>Visit https://steamcommunity.com/dev/apikey</li>
+        <li>Log in with your Steam account</li>
+        <li>Enter a domain name (can be localhost for testing)</li>
+        <li>Accept the agreement and generate the key</li>
+        <li>Copy and paste the key here</li>
+      </ol>
+
+      <h3>Notes</h3>
+      <ul>
+        <li>All numeric values must be valid integers</li>
+        <li>Changes take effect immediately after saving</li>
+        <li>Some settings may require server restart to take full effect</li>
       </ul>
     </div>
   </div>
@@ -177,17 +190,6 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
     .status-message {
       padding: 1rem;
       border-radius: 4px;
@@ -245,33 +247,18 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
     .info-section strong {
       color: #fff;
     }
-
-    .security-notice {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 4px;
-      color: #fcd34d;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .security-notice strong {
-      color: #fbbf24;
-    }
   </style>
 
   <script>
-    interface ConfigItem {
-      config_key: string;
-      config_value: string;
+    interface SystemSetting {
+      setting_key: string;
+      setting_value: string;
       description: string;
     }
 
-    async function loadConfig() {
+    async function loadSettings() {
       try {
-        const response = await fetch('/api/admin/discordConfig');
+        const response = await fetch('/api/admin/systemSettings');
         const data = await response.json() as any;
 
         if (!data.success) {
@@ -279,73 +266,54 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
           return;
         }
 
-        const fieldsContainer = document.getElementById('configFields');
+        const fieldsContainer = document.getElementById('settingsFields');
         if (!fieldsContainer) return;
         fieldsContainer.innerHTML = '';
 
-        // Define field order: bot token first, then command allow IDs, then channels
+        // Define field order and hints
         const fieldOrder = [
-          'DISCORD_BOT_TOKEN',
-          'DISCORD_COMMAND_ALLOW_IDS',
-          'DISCORD_ADMIN_LOG_CHANNEL_ID',
-          'DISCORD_SERVER_BROWSER_CHANNEL_ID',
-          'DISCORD_SERVER_COUNT_CHANNEL_ID',
-          'DISCORD_PLAYER_COUNT_CHANNEL_ID',
-          'DISCORD_MOD_UPDATES_CHANNEL_ID'
+          { key: 'STEAM_WEB_API_KEY', hint: 'Get this from https://steamcommunity.com/dev/apikey' },
+          { key: 'STEAM_APP_ID', hint: 'Default: 1172470 for R5Valkyrie' },
+          { key: 'THUNDERSTORE_COMMUNITY', hint: 'Default: r5valkyrie' },
+          { key: 'THUNDERSTORE_CHECK_INTERVAL_MS', hint: 'Milliseconds, default: 300000 (5 minutes)' },
+          { key: 'BAN_CLEANUP_INTERVAL_HOURS', hint: 'Hours, default: 12' },
+          { key: 'USER_CLEANUP_INACTIVE_HOURS', hint: 'Hours, default: 24' },
+          { key: 'DEFAULT_SERVER_PORT', hint: 'Default: 37015' }
         ];
 
-        // Create a map of config items
-        const configMap = new Map(data.config.map((item: ConfigItem) => [item.config_key, item]));
+        // Create a map of settings
+        const settingMap = new Map(data.settings.map((item: SystemSetting) => [item.setting_key, item]));
 
         // Render in specified order
-        fieldOrder.forEach((key: string) => {
-          const item = configMap.get(key) as ConfigItem | undefined;
+        fieldOrder.forEach((field) => {
+          const item = settingMap.get(field.key) as SystemSetting | undefined;
           if (!item) return;
 
           const fieldDiv = document.createElement('div');
           fieldDiv.className = 'config-field';
-          const isTokenField = item.config_key === 'DISCORD_BOT_TOKEN';
-          const inputType = isTokenField ? 'password' : 'text';
-          let placeholder = 'Enter value';
-          
-          if (isTokenField) {
-            placeholder = 'Enter your Discord bot token';
-          } else if (item.config_key === 'DISCORD_COMMAND_ALLOW_IDS') {
-            placeholder = 'Enter user IDs (comma-separated)';
-          } else {
-            placeholder = 'Enter channel ID (18+ digits)';
-          }
+          const label = field.key
+            .split('_')
+            .map((word: string) => word.charAt(0) + word.slice(1).toLowerCase())
+            .join(' ');
 
           fieldDiv.innerHTML = `
-            <label for="${item.config_key}">${formatLabel(item.config_key)}</label>
+            <label for="${item.setting_key}">${label}</label>
             <input
-              type="${inputType}"
-              id="${item.config_key}"
-              name="${item.config_key}"
-              placeholder="${placeholder}"
-              value="${item.config_value || ''}"
-              data-key="${item.config_key}"
+              type="text"
+              id="${item.setting_key}"
+              name="${item.setting_key}"
+              placeholder="Enter value"
+              value="${item.setting_value || ''}"
+              data-key="${item.setting_key}"
             />
-            <div class="field-description">${item.description || ''}</div>
+            <div class="field-description">${field.hint}</div>
           `;
           fieldsContainer.appendChild(fieldDiv);
         });
       } catch (err) {
-        console.error('Error loading config:', err);
+        console.error('Error loading settings:', err);
         showError('Error loading configuration');
       }
-    }
-
-    function formatLabel(key: string) {
-      return key
-        .replace('DISCORD_', '')
-        .replace('_CHANNEL_ID', '')
-        .replace('_TOKEN', '')
-        .replace('_IDS', '')
-        .replace(/_/g, ' ')
-        .split(' ')
-        .map((word: string) => word.charAt(0) + word.slice(1).toLowerCase())
-        .join(' ');
     }
 
     function showMessage(message: string, isSuccess: boolean) {
@@ -364,7 +332,7 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
       showMessage(message, false);
     }
 
-    const form = document.getElementById('discordConfigForm');
+    const form = document.getElementById('systemSettingsForm');
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -376,7 +344,7 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         }));
 
         try {
-          const response = await fetch('/api/admin/discordConfig', {
+          const response = await fetch('/api/admin/systemSettings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ updates })
@@ -385,18 +353,18 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
           const data = await response.json() as any;
 
           if (data.success) {
-            showMessage(`Successfully saved ${data.updated} configuration(s)`, true);
+            showMessage(`Successfully saved ${data.updated} setting(s)`, true);
           } else {
             showError(data.error || 'Failed to save configuration');
           }
         } catch (err) {
-          console.error('Error saving config:', err);
+          console.error('Error saving settings:', err);
           showError('Error saving configuration');
         }
       });
     }
 
-    // Load config on page load
-    loadConfig();
+    // Load settings on page load
+    loadSettings();
   </script>
 </DashboardLayout>

@@ -384,6 +384,30 @@ CREATE TABLE IF NOT EXISTS `api_keys` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='API key management for client and programmatic access';
 
 -- ============================================================================
+-- SYSTEM SETTINGS TABLE
+-- Stores system configuration settings previously in environment variables
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `system_settings` (
+    `setting_key` VARCHAR(100) NOT NULL PRIMARY KEY COMMENT 'Setting identifier (e.g., STEAM_WEB_API_KEY)',
+    `setting_value` TEXT NOT NULL COMMENT 'Setting value',
+    `description` TEXT COMMENT 'Human-readable description of this setting',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
+    
+    INDEX `idx_updated_at` (`updated_at` DESC) COMMENT 'For tracking recent changes'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='System configuration settings from environment variables';
+
+-- Insert default system settings
+INSERT INTO `system_settings` (`setting_key`, `setting_value`, `description`) VALUES 
+('STEAM_WEB_API_KEY', '', 'Steam Web API key for Steam profile lookups'),
+('STEAM_APP_ID', '1172470', 'Steam App ID to use (Will show as the game being played)'),
+('THUNDERSTORE_COMMUNITY', 'r5valkyrie', 'Community key on Thunderstore for mod tracking'),
+('THUNDERSTORE_CHECK_INTERVAL_MS', '300000', 'Poll interval in milliseconds for Thunderstore updates (default: 5 minutes)'),
+('BAN_CLEANUP_INTERVAL_HOURS', '12', 'Interval for expired ban cleanup in hours'),
+('USER_CLEANUP_INACTIVE_HOURS', '24', 'Inactivity threshold for user cleanup in hours'),
+('DEFAULT_SERVER_PORT', '37015', 'Default server port for authentication fallback')
+ON DUPLICATE KEY UPDATE `setting_key`=`setting_key`;
+
+-- ============================================================================
 -- SCHEMA VERSION INFO
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `schema_version` (
@@ -395,7 +419,8 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
 INSERT INTO `schema_version` (`version`, `description`) VALUES 
 ('1.0.0', 'Initial schema for R5Valkyrie Master Server'),
 ('1.1.0', 'Added discord_config table for storing Discord bot channel IDs'),
-('1.2.0', 'Added api_keys table for API key management')
+('1.2.0', 'Added api_keys table for API key management'),
+('1.3.0', 'Added system_settings table for system configuration')
 ON DUPLICATE KEY UPDATE `version`=`version`;
 
 -- ============================================================================
