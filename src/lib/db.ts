@@ -236,12 +236,12 @@ export async function getAllApiKeys(): Promise<ApiKey[]> {
     }
 }
 
-export async function verifyApiKey(key: string): Promise<boolean> {
+export async function verifyApiKey(key: string): Promise<{ valid: boolean; keyId?: number }> {
     try {
-        if (!key || typeof key !== 'string') return false;
+        if (!key || typeof key !== 'string') return { valid: false };
         
         const pool = getPool();
-        if (!pool) return false;
+        if (!pool) return { valid: false };
         
         // Get the key prefix (first 10 chars)
         const prefix = key.substring(0, 10);
@@ -251,24 +251,25 @@ export async function verifyApiKey(key: string): Promise<boolean> {
         );
         
         if (!Array.isArray(rows) || rows.length === 0) {
-            return false;
+            return { valid: false };
         }
         
         const bcrypt = await import('bcrypt');
         const match = await bcrypt.compare(key, (rows[0] as any).key_hash);
+        const keyId = (rows[0] as any).id;
         
         if (match) {
             // Update last_used timestamp
             await pool.execute(
                 "UPDATE `api_keys` SET `last_used`=NOW() WHERE `id`=?",
-                [(rows[0] as any).id]
+                [keyId]
             );
         }
         
-        return match;
+        return { valid: match, keyId: match ? keyId : undefined };
     } catch (err) {
         logger.error(`verifyApiKey error: ${err}`, { prefix: 'DB' });
-        return false;
+        return { valid: false };
     }
 }
 

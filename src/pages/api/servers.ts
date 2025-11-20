@@ -4,6 +4,7 @@ import { getServers } from '../../lib/servers';
 import { IsVersionFlagSet, IsVersionSupported, flags, GetLatestVersion, initializeVersions } from '../../lib/versions';
 import { ValidateLanguage } from '../../lib/utils';
 import { logger } from '../../lib/logger';
+import { logAdminEvent } from '../../lib/discord';
 import { verifyApiKey } from '../../lib/db';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -20,13 +21,15 @@ export const POST: APIRoute = async ({ request }) => {
         let useRealTypes = await IsVersionFlagSet(body.version, flags.VF_REAL_TYPES);
         let servers = (await getServers(useRealTypes)) || [];
 
-        const isValidKey = await verifyApiKey(body.password || '');
-        if (!isValidKey) {
+        const keyResult = await verifyApiKey(body.password || '');
+        if (!keyResult.valid) {
             if (body.version) {
                 servers = servers.filter(s => (body.version == s.version));
             }
             servers = servers.map(({ version, ...keepAttrs }) => keepAttrs);
             servers = servers.filter(s => (s.hidden === false || s.hidden === 'false'));
+        } else if (keyResult.keyId) {
+            await logAdminEvent(`API key #${keyResult.keyId} used: servers`);
         }
 
         servers.sort((a, b) => (parseInt(b.playerCount) - parseInt(a.playerCount)));

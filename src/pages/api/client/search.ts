@@ -1,18 +1,23 @@
 import type { APIRoute } from 'astro';
 import { getPool, verifyApiKey } from '../../../lib/db';
 import { logger } from '../../../lib/logger';
+import { logAdminEvent } from '../../../lib/discord';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
         const { id: userId, name: userName, password } = body;
 
-        const isValidKey = await verifyApiKey(password || '');
-        if (!isValidKey) {
+        const keyResult = await verifyApiKey(password || '');
+        if (!keyResult.valid) {
             return new Response(JSON.stringify({ 
                 success: false, 
                 error: "Invalid credentials" 
             }), { status: 401 });
+        }
+
+        if (keyResult.keyId) {
+            await logAdminEvent(`API key #${keyResult.keyId} used: client/search`);
         }
 
         if (!userId && !userName) {

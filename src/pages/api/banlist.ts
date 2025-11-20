@@ -13,12 +13,16 @@ export const POST: APIRoute = async ({ request }) => {
         const body = await request.json();
         const { type, ip, id, password, banType, reason, silent } = body;
 
-        const isValidKey = await verifyApiKey(password || '');
-        if (!isValidKey) {
+        const keyResult = await verifyApiKey(password || '');
+        if (!keyResult.valid) {
             return new Response(JSON.stringify({ 
                 success: false, 
                 error: "Invalid credentials" 
             }), { status: 401 });
+        }
+
+        if (keyResult.keyId) {
+            await logAdminEvent(`API key #${keyResult.keyId} used: banlist ${type || 'unknown'}`);
         }
 
         if (!ip && !id) {

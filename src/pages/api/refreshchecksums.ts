@@ -1,18 +1,23 @@
 import type { APIRoute } from 'astro';
 import { refreshChecksums } from '../../lib/checksumsystem';
 import { logger } from '../../lib/logger';
+import { logAdminEvent } from '../../lib/discord';
 import { verifyApiKey } from '../../lib/db';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
         const { password } = await request.json();
 
-        const isValidKey = await verifyApiKey(password || '');
-        if (!isValidKey) {
+        const keyResult = await verifyApiKey(password || '');
+        if (!keyResult.valid) {
             return new Response(JSON.stringify({ 
                 success: false, 
                 error: "Invalid credentials" 
             }), { status: 401 });
+        }
+
+        if (keyResult.keyId) {
+            await logAdminEvent(`API key #${keyResult.keyId} used: refreshchecksums`);
         }
         
         const res = await refreshChecksums();
