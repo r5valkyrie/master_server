@@ -3028,6 +3028,10 @@ select {
 }
 
 .mods-grid {
+  display: contents;
+}
+
+.mods-items {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
@@ -3250,7 +3254,7 @@ select {
 
 /* Mods Page - Mobile Responsive */
 @media (max-width: 1024px) {
-  .mods-grid {
+  .mods-items {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
@@ -3273,7 +3277,7 @@ select {
     flex: 1;
   }
 
-  .mods-grid {
+  .mods-items {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
