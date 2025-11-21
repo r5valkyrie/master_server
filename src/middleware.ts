@@ -84,8 +84,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
-        // Discord config - master only
-        if (url.pathname.startsWith('/admin/discordConfig') || url.pathname.startsWith('/api/admin/discordConfig')) {
+        // Settings page - master only (combines Discord config and System Settings)
+        if (url.pathname.startsWith('/admin/settings') || url.pathname.startsWith('/api/admin/settings')) {
             if (!isMaster) {
                 if (url.pathname.startsWith('/api/')) {
                     return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
@@ -104,19 +104,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
-        // System Settings - master only
-        if (url.pathname.startsWith('/admin/systemSettings') || url.pathname.startsWith('/api/admin/systemSettings')) {
-            if (!isMaster) {
-                if (url.pathname.startsWith('/api/')) {
-                    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
-                }
-                return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });
-            }
-        }
-
         // Moderators: allow dashboard, users list, banlist, userQuery, servers, content; deny MOTD admin API
         if (isModerator) {
-            const allowedPages = ['/admin/dashboard', '/admin/users', '/admin/banlist', '/admin/userQuery', '/admin/servers', '/admin/content', '/admin/verifiedMods'];
+            const allowedPages = ['/admin/dashboard', '/admin/users', '/admin/banlist', '/admin/userQuery', '/admin/servers', '/admin/content', '/admin/mods'];
             const allowedApiPrefixes = ['/api/admin/users', '/api/admin/banlist', '/api/admin/userQuery', '/api/admin/servers', '/api/admin/auth/changePassword', '/api/admin/motd', '/api/admin/playersChart', '/api/admin/bansChart', '/api/admin/eula', '/api/admin/recentActivity', '/api/admin/uptime', '/api/admin/systemHealth', '/api/admin/banStats', '/api/admin/userGrowth', '/api/admin/playerStats', '/api/admin/verifiedMods'];
             if (url.pathname.startsWith('/admin') && !allowedPages.some(p => url.pathname.startsWith(p))) {
                 return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });

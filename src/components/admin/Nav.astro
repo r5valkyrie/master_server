@@ -31,14 +31,14 @@ const { currentPage, loggedInUser, role = '' } = Astro.props;
                 Users
             </a>
             <a href="/admin/userQuery" class:list={[
-                { 'active-page': currentPage === 'UserQuery' }
+                { 'active-page': currentPage === 'User Lookup' }
             ]}>
-                User Query
+                User Lookup
             </a>
-            <a href="/admin/verifiedMods" class:list={[
-                { 'active-page': currentPage === 'Verified Mods' }
+            <a href="/admin/mods" class:list={[
+                { 'active-page': currentPage === 'Mods' }
             ]}>
-                Verified Mods
+                Mods
             </a>
         </>
       )}

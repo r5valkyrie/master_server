@@ -19,49 +19,29 @@ try {
 }
 ---
 <Dashboard>
-  <!-- User Management -->
+  <!-- Admins Management -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">User Management</h1>
-      <p class="page-description">Manage admin users, roles and permissions</p>
+      <h1 class="page-title">Admins</h1>
+      <p class="page-description">Manage admin users and their access roles</p>
     </div>
     <div class="header-actions">
       <button class="btn btn-primary" id="open-create-user-modal">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Create New User
+        Add Admin
       </button>
     </div>
   </div>
 
-  <!-- Users Table -->
-  <div class="card">
-    <div class="table-container">
-      <table class="data-table" id="users-table">
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Last Updated</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="users-table-body">
-          <tr>
-            <td colspan="6" class="text-center py-8">
-              <div class="loading-state">
-                <svg class="spinner" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
-                </svg>
-                <p>Loading users...</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Admins Grid -->
+  <div id="admins-container" class="admins-grid">
+    <div class="loading-state">
+      <svg class="spinner" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+      </svg>
+      <p>Loading admins...</p>
     </div>
   </div>
 
@@ -152,280 +132,99 @@ try {
   </div>
 
   <style>
-    .table-container {
-      overflow-x: auto;
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-    }
-
-    .data-table thead {
-      background: var(--bg-secondary);
-    }
-
-    .data-table th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text-primary);
-      border-bottom: 2px solid var(--border-color);
-      white-space: nowrap;
-    }
-
-    .data-table td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      vertical-align: middle;
-    }
-
-    .data-table tbody tr {
-      transition: background-color 0.2s;
-    }
-
-    .data-table tbody tr:hover {
-      background: var(--bg-secondary);
-    }
-
-    .data-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .user-name {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 500;
-    }
-
-    .user-badges {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    /* Badge styles */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
-    }
-
-    .badge-info {
-      background: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-    }
-
-    .badge-success {
-      background: rgba(34, 197, 94, 0.1);
-      color: #22c55e;
-      border: 1px solid rgba(34, 197, 94, 0.2);
-    }
-
-    .badge-warning {
-      background: rgba(251, 191, 36, 0.1);
-      color: #fbbf24;
-      border: 1px solid rgba(251, 191, 36, 0.2);
-    }
-
-    .badge-error {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-      gap: 0.5rem;
-    }
-
-    .role-select {
-      padding: 0.375rem 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-size: 0.875rem;
-      cursor: pointer;
-      min-width: 120px;
-    }
-
-    .role-select:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px var(--primary-color-alpha);
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn-icon {
-      padding: 0.5rem;
-      min-width: auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-icon svg {
-      width: 1.25rem;
-      height: 1.25rem;
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-    }
-
-    .btn-outline:hover {
-      background: var(--bg-secondary);
-      border-color: var(--primary-color);
-    }
-
-    .btn-danger {
-      background: var(--error-color, #ef4444);
-      color: white;
-      border: 1px solid var(--error-color, #ef4444);
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      background: #dc2626;
-      border-color: #dc2626;
-    }
-
-    .loading-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      color: var(--text-secondary);
-    }
-
-    .spinner {
-      width: 3rem;
-      height: 3rem;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--text-secondary);
-    }
-
-    .empty-state svg {
-      width: 4rem;
-      height: 4rem;
-      margin: 0 auto 1rem;
-      opacity: 0.3;
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    .py-8 {
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-    }
+    /* Styles moved to modern-admin.css */
   </style>
 
 <script>
 // @ts-nocheck
 document.addEventListener('DOMContentLoaded', function() {
-  async function loadUsers() {
+  async function loadAdmins() {
     try {
       const res = await fetch('/api/admin/users/manage');
       const data = await res.json();
       const users = data.users || [];
-      const tbody = document.getElementById('users-table-body');
+      const container = document.getElementById('admins-container');
       
-      if (!tbody) return;
+      if (!container) return;
 
       if (users.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6">
-              <div class="empty-state">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
-                </svg>
-                <p>No users found</p>
-              </div>
-            </td>
-          </tr>
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+            </svg>
+            <p>No admins found</p>
+          </div>
         `;
         return;
       }
 
       const currentUsername = '${currentUser}';
       
-      tbody.innerHTML = users.map(user => {
+      container.innerHTML = users.map(user => {
         const roleClass = user.role === 'master' ? 'badge-info' : user.role === 'admin' ? 'badge-success' : 'badge-warning';
         const statusClass = user.must_change_password ? 'badge-error' : 'badge-success';
         const isCurrentUser = user.username === currentUsername;
+        const initials = user.username.substring(0, 2).toUpperCase();
         
         return `
-          <tr>
-            <td>
-              <div class="user-name">
-                ${user.username}
-                ${isCurrentUser ? '<span class="badge badge-info">You</span>' : ''}
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <div class="admin-card-avatar">${initials}</div>
+              <div class="admin-card-info">
+                <div class="admin-card-username">
+                  ${user.username}
+                  ${isCurrentUser ? '<span class="badge badge-info">You</span>' : ''}
+                </div>
+                <div class="admin-card-status">
+                  <span class="badge ${statusClass}">
+                    ${user.must_change_password ? 'Reset Required' : 'Active'}
+                  </span>
+                </div>
               </div>
-            </td>
-            <td>
-              <select class="role-select" data-action="set-role" data-username="${user.username}">
-                <option value="moderator" ${user.role === 'moderator' ? 'selected' : ''}>Moderator</option>
-                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                <option value="master" ${user.role === 'master' ? 'selected' : ''}>Master</option>
-              </select>
-            </td>
-            <td>
-              <span class="badge ${statusClass}">
-                ${user.must_change_password ? 'Reset Required' : 'Active'}
-              </span>
-            </td>
-            <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
-            <td>${user.updated_at ? new Date(user.updated_at).toLocaleDateString() : '-'}</td>
-            <td>
-              <div class="action-buttons">
-                <button class="btn btn-outline btn-icon" data-action="temp-pass" data-username="${user.username}" title="Set Temporary Password">
+            </div>
+            <div class="admin-card-body">
+              <div class="admin-field">
+                <div class="admin-field-label">Role</div>
+                <select class="role-select" data-action="set-role" data-username="${user.username}">
+                  <option value="moderator" ${user.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                  <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                  <option value="master" ${user.role === 'master' ? 'selected' : ''}>Master</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <div class="admin-field-label">Created</div>
+                <div class="admin-field-value">${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</div>
+              </div>
+              <div class="admin-field">
+                <div class="admin-field-label">Last Updated</div>
+                <div class="admin-field-value">${user.updated_at ? new Date(user.updated_at).toLocaleDateString() : '-'}</div>
+              </div>
+            </div>
+            <div class="admin-card-footer">
+              <button class="btn btn-outline" data-action="temp-pass" data-username="${user.username}" title="Set Temporary Password">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+                Reset Password
+              </button>
+              ${!isCurrentUser ? `
+                <button class="btn btn-danger" data-action="delete-user" data-username="${user.username}" title="Delete Admin">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                   </svg>
+                  Delete
                 </button>
-                ${!isCurrentUser ? `
-                  <button class="btn btn-danger btn-icon" data-action="delete-user" data-username="${user.username}" title="Delete User">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
-                ` : ''}
-              </div>
-            </td>
-          </tr>
+              ` : ''}
+            </div>
+          </div>
         `;
       }).join('');
 
       bindActions();
     } catch (error) {
-      console.error('Failed to load users:', error);
-      window.showNotification?.('error', 'Error', 'Failed to load users');
+      console.error('Failed to load admins:', error);
+      window.showNotification?.('error', 'Error', 'Failed to load admins');
     }
   }
 
@@ -445,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
           
           if (res.ok) {
             window.showNotification?.('success', 'Success', `Role updated for ${username}`);
-            loadUsers();
+            loadAdmins();
           } else {
             window.showNotification?.('error', 'Error', 'Failed to update role');
           }
@@ -470,9 +269,8 @@ document.addEventListener('DOMContentLoaded', function() {
           const data = await res.json();
           
           if (data.tempPassword) {
-            // Show password in a modal-like notification
             window.showNotification?.('success', 'Temporary Password Set', `Password for ${username}: ${data.tempPassword}`);
-            loadUsers();
+            loadAdmins();
           } else {
             window.showNotification?.('error', 'Error', 'Failed to set temporary password');
           }
@@ -499,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function() {
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
       
-      // Focus on username input
       const usernameInput = document.getElementById('modal-new-username');
       if (usernameInput) {
         setTimeout(() => usernameInput.focus(), 100);
@@ -513,7 +310,6 @@ document.addEventListener('DOMContentLoaded', function() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
       
-      // Clear form and status
       const form = document.getElementById('create-user-form');
       if (form) form.reset();
       
@@ -547,7 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.body.style.overflow = '';
       userToDelete = '';
       
-      // Clear status
       const statusEl = document.getElementById('delete-status');
       if (statusEl) {
         statusEl.textContent = '';
@@ -584,9 +379,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      // Set loading state
       if (statusEl) {
-        statusEl.textContent = 'Creating user...';
+        statusEl.textContent = 'Creating admin...';
         statusEl.className = 'mt-4 text-sm text-gray-500';
       }
       if (submitBtn) submitBtn.disabled = true;
@@ -600,37 +394,35 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (data && data.success) {
         if (statusEl) {
-          statusEl.textContent = `User created! Initial password: ${data.firstPassword}`;
+          statusEl.textContent = `Admin created! Initial password: ${data.firstPassword}`;
           statusEl.className = 'mt-4 text-sm text-success-600';
         }
-        window.showNotification?.('success', 'User Created', `User ${username} created successfully`);
+        window.showNotification?.('success', 'Admin Created', `Admin ${username} created successfully`);
         
-        loadUsers();
+        loadAdmins();
         
-        // Close modal after short delay
         setTimeout(() => {
           closeCreateUserModal();
         }, 2000);
       } else {
         if (statusEl) {
-          statusEl.textContent = data.error || 'Failed to create user';
+          statusEl.textContent = data.error || 'Failed to create admin';
           statusEl.className = 'mt-4 text-sm text-error-600';
         }
-        window.showNotification?.('error', 'Error', data.error || 'Failed to create user');
+        window.showNotification?.('error', 'Error', data.error || 'Failed to create admin');
       }
     } catch (error) {
-      console.error('Failed to create user:', error);
+      console.error('Failed to create admin:', error);
       if (statusEl) {
-        statusEl.textContent = 'Failed to create user';
+        statusEl.textContent = 'Failed to create admin';
         statusEl.className = 'mt-4 text-sm text-error-600';
       }
-      window.showNotification?.('error', 'Error', 'Failed to create user');
+      window.showNotification?.('error', 'Error', 'Failed to create admin');
     } finally {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
 
-  // Close modal on background click
   document.getElementById('create-user-modal')?.addEventListener('click', function(e) {
     if (e.target === this) {
       closeCreateUserModal();
@@ -645,9 +437,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmBtn = this;
     
     try {
-      // Set loading state
       if (statusEl) {
-        statusEl.textContent = 'Deleting user...';
+        statusEl.textContent = 'Deleting admin...';
         statusEl.className = 'mt-4 text-sm text-gray-500';
       }
       if (confirmBtn) confirmBtn.disabled = true;
@@ -661,35 +452,33 @@ document.addEventListener('DOMContentLoaded', function() {
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          window.showNotification?.('success', 'User Deleted', `User ${userToDelete} has been deleted successfully`);
-          loadUsers();
+          window.showNotification?.('success', 'Admin Deleted', `Admin ${userToDelete} has been deleted successfully`);
+          loadAdmins();
           closeDeleteUserModal();
         } else {
-          throw new Error(data.error || 'Failed to delete user');
+          throw new Error(data.error || 'Failed to delete admin');
         }
       } else {
-        throw new Error('Failed to delete user');
+        throw new Error('Failed to delete admin');
       }
     } catch (error) {
-      console.error('Failed to delete user:', error);
+      console.error('Failed to delete admin:', error);
       if (statusEl) {
-        statusEl.textContent = error.message || 'Failed to delete user';
+        statusEl.textContent = error.message || 'Failed to delete admin';
         statusEl.className = 'mt-4 text-sm text-error-600';
       }
-      window.showNotification?.('error', 'Error', error.message || 'Failed to delete user');
+      window.showNotification?.('error', 'Error', error.message || 'Failed to delete admin');
     } finally {
       if (confirmBtn) confirmBtn.disabled = false;
     }
   });
 
-  // Close delete modal on background click
   document.getElementById('delete-user-modal')?.addEventListener('click', function(e) {
     if (e.target === this) {
       closeDeleteUserModal();
     }
   });
 
-  // Close modal on Escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeCreateUserModal();
@@ -697,8 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Initial load
-  loadUsers();
+  loadAdmins();
 });
 </script>
 

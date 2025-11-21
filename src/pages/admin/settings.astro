@@ -1,0 +1,468 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard>
+  <div class="content-container">
+    <div class="page-header">
+      <h1>Settings</h1>
+      <p>Manage Discord configuration and system settings</p>
+    </div>
+
+    <div class="settings-toolbar">
+      <button class="btn btn-primary btn-lg" id="saveAllBtn">Save All Changes</button>
+      <div id="statusMessage" class="status-message" style="display: none;"></div>
+    </div>
+
+    <div id="settingsContainer" class="settings-panels-container">
+      <div class="loading">Loading settings...</div>
+    </div>
+
+    <!-- MOTD and EULA Sections -->
+    <div class="page-header" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+      <h2>Server Content</h2>
+      <p>Manage server messages and legal content</p>
+    </div>
+
+    <div class="settings-panels-container">
+      <!-- MOTD Panel -->
+      <div class="settings-panel settings-panel-content full-width">
+        <div class="settings-panel-header">
+          <div class="settings-panel-title">
+            <span class="settings-section-label content">content</span>
+            <h3>Message of the Day (MOTD)</h3>
+          </div>
+        </div>
+        <div class="settings-panel-body">
+          <p class="settings-panel-description">Message displayed to players when they connect</p>
+          <textarea
+            id="motd-textarea"
+            class="settings-panel-textarea"
+            rows="6"
+            placeholder="Enter the message of the day..."
+          ></textarea>
+          <div class="settings-panel-actions">
+            <button class="btn btn-primary btn-sm" id="save-motd-btn">Save MOTD</button>
+            <button class="btn btn-outline btn-sm" id="preview-motd-btn">Preview</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EULA Panel -->
+      <div class="settings-panel settings-panel-content full-width">
+        <div class="settings-panel-header">
+          <div class="settings-panel-title">
+            <span class="settings-section-label content">content</span>
+            <h3>End User License Agreement (EULA)</h3>
+          </div>
+        </div>
+        <div class="settings-panel-body">
+          <p class="settings-panel-description">Legal terms users must accept. Consult legal counsel before changes.</p>
+          <textarea
+            id="eula-textarea"
+            class="settings-panel-textarea"
+            rows="10"
+            placeholder="Enter the End User License Agreement..."
+          ></textarea>
+          <div class="settings-panel-actions">
+            <button class="btn btn-primary btn-sm" id="save-eula-btn">Save EULA</button>
+            <button class="btn btn-outline btn-sm" id="preview-eula-btn">Preview</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="preview-modal" style="display: none;">
+      <div class="preview-modal-content">
+        <div class="preview-modal-header">
+          <h3 id="preview-title">Preview</h3>
+          <button class="preview-modal-close" id="preview-close-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="preview-modal-body">
+          <div id="preview-content" class="preview-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    interface Setting {
+      key: string;
+      value: string;
+      description: string;
+      category: 'discord' | 'system';
+      isPassword?: boolean;
+    }
+
+    interface SettingResponse {
+      success: boolean;
+      discord?: any[];
+      system?: any[];
+      error?: string;
+    }
+
+    const statusMessage = document.getElementById('statusMessage');
+    const saveAllBtn = document.getElementById('saveAllBtn') as HTMLButtonElement | null;
+    const allSettings: Map<string, {key: string, category: string, originalValue: string, currentValue: string}> = new Map();
+
+    function showMessage(message: string, isSuccess: boolean) {
+      if (!statusMessage) return;
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+      statusMessage.style.display = 'block';
+
+      setTimeout(() => {
+        if (statusMessage) statusMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    async function saveAllSettings() {
+      if (saveAllBtn) {
+        saveAllBtn.textContent = 'Saving All...';
+        saveAllBtn.classList.add('btn-loading');
+        saveAllBtn.disabled = true;
+      }
+
+      try {
+        const discordUpdates: Array<{ key: string; value: string }> = [];
+        const systemUpdates: Array<{ key: string; value: string }> = [];
+
+        allSettings.forEach((setting) => {
+          if (setting.currentValue !== setting.originalValue) {
+            if (setting.category === 'discord') {
+              discordUpdates.push({ key: setting.key, value: setting.currentValue });
+            } else {
+              systemUpdates.push({ key: setting.key, value: setting.currentValue });
+            }
+          }
+        });
+
+        let hasErrors = false;
+
+        if (discordUpdates.length > 0) {
+          const response = await fetch('/api/admin/discordConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates: discordUpdates })
+          });
+          const data = (await response.json()) as any;
+          if (!data.success) hasErrors = true;
+        }
+
+        if (systemUpdates.length > 0) {
+          const response = await fetch('/api/admin/systemSettings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates: systemUpdates })
+          });
+          const data = (await response.json()) as any;
+          if (!data.success) hasErrors = true;
+        }
+
+        if (hasErrors) {
+          showMessage('Some settings failed to save', false);
+        } else if (discordUpdates.length + systemUpdates.length > 0) {
+          showMessage('All settings saved successfully', true);
+          // Update original values
+          allSettings.forEach((setting) => {
+            setting.originalValue = setting.currentValue;
+          });
+        } else {
+          showMessage('No changes to save', true);
+        }
+      } catch (err) {
+        console.error('Error saving all settings:', err);
+        showMessage('Error saving settings', false);
+      } finally {
+        if (saveAllBtn) {
+          saveAllBtn.textContent = 'Save All Changes';
+          saveAllBtn.classList.remove('btn-loading');
+          saveAllBtn.disabled = false;
+        }
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        const discordResponse = await fetch('/api/admin/discordConfig');
+        const systemResponse = await fetch('/api/admin/systemSettings');
+
+        const discordData = (await discordResponse.json()) as any;
+        const systemData = (await systemResponse.json()) as any;
+
+        if (!discordData.success || !systemData.success) {
+          showMessage('Failed to load settings', false);
+          return;
+        }
+
+        const container = document.getElementById('settingsContainer');
+        if (!container) return;
+
+        // Map Discord settings
+        const discordSettings: Setting[] = (discordData.config || []).map((item: any) => ({
+          key: item.config_key,
+          value: item.config_value || '',
+          description: item.description || getDefaultDescription(item.config_key),
+          category: 'discord',
+          isPassword: item.config_key === 'DISCORD_BOT_TOKEN'
+        }));
+
+        // Map System settings
+        const systemSettings: Setting[] = (systemData.settings || []).map((item: any) => ({
+          key: item.setting_key,
+          value: item.setting_value || '',
+          description: getDefaultSystemDescription(item.setting_key),
+          category: 'system',
+          isPassword: item.setting_key === 'STEAM_WEB_API_KEY'
+        }));
+
+        const combinedSettings = [...discordSettings, ...systemSettings];
+
+        if (combinedSettings.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>No settings available.</p></div>';
+          return;
+        }
+
+        container.innerHTML = '';
+        
+        combinedSettings.forEach((setting: Setting) => {
+          const panel = document.createElement('div');
+          panel.className = `settings-panel settings-panel-${setting.category}`;
+          const inputType = setting.isPassword ? 'password' : 'text';
+          const categoryLabel = setting.category === 'discord' ? 'discord' : 'system';
+
+          panel.innerHTML = `
+            <div class="settings-panel-header">
+              <div class="settings-panel-title">
+                <span class="settings-section-label ${categoryLabel}">${setting.category}</span>
+                <h3>${formatSettingKey(setting.key)}</h3>
+              </div>
+            </div>
+            <div class="settings-panel-body">
+              <p class="settings-panel-description">${setting.description}</p>
+              <input
+                type="${inputType}"
+                class="settings-panel-input"
+                value="${setting.value}"
+                data-key="${setting.key}"
+                data-category="${setting.category}"
+                placeholder="Enter value"
+              />
+            </div>
+          `;
+          
+          const input = panel.querySelector('.settings-panel-input') as HTMLInputElement;
+          allSettings.set(setting.key, {
+            key: setting.key,
+            category: setting.category,
+            originalValue: setting.value,
+            currentValue: setting.value
+          });
+          
+          input.addEventListener('change', () => {
+            const settingData = allSettings.get(setting.key);
+            if (settingData) {
+              settingData.currentValue = input.value;
+            }
+          });
+
+          container.appendChild(panel);
+        });
+      } catch (err) {
+        console.error('Error loading settings:', err);
+        showMessage('Error loading settings', false);
+      }
+    }
+
+    function formatSettingKey(key: string): string {
+      return key
+        .replace(/^(DISCORD_|)/, '')
+        .replace(/_CHANNEL_ID|_TOKEN|_IDS|_KEY|_INTERVAL|_PORT|_COMMUNITY|_APP_ID/g, '')
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0) + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    function getDefaultDescription(key: string): string {
+      const descriptions: { [key: string]: string } = {
+        'DISCORD_BOT_TOKEN': 'Your Discord bot token (keep this secret)',
+        'DISCORD_COMMAND_ALLOW_IDS': 'Comma-separated list of Discord user IDs allowed to run bot commands',
+        'DISCORD_ADMIN_LOG_CHANNEL_ID': 'Channel for server startup and admin events',
+        'DISCORD_SERVER_BROWSER_CHANNEL_ID': 'Channel showing active servers list (updates every 5 minutes)',
+        'DISCORD_SERVER_COUNT_CHANNEL_ID': 'Channel name shows active server count',
+        'DISCORD_PLAYER_COUNT_CHANNEL_ID': 'Channel name shows total online players',
+        'DISCORD_MOD_UPDATES_CHANNEL_ID': 'Channel for Thunderstore mod release notifications'
+      };
+      return descriptions[key] || 'Configuration setting';
+    }
+
+    function getDefaultSystemDescription(key: string): string {
+      const descriptions: { [key: string]: string } = {
+        'STEAM_WEB_API_KEY': 'Your Steam Web API key (get from https://steamcommunity.com/dev/apikey)',
+        'STEAM_APP_ID': 'Steam App ID (usually 1172470 for R5Valkyrie)',
+        'THUNDERSTORE_COMMUNITY': 'Community key on Thunderstore for mod tracking',
+        'THUNDERSTORE_CHECK_INTERVAL_MS': 'How often to check for mod updates (milliseconds, default: 300000)',
+        'BAN_CLEANUP_INTERVAL_HOURS': 'How often to clean up expired bans (hours, default: 12)',
+        'USER_CLEANUP_INACTIVE_HOURS': 'Inactivity threshold for user cleanup (hours, default: 24)',
+        'DEFAULT_SERVER_PORT': 'Default port for server authentication fallback (default: 37015)'
+      };
+      return descriptions[key] || 'System setting';
+    }
+
+    // Attach save all listener
+    saveAllBtn?.addEventListener('click', saveAllSettings);
+
+    // Load settings on page load
+    loadSettings();
+
+    // MOTD and EULA functionality
+    let currentMOTD = '';
+    let currentEULA = '';
+
+    async function loadMOTDandEULA() {
+      try {
+        const motdResponse = await fetch('/api/admin/motd');
+        const eulaResponse = await fetch('/api/admin/eula');
+
+        if (motdResponse.ok) {
+          const motdData = (await motdResponse.json()) as any;
+          currentMOTD = motdData.content || '';
+          const motdTextarea = document.getElementById('motd-textarea') as HTMLTextAreaElement;
+          if (motdTextarea) motdTextarea.value = currentMOTD;
+        }
+
+        if (eulaResponse.ok) {
+          const eulaData = (await eulaResponse.json()) as any;
+          currentEULA = eulaData.eula?.contents || '';
+          const eulaTextarea = document.getElementById('eula-textarea') as HTMLTextAreaElement;
+          if (eulaTextarea) eulaTextarea.value = currentEULA;
+        }
+      } catch (error) {
+        console.error('Error loading MOTD/EULA:', error);
+      }
+    }
+
+    async function saveMOTD() {
+      const motdTextarea = document.getElementById('motd-textarea') as HTMLTextAreaElement;
+      if (!motdTextarea) return;
+
+      const content = motdTextarea.value.trim();
+      const btn = document.getElementById('save-motd-btn') as HTMLButtonElement;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+      }
+
+      try {
+        const response = await fetch('/api/admin/motd', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+
+        const result = (await response.json()) as any;
+        if (result.success) {
+          currentMOTD = content;
+          (window as any).showNotification?.('success', 'Success', 'MOTD updated successfully');
+        } else {
+          (window as any).showNotification?.('error', 'Error', result.error || 'Failed to save MOTD');
+        }
+      } catch (error) {
+        console.error('Error saving MOTD:', error);
+        (window as any).showNotification?.('error', 'Error', 'Failed to save MOTD');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Save MOTD';
+        }
+      }
+    }
+
+    async function saveEULA() {
+      const eulaTextarea = document.getElementById('eula-textarea') as HTMLTextAreaElement;
+      if (!eulaTextarea) return;
+
+      const content = eulaTextarea.value.trim();
+      const btn = document.getElementById('save-eula-btn') as HTMLButtonElement;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+      }
+
+      try {
+        const response = await fetch('/api/admin/eula', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: content, lang: 'english' })
+        });
+
+        const result = (await response.json()) as any;
+        if (result.success) {
+          currentEULA = content;
+          (window as any).showNotification?.('success', 'Success', 'EULA updated successfully');
+        } else {
+          (window as any).showNotification?.('error', 'Error', result.error || 'Failed to save EULA');
+        }
+      } catch (error) {
+        console.error('Error saving EULA:', error);
+        (window as any).showNotification?.('error', 'Error', 'Failed to save EULA');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Save EULA';
+        }
+      }
+    }
+
+    function showPreview(title: string, content: string) {
+      const previewTitle = document.getElementById('preview-title');
+      const previewContent = document.getElementById('preview-content');
+      const previewModal = document.getElementById('preview-modal');
+
+      if (previewTitle) previewTitle.textContent = title;
+      if (previewContent) previewContent.textContent = content || 'No content to preview';
+      if (previewModal) previewModal.style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+      const previewModal = document.getElementById('preview-modal');
+      if (previewModal) previewModal.style.display = 'none';
+    }
+
+    // Event listeners for MOTD/EULA
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMOTDandEULA();
+
+      document.getElementById('save-motd-btn')?.addEventListener('click', saveMOTD);
+      document.getElementById('save-eula-btn')?.addEventListener('click', saveEULA);
+      document.getElementById('preview-motd-btn')?.addEventListener('click', () => {
+        const motdTextarea = document.getElementById('motd-textarea') as HTMLTextAreaElement;
+        if (motdTextarea) showPreview('MOTD Preview', motdTextarea.value);
+      });
+      document.getElementById('preview-eula-btn')?.addEventListener('click', () => {
+        const eulaTextarea = document.getElementById('eula-textarea') as HTMLTextAreaElement;
+        if (eulaTextarea) showPreview('EULA Preview', eulaTextarea.value);
+      });
+      document.getElementById('preview-close-btn')?.addEventListener('click', closePreviewModal);
+
+      // Close modal on background click
+      const previewModal = document.getElementById('preview-modal');
+      previewModal?.addEventListener('click', (e) => {
+        if (e.target === previewModal) closePreviewModal();
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closePreviewModal();
+      });
+    });
+  </script>
+</Dashboard>

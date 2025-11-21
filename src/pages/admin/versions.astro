@@ -4,39 +4,48 @@ import Dashboard from '../../layouts/Dashboard.astro';
 <Dashboard>
   <!-- Versions Management -->
   <div id="versions-list">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Versions</h1>
+      <p>Manage game versions and synchronization</p>
+    </div>
+
     <!-- Header Actions -->
-    <div class="flex justify-end items-center gap-4 mb-6">
+    <div class="versions-toolbar">
       <button class="btn btn-primary" id="add-version-btn">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
         Add Version
       </button>
       <button class="btn btn-success" id="push-versions-btn">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
-        Sync to Master
+        Apply Changes
       </button>
     </div>
 
-    <!-- Versions Table -->
-    <div class="card">
-      <div class="table-container">
-        <table class="table" id="versions-table">
-          <thead>
-            <tr>
-              <th>Version Name</th>
-              <th>Checksums Enabled</th>
-              <th>Supported</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="versions-table-body">
-            <!-- Rows will be inserted here by script -->
-          </tbody>
-        </table>
+    <!-- Versions Grid Container -->
+    <div id="versions-container" class="versions-grid">
+      <div class="loading-state">
+        <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
+        </svg>
+        <p>Loading versions...</p>
       </div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="versions-empty hidden">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
+        </svg>
+        <p>No versions found</p>
+        <p class="text-sm mt-2">Click "Add Version" to create one</p>
+      </div>
+
+      <!-- Versions will be rendered here -->
+      <div id="versions-items" class="versions-items"></div>
     </div>
   </div>
 
@@ -156,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     pushBtn.addEventListener('click', async function() {
       pushBtn.disabled = true;
       const originalText = pushBtn.textContent;
-      pushBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Syncing...';
+      pushBtn.innerHTML = '<svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Syncing...';
       
       try {
         const res = await fetch('/api/admin/versionsPush', { method: 'POST' });
@@ -174,60 +183,62 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Simplified version loading for now - keeping original functionality
+  // Load versions
   async function fetchVersions() {
     try {
       const response = await fetch('/api/admin/versions');
       const payload = await response.json();
       const versions = payload.versions || [];
-      const tableBody = document.getElementById('versions-table-body');
+      const container = document.getElementById('versions-items');
+      const loadingState = document.getElementById('versions-list').querySelector('.loading-state');
+      const emptyState = document.getElementById('empty-state');
       
-      if (!tableBody) return;
+      if (!container) return;
+
+      loadingState?.classList.add('hidden');
 
       if (versions.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="4" class="text-center py-8 text-gray-500">
-              <div class="flex flex-col items-center">
-                <svg class="w-12 h-12 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
-                </svg>
-                <p>No versions found</p>
-              </div>
-            </td>
-          </tr>
-        `;
+        container.innerHTML = '';
+        emptyState?.classList.remove('hidden');
       } else {
-        tableBody.innerHTML = versions.map(version => `
-          <tr>
-            <td class="font-mono text-sm">${version.name || ''}</td>
-            <td>
-              <span class="badge ${version.checksums_enabled ? 'badge-success' : 'badge-error'}">
-                ${version.checksums_enabled ? 'Enabled' : 'Disabled'}
-              </span>
-            </td>
-            <td>
-              <span class="badge ${version.supported ? 'badge-success' : 'badge-warning'}">
-                ${version.supported ? 'Supported' : 'Legacy'}
-              </span>
-            </td>
-            <td>
-              <div class="flex gap-2">
-                <button class="btn btn-outline btn-sm btn-edit" data-name="${version.name}" data-checksums="${version.checksums_enabled}" data-supported="${version.supported}">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  Edit
-                </button>
-                <button class="btn btn-danger btn-sm btn-delete" data-name="${version.name}">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  Delete
-                </button>
+        emptyState?.classList.add('hidden');
+        
+        container.innerHTML = versions.map((version) => `
+          <div class="version-card">
+            <div class="version-card-header">
+              <h3 class="version-name">${escapeHtml(version.name)}</h3>
+            </div>
+            <div class="version-card-body">
+              <div class="version-status">
+                <div class="status-item">
+                  <span class="status-label">Checksums</span>
+                  <span class="status-value ${version.checksums_enabled ? 'enabled' : 'disabled'}">
+                    ${version.checksums_enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <div class="status-item">
+                  <span class="status-label">Support Status</span>
+                  <span class="status-value ${version.supported ? 'supported' : 'legacy'}">
+                    ${version.supported ? 'Supported' : 'Legacy'}
+                  </span>
+                </div>
               </div>
-            </td>
-          </tr>
+            </div>
+            <div class="version-card-footer">
+              <button class="btn btn-sm btn-outline btn-edit" data-name="${escapeHtml(version.name)}" data-checksums="${version.checksums_enabled}" data-supported="${version.supported}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button class="btn btn-sm btn-danger btn-delete" data-name="${escapeHtml(version.name)}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
         `).join('');
 
         // Bind edit handlers
@@ -261,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
               
               if (res.ok) {
                 notify('success', 'Success', `Version "${name}" deleted successfully`);
-                fetchVersions(); // Refresh the table
+                fetchVersions();
               } else {
                 const error = await res.json();
                 notify('error', 'Error', error.error || 'Failed to delete version');
@@ -326,9 +337,8 @@ document.addEventListener('DOMContentLoaded', function () {
           notify('success', 'Success', 'Version added successfully');
           closeModal(addModal);
           fetchVersions();
-          // Reset form
           addForm.reset();
-          document.getElementById('supportedInput').checked = true; // Default to checked
+          document.getElementById('supportedInput').checked = true;
         } else {
           const error = await res.json();
           notify('error', 'Error', error.error || 'Failed to add version');
@@ -373,6 +383,12 @@ document.addEventListener('DOMContentLoaded', function () {
         notify('error', 'Error', 'Failed to update version');
       }
     });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // Initial load
