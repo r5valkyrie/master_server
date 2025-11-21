@@ -3912,6 +3912,23 @@ select {
   color: var(--text-primary);
 }
 
+.admin-field .role-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-field .role-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(86, 123, 243, 0.1);
+}
+
 .admin-card-footer {
   display: flex;
   gap: 0.5rem;
@@ -3924,28 +3941,15 @@ select {
   flex: 1;
   font-size: 0.875rem;
   padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .admin-card-footer .btn svg {
   width: 1rem;
   height: 1rem;
-}
-
-.admin-card-footer .role-select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.admin-card-footer .role-select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(86, 123, 243, 0.1);
 }
 
 @media (max-width: 1024px) {
