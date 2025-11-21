@@ -181,7 +181,7 @@ body {
 .nav-section {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--space-sm);
   margin-bottom: var(--space-sm);
   margin-top: var(--space-md);
 }
