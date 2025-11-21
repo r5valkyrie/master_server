@@ -3,24 +3,30 @@ import Dashboard from '../../layouts/Dashboard.astro';
 ---
 <Dashboard>
   <!-- Verified Mods Management -->
-  <div id="verified-mods-list">
-    <!-- Header Actions -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+  <div id="verified-mods-list" class="mods-page">
+    <!-- Header with Actions -->
+    <div class="page-header">
+      <h1>Verified Mods</h1>
+      <p>Manage and verify Thunderstore mods</p>
+    </div>
+
+    <!-- Search and Filter Toolbar -->
+    <div class="mods-toolbar">
       <div class="search-container">
         <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         <input type="text" id="search-bar" class="search-input" placeholder="Search mods by name or author..." />
       </div>
-      <div class="flex gap-2">
+      <div class="mods-actions">
         <button class="btn btn-outline" id="show-verified-only">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           Verified Only
         </button>
         <button class="btn btn-primary" id="refresh-mods-btn">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
           Refresh Mods
@@ -28,67 +34,54 @@ import Dashboard from '../../layouts/Dashboard.astro';
       </div>
     </div>
 
-    <!-- Mods Browser Table -->
-    <div class="card">
-      <div class="table-container">
-        <table class="table" id="mods-browser-table">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Mod Name</th>
-              <th>Author</th>
-              <th>Category</th>
-              <th>Downloads</th>
-              <th>Rating</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="mods-browser-table-body">
-            <!-- Rows will be inserted here by script -->
-          </tbody>
-        </table>
-      </div>
-      
+    <!-- Mods Grid Container -->
+    <div id="mods-container" class="mods-grid">
       <!-- Loading State -->
-      <div id="loading-state" class="text-center py-8 text-gray-500">
-        <svg class="w-8 h-8 mx-auto mb-4 text-gray-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div id="loading-state" class="mods-loading">
+        <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
         </svg>
         <p>Loading mods from Thunderstore...</p>
       </div>
       
       <!-- Empty State -->
-      <div id="empty-state" class="text-center py-8 text-gray-500 hidden">
-        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div id="empty-state" class="mods-empty hidden">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
         <p>No mods found</p>
         <p class="text-sm mt-2">Try adjusting your search or refresh the mod list</p>
       </div>
-      
-      <!-- Pagination -->
-      <div id="pagination" class="pagination hidden">
-        <div class="pagination-info">
-          <span id="page-info">Showing 1-50 of 150 mods</span>
-        </div>
-        <div class="pagination-controls">
-          <button class="btn btn-outline btn-sm" id="prev-page">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            Previous
-          </button>
-          <span id="page-number" class="px-3 py-2 text-sm text-gray-700">Page 1</span>
-          <button class="btn btn-outline btn-sm" id="next-page">
-            Next
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
-        </div>
+
+      <!-- Mods will be rendered here -->
+      <div id="mods-browser-table-body" class="mods-items"></div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="pagination hidden">
+      <div class="pagination-info">
+        <span id="page-info">Showing 1-50 of 150 mods</span>
+      </div>
+      <div class="pagination-controls">
+        <button class="btn btn-outline btn-sm" id="prev-page">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Previous
+        </button>
+        <span id="page-number" class="px-3 py-2 text-sm">Page 1</span>
+        <button class="btn btn-outline btn-sm" id="next-page">
+          Next
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
+
+  <!-- Notification Container -->
+  <div id="notificationContainer"></div>
 
 
   <script>
@@ -97,7 +90,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
     let filteredMods: any[] = [];
     let showVerifiedOnly = false;
     let currentPage = 1;
-    const modsPerPage = 25;
+    const modsPerPage = 12;
 
     // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
@@ -123,7 +116,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
       // Event delegation for verify/unverify buttons
       document.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
-        const button = target.closest('.verify-action-btn') as HTMLButtonElement;
+        const button = target.closest('.mod-action-btn') as HTMLButtonElement;
         
         if (button) {
           e.preventDefault();
@@ -146,7 +139,6 @@ import Dashboard from '../../layouts/Dashboard.astro';
     async function loadAllData() {
       showLoading();
       try {
-        // Load both Thunderstore mods and verified mods in parallel
         const [thunderstoreResponse, verifiedResponse] = await Promise.all([
           fetch('/api/client/mods'),
           fetch('/api/admin/verifiedMods')
@@ -191,18 +183,18 @@ import Dashboard from '../../layouts/Dashboard.astro';
         return matchesSearch && matchesFilter;
       });
 
-      currentPage = 1; // Reset to first page when filtering
+      currentPage = 1;
       renderCurrentPage();
     }
 
     function renderCurrentPage() {
       hideLoading();
-      const tbody = document.getElementById('mods-browser-table-body');
+      const container = document.getElementById('mods-browser-table-body');
       const emptyState = document.getElementById('empty-state');
       const pagination = document.getElementById('pagination');
       
       if (filteredMods.length === 0) {
-        if (tbody) tbody.innerHTML = '';
+        if (container) container.innerHTML = '';
         emptyState?.classList.remove('hidden');
         pagination?.classList.add('hidden');
         return;
@@ -210,72 +202,78 @@ import Dashboard from '../../layouts/Dashboard.astro';
       
       emptyState?.classList.add('hidden');
       
-      // Calculate pagination
       const totalPages = Math.ceil(filteredMods.length / modsPerPage);
       const startIndex = (currentPage - 1) * modsPerPage;
       const endIndex = Math.min(startIndex + modsPerPage, filteredMods.length);
       const currentMods = filteredMods.slice(startIndex, endIndex);
       
-      // Render table
-      if (tbody) {
-        tbody.innerHTML = currentMods.map((mod: any) => {
+      if (container) {
+        container.innerHTML = currentMods.map((mod: any) => {
           const latestVersion = mod.versions?.[0];
           const downloads = latestVersion?.downloads || 0;
           const categories = mod.categories?.join(', ') || 'N/A';
+          const ratingClass = mod.rating_score > 4 ? 'text-green-400' : mod.rating_score > 2 ? 'text-yellow-400' : 'text-red-400';
           
           return `
-            <tr>
-              <td>
-                ${mod.isVerified ? 
-                  '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">[OK] Verified</span>' :
-                  '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unverified</span>'
-                }
-              </td>
-              <td class="font-medium">
-                <div>
-                  <div class="font-semibold">${escapeHtml(mod.name)}</div>
-                  ${mod.is_deprecated ? '<span class="text-xs text-red-600">[DEPRECATED]</span>' : ''}
-                </div>
-              </td>
-              <td>${escapeHtml(mod.owner)}</td>
-              <td class="text-sm">${escapeHtml(categories)}</td>
-              <td class="text-sm">${downloads.toLocaleString()}</td>
-              <td class="text-sm">
-                ${mod.rating_score > 0 ? 
-                  `<span class="text-yellow-600">[★] ${mod.rating_score}</span>` : 
-                  '<span class="text-gray-400">No rating</span>'
-                }
-              </td>
-              <td>
-                <div class="flex gap-2">
-                  <a href="${escapeHtml(mod.package_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M7 7h10v10M17 7l-10 10"></path>
-                    </svg>
-                    View
-                  </a>
+            <div class="mod-card ${mod.isVerified ? 'verified' : ''}">
+              <div class="mod-card-header">
+                <div class="mod-status">
                   ${mod.isVerified ? 
-                    `<button class="btn btn-sm btn-danger verify-action-btn" data-action="unverify" data-name="${escapeHtml(mod.name)}" data-owner="${escapeHtml(mod.owner)}">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                      Remove
-                    </button>` :
-                    `<button class="btn btn-sm btn-success verify-action-btn" data-action="verify" data-name="${escapeHtml(mod.name)}" data-owner="${escapeHtml(mod.owner)}" data-url="${escapeHtml(mod.package_url)}">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      Verify
-                    </button>`
+                    '<span class="status-badge verified"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Verified</span>' :
+                    '<span class="status-badge unverified">Unverified</span>'
                   }
+                  ${mod.is_deprecated ? '<span class="status-badge deprecated">Deprecated</span>' : ''}
                 </div>
-              </td>
-            </tr>
+              </div>
+              <div class="mod-card-body">
+                <h3 class="mod-name">${escapeHtml(mod.name)}</h3>
+                <p class="mod-author">by ${escapeHtml(mod.owner)}</p>
+                <p class="mod-description">${mod.description ? escapeHtml(mod.description.substring(0, 100)) + '...' : 'No description'}</p>
+                
+                <div class="mod-meta">
+                  <div class="meta-item">
+                    <span class="meta-label">Category</span>
+                    <span class="meta-value">${escapeHtml(categories)}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Downloads</span>
+                    <span class="meta-value">${downloads.toLocaleString()}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Rating</span>
+                    <span class="meta-value ${ratingClass}">
+                      ${mod.rating_score > 0 ? `★ ${mod.rating_score.toFixed(1)}` : 'No rating'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="mod-card-footer">
+                <a href="${escapeHtml(mod.package_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M7 7h10v10M17 7l-10 10"></path>
+                  </svg>
+                  View
+                </a>
+                ${mod.isVerified ? 
+                  `<button class="btn btn-sm btn-danger mod-action-btn" data-action="unverify" data-name="${escapeHtml(mod.name)}" data-owner="${escapeHtml(mod.owner)}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Remove
+                  </button>` :
+                  `<button class="btn btn-sm btn-success mod-action-btn" data-action="verify" data-name="${escapeHtml(mod.name)}" data-owner="${escapeHtml(mod.owner)}" data-url="${escapeHtml(mod.package_url)}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Verify
+                  </button>`
+                }
+              </div>
+            </div>
           `;
         }).join('');
       }
       
-      // Update pagination
       updatePagination(totalPages, startIndex + 1, endIndex, filteredMods.length);
     }
 
@@ -329,29 +327,20 @@ import Dashboard from '../../layouts/Dashboard.astro';
       try {
         const response = await fetch('/api/admin/verifiedMods', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            type: 'add',
-            name,
-            owner,
-            thunderstore_link
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'add', name, owner, thunderstore_link })
         });
 
         const result = await response.json();
         
         if (result.success) {
-          showSuccess(`${name} has been verified successfully`);
+          showSuccess(`${name} verified successfully`);
           
-          // Update local data
           const modIndex = allMods.findIndex(m => m.name === name && m.owner === owner);
           if (modIndex !== -1) {
             allMods[modIndex].isVerified = true;
           }
           
-          // Refresh verified mods list
           const verifiedResponse = await fetch('/api/admin/verifiedMods');
           const verifiedData = await verifiedResponse.json();
           if (verifiedData.success) {
@@ -370,7 +359,6 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
     async function unverifyMod(name: string, owner: string) {
       try {
-        // Find the verified mod ID
         const verifiedMod = verifiedMods.find(m => m.name === name && m.owner === owner);
         if (!verifiedMod) {
           showError('Verified mod not found');
@@ -379,27 +367,20 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
         const response = await fetch('/api/admin/verifiedMods', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            type: 'remove',
-            id: verifiedMod.id
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'remove', id: verifiedMod.id })
         });
 
         const result = await response.json();
         
         if (result.success) {
-          showSuccess(`${name} has been removed from verified mods`);
+          showSuccess(`${name} removed from verified mods`);
           
-          // Update local data
           const modIndex = allMods.findIndex(m => m.name === name && m.owner === owner);
           if (modIndex !== -1) {
             allMods[modIndex].isVerified = false;
           }
           
-          // Refresh verified mods list
           const verifiedResponse = await fetch('/api/admin/verifiedMods');
           const verifiedData = await verifiedResponse.json();
           if (verifiedData.success) {
@@ -427,13 +408,11 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
 
     function showSuccess(message: string) {
-      // Simple alert for now - could be replaced with a toast notification system
-      alert('Success: ' + message);
+      (window as any).showNotification?.('success', 'Success', message);
     }
 
     function showError(message: string) {
-      // Simple alert for now - could be replaced with a toast notification system
-      alert('Error: ' + message);
+      (window as any).showNotification?.('error', 'Error', message);
     }
 
     function escapeHtml(text: string) {

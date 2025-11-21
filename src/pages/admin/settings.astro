@@ -36,7 +36,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
 
     const statusMessage = document.getElementById('statusMessage');
-    const saveAllBtn = document.getElementById('saveAllBtn');
+    const saveAllBtn = document.getElementById('saveAllBtn') as HTMLButtonElement | null;
     const allSettings: Map<string, {key: string, category: string, originalValue: string, currentValue: string}> = new Map();
 
     function showMessage(message: string, isSuccess: boolean) {
@@ -58,8 +58,8 @@ import Dashboard from '../../layouts/Dashboard.astro';
       }
 
       try {
-        const discordUpdates = [];
-        const systemUpdates = [];
+        const discordUpdates: Array<{ key: string; value: string }> = [];
+        const systemUpdates: Array<{ key: string; value: string }> = [];
 
         allSettings.forEach((setting) => {
           if (setting.currentValue !== setting.originalValue) {
