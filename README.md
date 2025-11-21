@@ -14,7 +14,17 @@ A master server implementation for R5Valkyrie (Apex Legends) that provides serve
 
 ## Features
 
+### Public Frontend Website
+
+- **Home Page**: Welcome screen with server status overview
+- **Server Browser**: Searchable list of active game servers with player counts and status
+- **Downloads**: Game client downloads and installation guides
+- **Documentation**: Custom docs solution with markdown support and hierarchical navigation
+- **EULA & License**: End-user license agreement and legal information
+- **Contributors**: Community contributors acknowledgment page
+
 ### Core Functionality
+
 - **Server Browser API**: Server registration and listing for the in-game server browser
 - **Client Authentication**: Challenge-response authentication with Steam integration
 - **Version Management**: Game version validation and checksum verification
@@ -22,15 +32,24 @@ A master server implementation for R5Valkyrie (Apex Legends) that provides serve
 - **MOTD System**: Message of the Day management for in-game notifications
 
 ### Admin Panel
+
 Complete web-based administration interface for managing:
-- **User Management**: Create and manage admin/moderator accounts with role-based access
+
+- **Dashboard**: System overview and key statistics
+- **Admins**: Create and manage admin/moderator accounts with role-based access control
+- **Users**: Query and manage player accounts
 - **Ban Management**: View, add, and manage player bans with expiration support
-- **Server Monitoring**: Real-time server status and player counts
-- **Version Control**: Manage supported game versions
-- **Checksum Management**: Gamemode verification system
+- **Banlist Analytics**: Charts and trends for ban statistics
+- **Server Monitoring**: Real-time server status, player counts, and activity
+- **Version Control**: Manage supported game versions with edit/delete capabilities
+- **Checksum Management**: Gamemode/version integrity verification
+- **Verified Mods**: Manage approved Thunderstore modifications
+- **API Keys**: Generate and manage API keys for external integrations
+- **Settings**: Configure Discord webhooks, system settings, MOTD, and EULA
 - **Analytics Dashboard**: Player statistics, ban trends, and system health monitoring
 
 ### Security Features
+
 - SQL injection prevention with parameterized queries
 - Timing-safe API key comparison
 - Rate limiting and request validation
@@ -213,7 +232,72 @@ EXIT;
 
 Then update your `.env` file with the new credentials.
 
-### 5. Running the Development Server
+### 5. External Repository Setup (Documentation & Contributors)
+
+The project includes a custom documentation system that pulls markdown files from an external GitHub repository (`r5valkyrie/docs`). This allows you to maintain documentation and contributor information separately from the codebase.
+
+**To configure documentation and contributors:**
+
+1. Set up a GitHub repository for your documentation with the following structure:
+
+```
+docs-repo/
+├── docs/
+│   ├── sidebar.json
+│   ├── welcome.md
+│   ├── getting-started.md
+│   └── your-custom-guide.md
+└── contributors/
+    ├── contributors.json
+    └── r5reloaded_contributors.json
+```
+
+2. Create `docs/sidebar.json` to define the documentation navigation structure:
+
+```json
+{
+    "startPage": "welcome",
+    "sidebar": [
+        {
+            "title": "Introduction",
+            "pages": [
+                {
+                    "title": "Welcome",
+                    "slug": "welcome"
+                },
+                {
+                    "title": "Getting Started",
+                    "slug": "getting-started"
+                },
+                {
+                    "title": "My Custom Guide",
+                    "slug": "my-guide"
+                }
+            ]
+        }
+    ]
+}
+```
+
+3. Create `contributors/contributors.json` with the following structure:
+
+```json
+[
+    {
+        "name": "Contributor Name",
+        "role": "Role/Position",
+        "avatar": "avatar_url"
+    }
+]
+```
+
+4. The master server will pull:
+   - Documentation from `docs/` folder and serve at `/docs/{slug}` on the main website
+   - Contributors data from `contributors/` folder and display on the `/contributors` page
+
+**Note**: Update the GitHub repository configuration in the main server code to point to your documentation repository URL (default: `r5valkyrie/docs`).
+
+### 6. Running the Development Server
 
 Start the Astro development server:
 
@@ -222,10 +306,11 @@ npm run dev
 ```
 
 The application will be available at:
+
 - Main site: `http://localhost:3000`
 - Admin panel: `http://localhost:3000/admin/login`
 
-### 6. Building for Production
+### 7. Building for Production
 
 To create a production-ready build:
 
