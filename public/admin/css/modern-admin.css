@@ -3203,6 +3203,16 @@ select {
   flex: 1;
   padding: 0.625rem 0.875rem;
   font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.mod-card-footer .btn svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }
 
 /* Mods Page Pagination */
