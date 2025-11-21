@@ -3537,6 +3537,16 @@ select {
   font-size: 0.875rem;
 }
 
+.version-card-footer .btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.version-card-footer .btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
 .versions-empty {
   grid-column: 1 / -1;
   text-align: center;
@@ -3615,5 +3625,197 @@ select {
 
   .versions-toolbar .btn {
     width: 100%;
+  }
+}
+
+/* Checksums Card Layout */
+.checksums-toolbar {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.checksums-toolbar .search-container {
+  flex: 1;
+  min-width: 250px;
+}
+
+.checksums-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.checksums-grid {
+  display: contents;
+}
+
+.checksums-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.checksum-card {
+  background: rgba(25, 28, 34, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.checksum-card:hover {
+  background: rgba(25, 28, 34, 0.9);
+  border-color: rgba(86, 123, 243, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.checksum-card-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.checksum-version-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+}
+
+.checksum-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  background: rgba(86, 123, 243, 0.2);
+  color: #93c5fd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.checksum-card-body {
+  padding: 1.25rem;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.checksums-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checksum-item {
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.checksum-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checksum-hash {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  word-break: break-all;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.checksum-description {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.checksum-card-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.checksum-card-footer .btn {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.checksum-card-footer .btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.checksums-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.checksums-empty svg {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  color: #64748b;
+}
+
+.checksums-empty p {
+  margin: 0.5rem 0;
+  color: #94a3b8;
+}
+
+.checksums-empty .text-sm {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+@media (max-width: 1024px) {
+  .checksums-items {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .checksums-items {
+    grid-template-columns: 1fr;
+  }
+
+  .checksums-toolbar {
+    flex-direction: column;
+  }
+
+  .checksums-toolbar .search-container {
+    width: 100%;
+  }
+
+  .checksums-actions {
+    width: 100%;
+  }
+
+  .checksums-actions .btn {
+    flex: 1;
+  }
+
+  .checksum-card-body {
+    max-height: 250px;
   }
 }
