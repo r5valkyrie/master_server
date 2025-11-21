@@ -3,7 +3,6 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
 import ModernChart from '../../components/admin/ModernChart.astro';
 ---
 <DashboardLayout>
-  <link rel="stylesheet" type="text/css" href="/admin/css/dashboard.css">
   <!-- Stats Overview -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -112,13 +111,9 @@ import ModernChart from '../../components/admin/ModernChart.astro';
   </div>
 
   <!-- Charts -->
-  <div class="grid lg:grid-cols-2">
-    <div class="card">
-      <ModernChart chartId="players" title="Players Over Time" timeRange={14} />
-    </div>
-    <div class="card">
-      <ModernChart chartId="bans" title="Bans Over Time" timeRange={120} />
-    </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2">
+    <ModernChart chartId="players" title="Players Over Time" timeRange={14} />
+    <ModernChart chartId="bans" title="Bans Over Time" timeRange={120} />
   </div>
 
 
