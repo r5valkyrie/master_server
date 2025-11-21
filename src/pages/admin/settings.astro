@@ -17,6 +17,77 @@ import Dashboard from '../../layouts/Dashboard.astro';
     <div id="settingsContainer" class="settings-panels-container">
       <div class="loading">Loading settings...</div>
     </div>
+
+    <!-- MOTD and EULA Sections -->
+    <div class="page-header" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+      <h2>Server Content</h2>
+      <p>Manage server messages and legal content</p>
+    </div>
+
+    <div class="settings-panels-container">
+      <!-- MOTD Panel -->
+      <div class="settings-panel settings-panel-content full-width">
+        <div class="settings-panel-header">
+          <div class="settings-panel-title">
+            <span class="settings-section-label content">content</span>
+            <h3>Message of the Day (MOTD)</h3>
+          </div>
+        </div>
+        <div class="settings-panel-body">
+          <p class="settings-panel-description">Message displayed to players when they connect</p>
+          <textarea
+            id="motd-textarea"
+            class="settings-panel-textarea"
+            rows="6"
+            placeholder="Enter the message of the day..."
+          ></textarea>
+          <div class="settings-panel-actions">
+            <button class="btn btn-primary btn-sm" id="save-motd-btn">Save MOTD</button>
+            <button class="btn btn-outline btn-sm" id="preview-motd-btn">Preview</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EULA Panel -->
+      <div class="settings-panel settings-panel-content full-width">
+        <div class="settings-panel-header">
+          <div class="settings-panel-title">
+            <span class="settings-section-label content">content</span>
+            <h3>End User License Agreement (EULA)</h3>
+          </div>
+        </div>
+        <div class="settings-panel-body">
+          <p class="settings-panel-description">Legal terms users must accept. Consult legal counsel before changes.</p>
+          <textarea
+            id="eula-textarea"
+            class="settings-panel-textarea"
+            rows="10"
+            placeholder="Enter the End User License Agreement..."
+          ></textarea>
+          <div class="settings-panel-actions">
+            <button class="btn btn-primary btn-sm" id="save-eula-btn">Save EULA</button>
+            <button class="btn btn-outline btn-sm" id="preview-eula-btn">Preview</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="preview-modal" style="display: none;">
+      <div class="preview-modal-content">
+        <div class="preview-modal-header">
+          <h3 id="preview-title">Preview</h3>
+          <button class="preview-modal-close" id="preview-close-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="preview-modal-body">
+          <div id="preview-content" class="preview-content"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -249,5 +320,149 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
     // Load settings on page load
     loadSettings();
+
+    // MOTD and EULA functionality
+    let currentMOTD = '';
+    let currentEULA = '';
+
+    async function loadMOTDandEULA() {
+      try {
+        const motdResponse = await fetch('/api/admin/motd');
+        const eulaResponse = await fetch('/api/admin/eula');
+
+        if (motdResponse.ok) {
+          const motdData = (await motdResponse.json()) as any;
+          currentMOTD = motdData.content || '';
+          const motdTextarea = document.getElementById('motd-textarea') as HTMLTextAreaElement;
+          if (motdTextarea) motdTextarea.value = currentMOTD;
+        }
+
+        if (eulaResponse.ok) {
+          const eulaData = (await eulaResponse.json()) as any;
+          currentEULA = eulaData.eula?.contents || '';
+          const eulaTextarea = document.getElementById('eula-textarea') as HTMLTextAreaElement;
+          if (eulaTextarea) eulaTextarea.value = currentEULA;
+        }
+      } catch (error) {
+        console.error('Error loading MOTD/EULA:', error);
+      }
+    }
+
+    async function saveMOTD() {
+      const motdTextarea = document.getElementById('motd-textarea') as HTMLTextAreaElement;
+      if (!motdTextarea) return;
+
+      const content = motdTextarea.value.trim();
+      const btn = document.getElementById('save-motd-btn') as HTMLButtonElement;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+      }
+
+      try {
+        const response = await fetch('/api/admin/motd', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+
+        const result = (await response.json()) as any;
+        if (result.success) {
+          currentMOTD = content;
+          (window as any).showNotification?.('success', 'Success', 'MOTD updated successfully');
+        } else {
+          (window as any).showNotification?.('error', 'Error', result.error || 'Failed to save MOTD');
+        }
+      } catch (error) {
+        console.error('Error saving MOTD:', error);
+        (window as any).showNotification?.('error', 'Error', 'Failed to save MOTD');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Save MOTD';
+        }
+      }
+    }
+
+    async function saveEULA() {
+      const eulaTextarea = document.getElementById('eula-textarea') as HTMLTextAreaElement;
+      if (!eulaTextarea) return;
+
+      const content = eulaTextarea.value.trim();
+      const btn = document.getElementById('save-eula-btn') as HTMLButtonElement;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+      }
+
+      try {
+        const response = await fetch('/api/admin/eula', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: content, lang: 'english' })
+        });
+
+        const result = (await response.json()) as any;
+        if (result.success) {
+          currentEULA = content;
+          (window as any).showNotification?.('success', 'Success', 'EULA updated successfully');
+        } else {
+          (window as any).showNotification?.('error', 'Error', result.error || 'Failed to save EULA');
+        }
+      } catch (error) {
+        console.error('Error saving EULA:', error);
+        (window as any).showNotification?.('error', 'Error', 'Failed to save EULA');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Save EULA';
+        }
+      }
+    }
+
+    function showPreview(title: string, content: string) {
+      const previewTitle = document.getElementById('preview-title');
+      const previewContent = document.getElementById('preview-content');
+      const previewModal = document.getElementById('preview-modal');
+
+      if (previewTitle) previewTitle.textContent = title;
+      if (previewContent) previewContent.textContent = content || 'No content to preview';
+      if (previewModal) previewModal.style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+      const previewModal = document.getElementById('preview-modal');
+      if (previewModal) previewModal.style.display = 'none';
+    }
+
+    // Event listeners for MOTD/EULA
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMOTDandEULA();
+
+      document.getElementById('save-motd-btn')?.addEventListener('click', saveMOTD);
+      document.getElementById('save-eula-btn')?.addEventListener('click', saveEULA);
+      document.getElementById('preview-motd-btn')?.addEventListener('click', () => {
+        const motdTextarea = document.getElementById('motd-textarea') as HTMLTextAreaElement;
+        if (motdTextarea) showPreview('MOTD Preview', motdTextarea.value);
+      });
+      document.getElementById('preview-eula-btn')?.addEventListener('click', () => {
+        const eulaTextarea = document.getElementById('eula-textarea') as HTMLTextAreaElement;
+        if (eulaTextarea) showPreview('EULA Preview', eulaTextarea.value);
+      });
+      document.getElementById('preview-close-btn')?.addEventListener('click', closePreviewModal);
+
+      // Close modal on background click
+      const previewModal = document.getElementById('preview-modal');
+      previewModal?.addEventListener('click', (e) => {
+        if (e.target === previewModal) closePreviewModal();
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closePreviewModal();
+      });
+    });
   </script>
 </Dashboard>
