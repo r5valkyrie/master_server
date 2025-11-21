@@ -2038,14 +2038,14 @@ body {
   gap: var(--space-md);
   padding: var(--space-md);
   border-radius: var(--radius-md);
-  background: var(--gray-100);
-  border: 1px solid var(--gray-200);
+  background: rgba(40, 44, 52, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
 }
 
 .activity-item:hover {
-  background: var(--gray-200);
-  border-color: var(--gray-300);
+  background: rgba(53, 59, 66, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .activity-icon {

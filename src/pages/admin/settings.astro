@@ -1,0 +1,475 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard>
+  <div class="content-container">
+    <div class="page-header">
+      <h1>Settings</h1>
+      <p>Manage Discord configuration and system settings</p>
+    </div>
+
+    <div class="config-section">
+      <div class="section-header">
+        <h2>Configuration Settings</h2>
+        <p>Edit settings directly in the table below</p>
+      </div>
+
+      <div id="settingsContainer" class="settings-table-container" style="margin-top: 1.5rem;">
+        <div class="loading">Loading settings...</div>
+      </div>
+
+      <div id="statusMessage" class="status-message" style="display: none;"></div>
+    </div>
+  </div>
+
+  <style>
+    .content-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+
+    .page-header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .page-header p {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    .config-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    .section-header p {
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
+
+    .loading {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 2rem;
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .status-message.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .status-message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .settings-table-container {
+      overflow-x: auto;
+    }
+
+    .settings-table {
+      width: 100%;
+      border-collapse: collapse;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .settings-table thead {
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-table th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .settings-table tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.2s ease;
+    }
+
+    .settings-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .settings-table td {
+      padding: 1rem;
+      vertical-align: middle;
+    }
+
+    .setting-key {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #a1d8ff;
+      font-weight: 500;
+    }
+
+    .setting-description {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 300px;
+      line-height: 1.4;
+    }
+
+    .setting-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .setting-input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+      min-width: 200px;
+    }
+
+    .setting-input:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .setting-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .setting-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .setting-input[type="password"] {
+      font-family: 'Monaco', 'Courier New', monospace;
+      letter-spacing: 0.1em;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-success:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-loading {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .settings-section-label {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(86, 123, 243, 0.1);
+      border: 1px solid rgba(86, 123, 243, 0.2);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #567bf3;
+      text-transform: uppercase;
+      margin-right: 0.5rem;
+    }
+
+    .settings-section-label.discord {
+      background: rgba(88, 101, 242, 0.1);
+      border-color: rgba(88, 101, 242, 0.2);
+      color: #5865f2;
+    }
+
+    .settings-section-label.system {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+  </style>
+
+  <script>
+    interface Setting {
+      key: string;
+      value: string;
+      description: string;
+      category: 'discord' | 'system';
+      isPassword?: boolean;
+    }
+
+    interface SettingResponse {
+      success: boolean;
+      discord?: any[];
+      system?: any[];
+      error?: string;
+    }
+
+    const statusMessage = document.getElementById('statusMessage');
+
+    function showMessage(message: string, isSuccess: boolean) {
+      if (!statusMessage) return;
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+      statusMessage.style.display = 'block';
+
+      setTimeout(() => {
+        if (statusMessage) statusMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    async function loadSettings() {
+      try {
+        const discordResponse = await fetch('/api/admin/discordConfig');
+        const systemResponse = await fetch('/api/admin/systemSettings');
+
+        const discordData = (await discordResponse.json()) as any;
+        const systemData = (await systemResponse.json()) as any;
+
+        if (!discordData.success || !systemData.success) {
+          showMessage('Failed to load settings', false);
+          return;
+        }
+
+        const container = document.getElementById('settingsContainer');
+        if (!container) return;
+
+        // Map Discord settings
+        const discordSettings: Setting[] = (discordData.config || []).map((item: any) => ({
+          key: item.config_key,
+          value: item.config_value || '',
+          description: item.description || getDefaultDescription(item.config_key),
+          category: 'discord',
+          isPassword: item.config_key === 'DISCORD_BOT_TOKEN'
+        }));
+
+        // Map System settings
+        const systemSettings: Setting[] = (systemData.settings || []).map((item: any) => ({
+          key: item.setting_key,
+          value: item.setting_value || '',
+          description: getDefaultSystemDescription(item.setting_key),
+          category: 'system',
+          isPassword: item.setting_key === 'STEAM_WEB_API_KEY'
+        }));
+
+        const allSettings = [...discordSettings, ...systemSettings];
+
+        if (allSettings.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>No settings available.</p></div>';
+          return;
+        }
+
+        const table = document.createElement('table');
+        table.className = 'settings-table';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Setting</th>
+              <th>Description</th>
+              <th>Value</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+
+        allSettings.forEach((setting: Setting) => {
+          const row = document.createElement('tr');
+          const inputType = setting.isPassword ? 'password' : 'text';
+          const categoryLabel = setting.category === 'discord' ? 'discord' : 'system';
+
+          row.innerHTML = `
+            <td>
+              <span class="settings-section-label ${categoryLabel}">${setting.category}</span>
+              <span class="setting-key">${formatSettingKey(setting.key)}</span>
+            </td>
+            <td><div class="setting-description">${setting.description}</div></td>
+            <td>
+              <div class="setting-input-wrapper">
+                <input
+                  type="${inputType}"
+                  class="setting-input"
+                  value="${setting.value}"
+                  data-key="${setting.key}"
+                  data-category="${setting.category}"
+                  placeholder="Enter value"
+                />
+              </div>
+            </td>
+            <td>
+              <button class="btn btn-primary save-btn" data-key="${setting.key}" data-category="${setting.category}">
+                Save
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(table);
+
+        // Attach event listeners
+        attachEventListeners();
+      } catch (err) {
+        console.error('Error loading settings:', err);
+        showMessage('Error loading settings', false);
+      }
+    }
+
+    function formatSettingKey(key: string): string {
+      return key
+        .replace(/^(DISCORD_|)/, '')
+        .replace(/_CHANNEL_ID|_TOKEN|_IDS|_KEY|_INTERVAL|_PORT|_COMMUNITY|_APP_ID/g, '')
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0) + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    function getDefaultDescription(key: string): string {
+      const descriptions: { [key: string]: string } = {
+        'DISCORD_BOT_TOKEN': 'Your Discord bot token (keep this secret)',
+        'DISCORD_COMMAND_ALLOW_IDS': 'Comma-separated list of Discord user IDs allowed to run bot commands',
+        'DISCORD_ADMIN_LOG_CHANNEL_ID': 'Channel for server startup and admin events',
+        'DISCORD_SERVER_BROWSER_CHANNEL_ID': 'Channel showing active servers list (updates every 5 minutes)',
+        'DISCORD_SERVER_COUNT_CHANNEL_ID': 'Channel name shows active server count',
+        'DISCORD_PLAYER_COUNT_CHANNEL_ID': 'Channel name shows total online players',
+        'DISCORD_MOD_UPDATES_CHANNEL_ID': 'Channel for Thunderstore mod release notifications'
+      };
+      return descriptions[key] || 'Configuration setting';
+    }
+
+    function getDefaultSystemDescription(key: string): string {
+      const descriptions: { [key: string]: string } = {
+        'STEAM_WEB_API_KEY': 'Your Steam Web API key (get from https://steamcommunity.com/dev/apikey)',
+        'STEAM_APP_ID': 'Steam App ID (usually 1172470 for R5Valkyrie)',
+        'THUNDERSTORE_COMMUNITY': 'Community key on Thunderstore for mod tracking',
+        'THUNDERSTORE_CHECK_INTERVAL_MS': 'How often to check for mod updates (milliseconds, default: 300000)',
+        'BAN_CLEANUP_INTERVAL_HOURS': 'How often to clean up expired bans (hours, default: 12)',
+        'USER_CLEANUP_INACTIVE_HOURS': 'Inactivity threshold for user cleanup (hours, default: 24)',
+        'DEFAULT_SERVER_PORT': 'Default port for server authentication fallback (default: 37015)'
+      };
+      return descriptions[key] || 'System setting';
+    }
+
+    function attachEventListeners() {
+      document.querySelectorAll('.save-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const btn_el = btn as HTMLButtonElement;
+          const key = btn_el.dataset.key;
+          const category = btn_el.dataset.category;
+          const input = document.querySelector(`input[data-key="${key}"]`) as HTMLInputElement;
+
+          if (!input) return;
+
+          const value = input.value;
+          const originalText = btn_el.textContent;
+          btn_el.textContent = 'Saving...';
+          btn_el.classList.add('btn-loading');
+          btn_el.disabled = true;
+
+          try {
+            let endpoint = '';
+            let body = {};
+
+            if (category === 'discord') {
+              endpoint = '/api/admin/discordConfig';
+              body = { updates: [{ key, value }] };
+            } else {
+              endpoint = '/api/admin/systemSettings';
+              body = { updates: [{ key, value }] };
+            }
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+
+            const data = (await response.json()) as any;
+
+            if (data.success) {
+              showMessage(`Setting saved successfully`, true);
+            } else {
+              showMessage(data.error || 'Failed to save setting', false);
+            }
+          } catch (err) {
+            console.error('Error saving setting:', err);
+            showMessage('Error saving setting', false);
+          } finally {
+            btn_el.textContent = originalText;
+            btn_el.classList.remove('btn-loading');
+            btn_el.disabled = false;
+          }
+        });
+      });
+    }
+
+    // Load settings on page load
+    loadSettings();
+  </script>
+</Dashboard>

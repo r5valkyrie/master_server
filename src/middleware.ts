@@ -84,8 +84,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
-        // Discord config - master only
-        if (url.pathname.startsWith('/admin/discordConfig') || url.pathname.startsWith('/api/admin/discordConfig')) {
+        // Settings page - master only (combines Discord config and System Settings)
+        if (url.pathname.startsWith('/admin/settings') || url.pathname.startsWith('/api/admin/settings')) {
             if (!isMaster) {
                 if (url.pathname.startsWith('/api/')) {
                     return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
@@ -96,16 +96,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         // API Keys - master only
         if (url.pathname.startsWith('/admin/apiKeys') || url.pathname.startsWith('/api/admin/apiKeys')) {
-            if (!isMaster) {
-                if (url.pathname.startsWith('/api/')) {
-                    return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
-                }
-                return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });
-            }
-        }
-
-        // System Settings - master only
-        if (url.pathname.startsWith('/admin/systemSettings') || url.pathname.startsWith('/api/admin/systemSettings')) {
             if (!isMaster) {
                 if (url.pathname.startsWith('/api/')) {
                     return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
