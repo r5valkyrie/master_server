@@ -9,306 +9,15 @@ import Dashboard from '../../layouts/Dashboard.astro';
       <p>Manage Discord configuration and system settings</p>
     </div>
 
-    <div class="config-section">
-      <div class="section-header">
-        <h2>Configuration Settings</h2>
-        <p>Edit settings directly in the table below</p>
-      </div>
-
-      <div id="settingsContainer" class="settings-table-container" style="margin-top: 1.5rem;">
-        <div class="loading">Loading settings...</div>
-      </div>
-
+    <div class="settings-toolbar">
+      <button class="btn btn-primary btn-lg" id="saveAllBtn">Save All Changes</button>
       <div id="statusMessage" class="status-message" style="display: none;"></div>
     </div>
+
+    <div id="settingsContainer" class="settings-panels-container">
+      <div class="loading">Loading settings...</div>
+    </div>
   </div>
-
-  <style>
-    .content-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    .page-header {
-      margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 1rem;
-    }
-
-    .page-header h1 {
-      margin: 0 0 0.5rem 0;
-      font-size: 2rem;
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .page-header p {
-      color: rgba(255, 255, 255, 0.7);
-      margin: 0;
-      font-size: 0.95rem;
-    }
-
-    .config-section {
-      background: rgba(25, 28, 34, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .section-header {
-      margin-bottom: 1.5rem;
-    }
-
-    .section-header h2 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.5rem;
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .section-header p {
-      color: rgba(255, 255, 255, 0.6);
-      margin: 0;
-      font-size: 0.9rem;
-    }
-
-    .loading {
-      text-align: center;
-      color: rgba(255, 255, 255, 0.6);
-      padding: 3rem;
-      font-size: 1rem;
-    }
-
-    .status-message {
-      padding: 1rem;
-      border-radius: 8px;
-      font-weight: 500;
-      text-align: center;
-      margin-top: 1rem;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .status-message.success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #10b981;
-    }
-
-    .status-message.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #ef4444;
-    }
-
-    .settings-table-container {
-      overflow-x: auto;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .settings-table {
-      width: 100%;
-      border-collapse: collapse;
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .settings-table thead {
-      background: rgba(40, 44, 52, 0.6);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .settings-table th {
-      padding: 1.25rem;
-      text-align: left;
-      font-weight: 600;
-      color: #fff;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .settings-table tbody tr {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: background 0.2s ease;
-    }
-
-    .settings-table tbody tr:hover {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .settings-table tbody tr:last-child {
-      border-bottom: none;
-    }
-
-    .settings-table td {
-      padding: 1.25rem;
-      vertical-align: middle;
-    }
-
-    .setting-key {
-      font-family: 'Monaco', 'Courier New', monospace;
-      font-size: 0.85rem;
-      color: #a1d8ff;
-      font-weight: 500;
-    }
-
-    .setting-description {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.5);
-      max-width: 250px;
-      line-height: 1.4;
-      margin-top: 0.25rem;
-    }
-
-    .setting-input-wrapper {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-    }
-
-    .setting-input {
-      flex: 1;
-      padding: 0.625rem 0.875rem;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 6px;
-      color: #fff;
-      font-family: 'Monaco', 'Courier New', monospace;
-      font-size: 0.8rem;
-      transition: all 0.2s ease;
-      min-width: 200px;
-    }
-
-    .setting-input:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .setting-input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.12);
-      border-color: #567bf3;
-      box-shadow: 0 0 0 3px rgba(86, 123, 243, 0.15);
-    }
-
-    .setting-input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
-    }
-
-    .setting-input[type="password"] {
-      font-family: 'Monaco', 'Courier New', monospace;
-      letter-spacing: 0.1em;
-    }
-
-    .btn {
-      padding: 0.625rem 1.25rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: linear-gradient(90deg, #567bf3, #6a8cff);
-      color: #fff;
-      border: 1px solid rgba(86, 123, 243, 0.3);
-    }
-
-    .btn-primary:hover {
-      background: linear-gradient(90deg, #4a6fe8, #5a7eee);
-      box-shadow: 0 4px 12px rgba(86, 123, 243, 0.25);
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .btn-loading {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .settings-section-label {
-      display: inline-block;
-      padding: 0.3rem 0.8rem;
-      background: rgba(86, 123, 243, 0.1);
-      border: 1px solid rgba(86, 123, 243, 0.2);
-      border-radius: 14px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #567bf3;
-      text-transform: uppercase;
-      margin-right: 0.75rem;
-      letter-spacing: 0.02em;
-    }
-
-    .settings-section-label.discord {
-      background: rgba(88, 101, 242, 0.1);
-      border-color: rgba(88, 101, 242, 0.2);
-      color: #5865f2;
-    }
-
-    .settings-section-label.system {
-      background: rgba(16, 185, 129, 0.1);
-      border-color: rgba(16, 185, 129, 0.2);
-      color: #10b981;
-    }
-
-    @media (max-width: 768px) {
-      .content-container {
-        padding: 1rem;
-      }
-
-      .config-section {
-        padding: 1.5rem;
-      }
-
-      .page-header h1 {
-        font-size: 1.5rem;
-      }
-
-      .settings-table {
-        font-size: 0.75rem;
-      }
-
-      .settings-table th,
-      .settings-table td {
-        padding: 0.75rem;
-      }
-
-      .setting-input-wrapper {
-        flex-direction: column;
-      }
-
-      .setting-input {
-        min-width: 100%;
-      }
-
-      .btn {
-        width: 100%;
-      }
-    }
-  </style>
 
   <script>
     interface Setting {
@@ -327,6 +36,8 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
 
     const statusMessage = document.getElementById('statusMessage');
+    const saveAllBtn = document.getElementById('saveAllBtn');
+    const allSettings: Map<string, {key: string, category: string, originalValue: string, currentValue: string}> = new Map();
 
     function showMessage(message: string, isSuccess: boolean) {
       if (!statusMessage) return;
@@ -337,6 +48,72 @@ import Dashboard from '../../layouts/Dashboard.astro';
       setTimeout(() => {
         if (statusMessage) statusMessage.style.display = 'none';
       }, 5000);
+    }
+
+    async function saveAllSettings() {
+      if (saveAllBtn) {
+        saveAllBtn.textContent = 'Saving All...';
+        saveAllBtn.classList.add('btn-loading');
+        saveAllBtn.disabled = true;
+      }
+
+      try {
+        const discordUpdates = [];
+        const systemUpdates = [];
+
+        allSettings.forEach((setting) => {
+          if (setting.currentValue !== setting.originalValue) {
+            if (setting.category === 'discord') {
+              discordUpdates.push({ key: setting.key, value: setting.currentValue });
+            } else {
+              systemUpdates.push({ key: setting.key, value: setting.currentValue });
+            }
+          }
+        });
+
+        let hasErrors = false;
+
+        if (discordUpdates.length > 0) {
+          const response = await fetch('/api/admin/discordConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates: discordUpdates })
+          });
+          const data = (await response.json()) as any;
+          if (!data.success) hasErrors = true;
+        }
+
+        if (systemUpdates.length > 0) {
+          const response = await fetch('/api/admin/systemSettings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates: systemUpdates })
+          });
+          const data = (await response.json()) as any;
+          if (!data.success) hasErrors = true;
+        }
+
+        if (hasErrors) {
+          showMessage('Some settings failed to save', false);
+        } else if (discordUpdates.length + systemUpdates.length > 0) {
+          showMessage('All settings saved successfully', true);
+          // Update original values
+          allSettings.forEach((setting) => {
+            setting.originalValue = setting.currentValue;
+          });
+        } else {
+          showMessage('No changes to save', true);
+        }
+      } catch (err) {
+        console.error('Error saving all settings:', err);
+        showMessage('Error saving settings', false);
+      } finally {
+        if (saveAllBtn) {
+          saveAllBtn.textContent = 'Save All Changes';
+          saveAllBtn.classList.remove('btn-loading');
+          saveAllBtn.disabled = false;
+        }
+      }
     }
 
     async function loadSettings() {
@@ -373,67 +150,58 @@ import Dashboard from '../../layouts/Dashboard.astro';
           isPassword: item.setting_key === 'STEAM_WEB_API_KEY'
         }));
 
-        const allSettings = [...discordSettings, ...systemSettings];
+        const combinedSettings = [...discordSettings, ...systemSettings];
 
-        if (allSettings.length === 0) {
+        if (combinedSettings.length === 0) {
           container.innerHTML = '<div class="empty-state"><p>No settings available.</p></div>';
           return;
         }
 
-        const table = document.createElement('table');
-        table.className = 'settings-table';
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>Setting</th>
-              <th>Description</th>
-              <th>Value</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        `;
-
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-
-        allSettings.forEach((setting: Setting) => {
-          const row = document.createElement('tr');
+        container.innerHTML = '';
+        
+        combinedSettings.forEach((setting: Setting) => {
+          const panel = document.createElement('div');
+          panel.className = `settings-panel settings-panel-${setting.category}`;
           const inputType = setting.isPassword ? 'password' : 'text';
           const categoryLabel = setting.category === 'discord' ? 'discord' : 'system';
 
-          row.innerHTML = `
-            <td>
-              <span class="settings-section-label ${categoryLabel}">${setting.category}</span>
-              <span class="setting-key">${formatSettingKey(setting.key)}</span>
-            </td>
-            <td><div class="setting-description">${setting.description}</div></td>
-            <td>
-              <div class="setting-input-wrapper">
-                <input
-                  type="${inputType}"
-                  class="setting-input"
-                  value="${setting.value}"
-                  data-key="${setting.key}"
-                  data-category="${setting.category}"
-                  placeholder="Enter value"
-                />
+          panel.innerHTML = `
+            <div class="settings-panel-header">
+              <div class="settings-panel-title">
+                <span class="settings-section-label ${categoryLabel}">${setting.category}</span>
+                <h3>${formatSettingKey(setting.key)}</h3>
               </div>
-            </td>
-            <td>
-              <button class="btn btn-primary save-btn" data-key="${setting.key}" data-category="${setting.category}">
-                Save
-              </button>
-            </td>
+            </div>
+            <div class="settings-panel-body">
+              <p class="settings-panel-description">${setting.description}</p>
+              <input
+                type="${inputType}"
+                class="settings-panel-input"
+                value="${setting.value}"
+                data-key="${setting.key}"
+                data-category="${setting.category}"
+                placeholder="Enter value"
+              />
+            </div>
           `;
-          tbody.appendChild(row);
+          
+          const input = panel.querySelector('.settings-panel-input') as HTMLInputElement;
+          allSettings.set(setting.key, {
+            key: setting.key,
+            category: setting.category,
+            originalValue: setting.value,
+            currentValue: setting.value
+          });
+          
+          input.addEventListener('change', () => {
+            const settingData = allSettings.get(setting.key);
+            if (settingData) {
+              settingData.currentValue = input.value;
+            }
+          });
+
+          container.appendChild(panel);
         });
-
-        container.innerHTML = '';
-        container.appendChild(table);
-
-        // Attach event listeners
-        attachEventListeners();
       } catch (err) {
         console.error('Error loading settings:', err);
         showMessage('Error loading settings', false);
@@ -476,59 +244,8 @@ import Dashboard from '../../layouts/Dashboard.astro';
       return descriptions[key] || 'System setting';
     }
 
-    function attachEventListeners() {
-      document.querySelectorAll('.save-btn').forEach((btn) => {
-        btn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const btn_el = btn as HTMLButtonElement;
-          const key = btn_el.dataset.key;
-          const category = btn_el.dataset.category;
-          const input = document.querySelector(`input[data-key="${key}"]`) as HTMLInputElement;
-
-          if (!input) return;
-
-          const value = input.value;
-          const originalText = btn_el.textContent;
-          btn_el.textContent = 'Saving...';
-          btn_el.classList.add('btn-loading');
-          btn_el.disabled = true;
-
-          try {
-            let endpoint = '';
-            let body = {};
-
-            if (category === 'discord') {
-              endpoint = '/api/admin/discordConfig';
-              body = { updates: [{ key, value }] };
-            } else {
-              endpoint = '/api/admin/systemSettings';
-              body = { updates: [{ key, value }] };
-            }
-
-            const response = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body)
-            });
-
-            const data = (await response.json()) as any;
-
-            if (data.success) {
-              showMessage(`Setting saved successfully`, true);
-            } else {
-              showMessage(data.error || 'Failed to save setting', false);
-            }
-          } catch (err) {
-            console.error('Error saving setting:', err);
-            showMessage('Error saving setting', false);
-          } finally {
-            btn_el.textContent = originalText;
-            btn_el.classList.remove('btn-loading');
-            btn_el.disabled = false;
-          }
-        });
-      });
-    }
+    // Attach save all listener
+    saveAllBtn?.addEventListener('click', saveAllSettings);
 
     // Load settings on page load
     loadSettings();
