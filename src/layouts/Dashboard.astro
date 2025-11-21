@@ -61,14 +61,24 @@ try {
       </div>
       
       <nav class="sidebar-nav">
-        <!-- Main -->
-        <a href="/admin/dashboard" class={`nav-item ${currentPage === 'Dashboard' ? 'active' : ''}`}>
-          <svg class="nav-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v3H8V5z"></path>
-          </svg>
-          <span class="nav-item-text">Dashboard</span>
-        </a>
+        <!-- Overview Section -->
+        <div class="nav-section">
+          <button class="nav-section-toggle" data-section="overview">
+            <span class="nav-section-title">Overview</span>
+            <svg class="nav-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </button>
+          <div class="nav-section-items" id="overview-section">
+            <a href="/admin/dashboard" class={`nav-item ${currentPage === 'Dashboard' ? 'active' : ''}`}>
+              <svg class="nav-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v3H8V5z"></path>
+              </svg>
+              <span class="nav-item-text">Dashboard</span>
+            </a>
+          </div>
+        </div>
 
         {(role === 'master' || role === 'admin' || role === 'moderator') && (
           <>
@@ -140,15 +150,15 @@ try {
 
         {(role === 'master' || role === 'admin') && (
           <>
-            <!-- System Section -->
+            <!-- Data Section -->
             <div class="nav-section">
-              <button class="nav-section-toggle" data-section="system">
-                <span class="nav-section-title">System</span>
+              <button class="nav-section-toggle" data-section="data">
+                <span class="nav-section-title">Data</span>
                 <svg class="nav-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                 </svg>
               </button>
-              <div class="nav-section-items" id="system-section">
+              <div class="nav-section-items" id="data-section">
                 <a href="/admin/checksums" class={`nav-item ${currentPage === 'Checksums' ? 'active' : ''}`}>
                   <svg class="nav-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -162,9 +172,20 @@ try {
                   </svg>
                   <span class="nav-item-text">Versions</span>
                 </a>
+              </div>
+            </div>
 
-                {role === 'master' && (
-                  <>
+            {role === 'master' && (
+              <>
+                <!-- Administration Section -->
+                <div class="nav-section">
+                  <button class="nav-section-toggle" data-section="admin">
+                    <span class="nav-section-title">Administration</span>
+                    <svg class="nav-section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                  </button>
+                  <div class="nav-section-items" id="admin-section">
                     <a href="/admin/userManagement" class={`nav-item ${currentPage === 'User Management' ? 'active' : ''}`}>
                       <svg class="nav-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -194,10 +215,10 @@ try {
                       </svg>
                       <span class="nav-item-text">System Settings</span>
                     </a>
-                  </>
-                )}
-              </div>
-            </div>
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
       </nav>
