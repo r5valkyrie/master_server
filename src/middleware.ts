@@ -106,7 +106,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         // Moderators: allow dashboard, users list, banlist, userQuery, servers, content; deny MOTD admin API
         if (isModerator) {
-            const allowedPages = ['/admin/dashboard', '/admin/users', '/admin/banlist', '/admin/userQuery', '/admin/servers', '/admin/content', '/admin/verifiedMods'];
+            const allowedPages = ['/admin/dashboard', '/admin/users', '/admin/banlist', '/admin/userQuery', '/admin/servers', '/admin/content', '/admin/mods'];
             const allowedApiPrefixes = ['/api/admin/users', '/api/admin/banlist', '/api/admin/userQuery', '/api/admin/servers', '/api/admin/auth/changePassword', '/api/admin/motd', '/api/admin/playersChart', '/api/admin/bansChart', '/api/admin/eula', '/api/admin/recentActivity', '/api/admin/uptime', '/api/admin/systemHealth', '/api/admin/banStats', '/api/admin/userGrowth', '/api/admin/playerStats', '/api/admin/verifiedMods'];
             if (url.pathname.startsWith('/admin') && !allowedPages.some(p => url.pathname.startsWith(p))) {
                 return new Response(null, { status: 302, headers: { Location: '/admin/dashboard' } });
