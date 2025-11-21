@@ -25,7 +25,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
   <style>
     .content-container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 2rem 1rem;
     }
@@ -40,19 +40,24 @@ import Dashboard from '../../layouts/Dashboard.astro';
       margin: 0 0 0.5rem 0;
       font-size: 2rem;
       color: #fff;
+      font-weight: 700;
     }
 
     .page-header p {
       color: rgba(255, 255, 255, 0.7);
       margin: 0;
+      font-size: 0.95rem;
     }
 
     .config-section {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(25, 28, 34, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
       padding: 2rem;
       margin-bottom: 2rem;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }
 
     .section-header {
@@ -63,25 +68,40 @@ import Dashboard from '../../layouts/Dashboard.astro';
       margin: 0 0 0.5rem 0;
       font-size: 1.5rem;
       color: #fff;
+      font-weight: 600;
     }
 
     .section-header p {
       color: rgba(255, 255, 255, 0.6);
       margin: 0;
+      font-size: 0.9rem;
     }
 
     .loading {
       text-align: center;
       color: rgba(255, 255, 255, 0.6);
-      padding: 2rem;
+      padding: 3rem;
+      font-size: 1rem;
     }
 
     .status-message {
       padding: 1rem;
-      border-radius: 4px;
+      border-radius: 8px;
       font-weight: 500;
       text-align: center;
       margin-top: 1rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .status-message.success {
@@ -98,6 +118,8 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
     .settings-table-container {
       overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .settings-table {
@@ -107,15 +129,16 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
 
     .settings-table thead {
-      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      background: rgba(40, 44, 52, 0.6);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .settings-table th {
-      padding: 1rem;
+      padding: 1.25rem;
       text-align: left;
       font-weight: 600;
       color: #fff;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -129,8 +152,12 @@ import Dashboard from '../../layouts/Dashboard.astro';
       background: rgba(255, 255, 255, 0.02);
     }
 
+    .settings-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
     .settings-table td {
-      padding: 1rem;
+      padding: 1.25rem;
       vertical-align: middle;
     }
 
@@ -142,45 +169,46 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
 
     .setting-description {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.6);
-      max-width: 300px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+      max-width: 250px;
       line-height: 1.4;
+      margin-top: 0.25rem;
     }
 
     .setting-input-wrapper {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.75rem;
       align-items: center;
     }
 
     .setting-input {
       flex: 1;
-      padding: 0.5rem 0.75rem;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
+      padding: 0.625rem 0.875rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
       color: #fff;
       font-family: 'Monaco', 'Courier New', monospace;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       transition: all 0.2s ease;
       min-width: 200px;
     }
 
     .setting-input:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
     }
 
     .setting-input:focus {
       outline: none;
-      background: rgba(255, 255, 255, 0.15);
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #567bf3;
+      box-shadow: 0 0 0 3px rgba(86, 123, 243, 0.15);
     }
 
     .setting-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
+      color: rgba(255, 255, 255, 0.4);
     }
 
     .setting-input[type="password"] {
@@ -189,33 +217,30 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
 
     .btn {
-      padding: 0.5rem 1rem;
+      padding: 0.625rem 1.25rem;
       border: none;
-      border-radius: 4px;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .btn-primary {
-      background: #3b82f6;
+      background: linear-gradient(90deg, #567bf3, #6a8cff);
       color: #fff;
+      border: 1px solid rgba(86, 123, 243, 0.3);
     }
 
     .btn-primary:hover {
-      background: #2563eb;
+      background: linear-gradient(90deg, #4a6fe8, #5a7eee);
+      box-shadow: 0 4px 12px rgba(86, 123, 243, 0.25);
+      transform: translateY(-1px);
     }
 
-    .btn-success {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-success:hover {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: rgba(16, 185, 129, 0.5);
+    .btn-primary:active {
+      transform: translateY(0);
     }
 
     .btn-loading {
@@ -225,15 +250,16 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
     .settings-section-label {
       display: inline-block;
-      padding: 0.25rem 0.75rem;
+      padding: 0.3rem 0.8rem;
       background: rgba(86, 123, 243, 0.1);
       border: 1px solid rgba(86, 123, 243, 0.2);
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      border-radius: 14px;
+      font-size: 0.7rem;
+      font-weight: 700;
       color: #567bf3;
       text-transform: uppercase;
-      margin-right: 0.5rem;
+      margin-right: 0.75rem;
+      letter-spacing: 0.02em;
     }
 
     .settings-section-label.discord {
@@ -246,6 +272,41 @@ import Dashboard from '../../layouts/Dashboard.astro';
       background: rgba(16, 185, 129, 0.1);
       border-color: rgba(16, 185, 129, 0.2);
       color: #10b981;
+    }
+
+    @media (max-width: 768px) {
+      .content-container {
+        padding: 1rem;
+      }
+
+      .config-section {
+        padding: 1.5rem;
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .settings-table {
+        font-size: 0.75rem;
+      }
+
+      .settings-table th,
+      .settings-table td {
+        padding: 0.75rem;
+      }
+
+      .setting-input-wrapper {
+        flex-direction: column;
+      }
+
+      .setting-input {
+        min-width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
     }
   </style>
 
