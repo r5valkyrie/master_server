@@ -4,55 +4,62 @@ import Dashboard from '../../layouts/Dashboard.astro';
 <Dashboard>
   <!-- Users Management -->
   <div id="users-list">
-    <!-- Header Actions -->
-    <div class="flex flex-col gap-4 mb-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div class="search-container">
-          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input type="text" id="search-bar" class="search-input" placeholder="Search by Steam ID or username..." />
-        </div>
-      </div>
-      
-      <!-- Quick Filters -->
-      <div class="flex flex-wrap gap-2">
-        <span class="text-sm text-gray-600">Quick filters:</span>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-          </svg>
-          All Users
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="banned">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"></path>
-          </svg>
-          Banned Users
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="recent">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Recently Active
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="valid-steam">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Valid Steam IDs
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="multiple-names">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-          </svg>
-          Multiple Names
-        </button>
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Users</h1>
+        <p class="page-subtitle">View and manage registered users</p>
       </div>
     </div>
 
-    <!-- Users Table -->
+    <!-- Search and Table Card -->
     <div class="card">
+      <div class="card-header flex-col items-start gap-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+          <div class="search-container w-full max-w-md">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="search-bar" class="search-input" placeholder="Search by Steam ID or username..." />
+          </div>
+        </div>
+        
+        <!-- Quick Filters -->
+        <div class="flex flex-wrap gap-2 w-full border-t border-gray-800 pt-4 mt-2">
+          <span class="text-sm text-gray-400 self-center mr-2">Quick filters:</span>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            All Users
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="banned">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"></path>
+            </svg>
+            Banned Users
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="recent">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Recently Active
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="valid-steam">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Valid Steam IDs
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="multiple-names">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            Multiple Names
+          </button>
+        </div>
+      </div>
+
       <div class="table-container">
         <table class="table" id="users-table">
           <thead>
@@ -83,7 +90,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
             </svg>
             Previous
           </button>
-          <span id="page-number" class="px-3 py-2 text-sm text-gray-700">Page 1</span>
+          <span id="page-number" class="px-3 py-2 text-sm text-gray-400">Page 1</span>
           <button class="btn btn-outline btn-sm" id="next-page">
             Next
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

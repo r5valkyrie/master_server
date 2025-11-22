@@ -77,75 +77,74 @@ import Dashboard from '../../layouts/Dashboard.astro';
       </div>
     </div>
 
-    <!-- Search and Filters -->
-    <div class="flex flex-col gap-4 mb-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div class="search-container">
-          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input type="text" id="search-bar" class="search-input" placeholder="Search servers..." />
-        </div>
-        
-        <div class="flex gap-2">
-          <select id="sort-select" class="form-select form-select-sm">
-            <option value="playerCount">Sort by Players</option>
-            <option value="name">Sort by Name</option>
-            <option value="region">Sort by Region</option>
-            <option value="map">Sort by Map</option>
-            <option value="maxPlayers">Sort by Capacity</option>
-          </select>
-          <select id="order-select" class="form-select form-select-sm">
-            <option value="desc">Descending</option>
-            <option value="asc">Ascending</option>
-          </select>
-        </div>
-      </div>
-      
-      <!-- Quick Filters -->
-      <div class="flex flex-wrap gap-2">
-        <span class="text-sm text-gray-600">Quick filters:</span>
-        <button class="btn btn-outline btn-sm filter-btn active" data-filter="">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-          </svg>
-          All Servers
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="active">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-          </svg>
-          Active
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="empty">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-          </svg>
-          Empty
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="full">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          Full
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="password">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-          </svg>
-          Password Protected
-        </button>
-        <button class="btn btn-outline btn-sm filter-btn" data-filter="modded">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-          </svg>
-          Modded
-        </button>
-      </div>
-    </div>
-
     <!-- Servers Table -->
     <div class="card">
+      <div class="card-header flex-col items-start gap-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+          <div class="search-container w-full max-w-md">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="search-bar" class="search-input" placeholder="Search servers..." />
+          </div>
+          
+          <div class="flex gap-2 w-full sm:w-auto">
+            <select id="sort-select" class="form-select form-select-sm">
+              <option value="playerCount">Sort by Players</option>
+              <option value="name">Sort by Name</option>
+              <option value="region">Sort by Region</option>
+              <option value="map">Sort by Map</option>
+              <option value="maxPlayers">Sort by Capacity</option>
+            </select>
+            <select id="order-select" class="form-select form-select-sm w-32">
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Quick Filters -->
+        <div class="flex flex-wrap gap-2 w-full border-t border-gray-800 pt-4 mt-2">
+          <span class="text-sm text-gray-400 self-center mr-2">Quick filters:</span>
+          <button class="btn btn-outline btn-sm filter-btn active" data-filter="">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            All Servers
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="active">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            Active
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="empty">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+            </svg>
+            Empty
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="full">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Full
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="password">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            Password Protected
+          </button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="modded">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+            </svg>
+            Modded
+          </button>
+        </div>
+      </div>
+
       <div class="table-container">
         <table class="table" id="servers-table">
           <thead>
@@ -178,7 +177,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
             </svg>
             Previous
           </button>
-          <span id="page-number" class="px-3 py-2 text-sm text-gray-700">Page 1</span>
+          <span id="page-number" class="px-3 py-2 text-sm text-gray-400">Page 1</span>
           <button class="btn btn-outline btn-sm" id="next-page">
             Next
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
