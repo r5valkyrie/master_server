@@ -29,3 +29,11 @@ auth.pem
 
 # jetbrains setting folder
 .idea/
+
+# Docker
+docker-compose.override.yml
+*.sql.backup
+backup.sql
+
+# But keep docker-init.sql (needed for Docker setup)
+!docker-init.sql

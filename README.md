@@ -7,7 +7,7 @@ A master server implementation for R5Valkyrie (Apex Legends) that provides serve
 - **Framework**: [Astro](https://astro.build/) (Server-Side Rendering)
 - **Language**: TypeScript
 - **Database**: MySQL (with parameterized queries for security)
-- **Caching**: Redis (optional)
+- **Caching**: Redis
 - **Authentication**: RSA-256 JWT tokens for game clients, session-based for admin panel
 - **Encryption**: AES-128-GCM for secure server communication
 - **Styling**: Plain CSS
@@ -85,13 +85,37 @@ public/               # Static assets (CSS, images)
 
 ## Getting Started
 
-Follow these instructions to get the project up and running on your local machine.
+You have two options to run this project:
+
+### Option 1: Docker (Recommended for Quick Setup) 🐳
+
+**Perfect for users who want an easy, automated setup with all dependencies included.**
+
+Docker handles all the installation and configuration automatically. Simply install Docker and run:
+
+```bash
+git clone https://github.com/r5valkyrie/master_server.git
+cd master_server
+cp docker.env.example .env
+# Edit .env and change the passwords/secrets
+docker-compose up -d
+```
+
+**That's it!** The application, MariaDB, and Redis will be running and configured.
+
+**[Full Docker Setup Guide](DOCKER.md)** - Complete documentation for Docker installation, development, and troubleshooting.
+
+### Option 2: Traditional Installation
+
+**For users who prefer manual control or want to develop locally.**
+
+Follow the instructions below for a traditional setup on your local machine.
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or newer recommended)
-- [MySQL](https://www.mysql.com/) server (v8.0 or newer)
-- (Optional) [Redis](https://redis.io/) server for caching server presence data
+- [MariaDB](https://mariadb.org/) server (v10.5 or newer)
+- [Redis](https://redis.io/) server for caching server presence data
 - RSA key pair for JWT signing (see Authentication Setup below)
 
 ### 1. Installation
@@ -138,7 +162,7 @@ MYSQL_USER=root
 MYSQL_PASS=password
 MYSQL_DB=r5
 
-# Redis (Optional - the app will run without it)
+# Redis
 REDIS_URL="redis://localhost:6379"
 REDIS_PASSWORD=
 # Disable Redis even if configured (set to "1" to disable)

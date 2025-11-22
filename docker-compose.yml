@@ -1,0 +1,115 @@
+# Docker Compose configuration for R5Valkyrie Master Server
+# This provides a complete stack with MySQL, Redis, and the application
+
+services:
+  # MariaDB Database
+  mysql:
+    image: mariadb:11
+    container_name: r5valk-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_root}
+      MYSQL_DATABASE: ${MYSQL_DB:-r5}
+      MYSQL_USER: ${MYSQL_USER:-r5valk}
+      MYSQL_PASSWORD: ${MYSQL_PASS:-changeme}
+    volumes:
+      # Persist database data
+      - mysql_data:/var/lib/mysql
+      # Auto-import schema on first run
+      # Note: MYSQL_USER from environment is automatically created with full privileges
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - r5valk-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: r5valk-redis
+    restart: unless-stopped
+    command: sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then redis-server --requirepass "$$REDIS_PASSWORD"; else redis-server; fi'
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - r5valk-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # R5Valkyrie Master Server Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: r5valk-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database Configuration
+      MYSQL_HOST: mysql
+      MYSQL_USER: ${MYSQL_USER:-r5valk}
+      MYSQL_PASS: ${MYSQL_PASS:-changeme}
+      MYSQL_DB: ${MYSQL_DB:-r5}
+      
+      # Redis Configuration (optional)
+      REDIS_URL: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      DISABLE_REDIS: ${DISABLE_REDIS:-0}
+      SERVER_TTL: ${SERVER_TTL:-35}
+      
+      # Admin Session Secret (REQUIRED - change this!)
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-CHANGE_ME_IN_PRODUCTION}
+      
+      # JWT Key Passphrase (if auth.key is passphrase-protected)
+      AUTH_KEY_PASSPHRASE: ${AUTH_KEY_PASSPHRASE:-}
+      
+      # Application Environment
+      NODE_ENV: ${NODE_ENV:-production}
+      
+      # Port Configuration (Astro uses this in production)
+      PORT: 3000
+      HOST: 0.0.0.0
+      
+      # Optional: Allowed hosts for Vite
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    networks:
+      - r5valk-network
+    volumes:
+      # Mount auth keys from host if they exist (optional)
+      - ./auth.key:/app/auth.key:ro
+      - ./auth.key.pub:/app/auth.key.pub:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+
+networks:
+  r5valk-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+

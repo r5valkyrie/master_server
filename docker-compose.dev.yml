@@ -1,0 +1,52 @@
+# Docker Compose configuration for DEVELOPMENT
+# This runs only the supporting services (MySQL + Redis)
+# allowing you to run the app locally with hot-reload
+
+services:
+  # MariaDB Database
+  mysql:
+    image: mariadb:11
+    container_name: r5valk-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_root}
+      MYSQL_DATABASE: ${MYSQL_DB:-r5}
+      MYSQL_USER: ${MYSQL_USER:-r5valk}
+      MYSQL_PASSWORD: ${MYSQL_PASS:-changeme}
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      # Auto-import schema on first run
+      # Note: MYSQL_USER from environment is automatically created with full privileges
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: r5valk-redis-dev
+    restart: unless-stopped
+    command: sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then redis-server --requirepass "$$REDIS_PASSWORD"; else redis-server; fi'
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+

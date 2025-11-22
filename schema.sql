@@ -1,5 +1,5 @@
 -- R5Valkyrie Master Server Database Schema
--- MySQL 8.0+ Required
+-- MariaDB 10.5+ or MySQL 8.0+ Required
 -- 
 -- This schema includes all tables, indexes, and constraints needed for the R5Valkyrie master server.
 -- Run this script to quickly set up a new database instance.
@@ -29,6 +29,17 @@ CREATE TABLE IF NOT EXISTS `users` (
     INDEX `idx_name` (`name`) COMMENT 'For name-based searches',
     INDEX `idx_flagged` (`flagged`) COMMENT 'For filtering flagged users'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Player accounts and activity tracking';
+
+-- ============================================================================
+-- DAILY PLAYER COUNT TABLE
+-- Tracks daily unique player statistics
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `daily_playercount` (
+    `date` DATE NOT NULL PRIMARY KEY COMMENT 'Date of the player count',
+    `total_players` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total unique players for this day',
+    
+    INDEX `idx_date` (`date` DESC) COMMENT 'For chronological queries'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Daily unique player statistics';
 
 -- ============================================================================
 -- USERNAME HISTORY TABLE
@@ -165,10 +176,10 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Admin panel user accounts';
 
 -- Insert default admin account: username="admin" password="changeme"
--- Password hash is bcrypt hash of "changeme" (cost factor 10)
+-- Password hash is bcrypt hash of "changeme" (cost factor 12)
 -- IMPORTANT: Change this password on first login!
 INSERT INTO `admin_users` (`username`, `password_hash`, `role`, `must_change_password`) VALUES 
-('admin', '$2b$10$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUmmXmIm', 'master', 1)
+('admin', '$2b$12$biBWYIXUobBihY7wNJmbHuTMHKn2.3Y/Xp2EL7TqnerbfO/m67QCO', 'master', 1)
 ON DUPLICATE KEY UPDATE `username`=`username`;
 
 -- ============================================================================
