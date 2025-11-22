@@ -9,412 +9,114 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
       <p>Create and manage API keys for external integrations</p>
     </div>
 
-    <div class="config-section">
-      <div class="section-header">
-        <h2>Active API Keys</h2>
-        <p>Manage your API keys for server integrations</p>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Active API Keys</h2>
       </div>
-
-      <button id="newKeyBtn" class="btn btn-primary">+ Generate New Key</button>
-
-      <div id="keysContainer" class="keys-table-container" style="margin-top: 1.5rem;">
-        <div class="loading">Loading API keys...</div>
-      </div>
-
-      <div id="statusMessage" class="status-message" style="display: none;"></div>
-    </div>
-
-    <div class="modal" id="newKeyModal" style="display: none;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Generate New API Key</h2>
-          <button class="modal-close" id="closeModal">&times;</button>
-        </div>
+      <div class="card-content">
+        <p class="text-gray-500 mb-4">Manage your API keys for server integrations</p>
         
-        <form id="newKeyForm" class="modal-form">
-          <div class="form-group">
-            <label for="keyName">Key Name</label>
-            <input
-              type="text"
-              id="keyName"
-              name="keyName"
-              placeholder="e.g., Discord Bot, Game Server Client"
-              required
-            />
-            <div class="field-hint">A descriptive name for this API key</div>
-          </div>
+        <button id="newKeyBtn" class="btn btn-primary">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Generate New Key
+        </button>
 
-          <div class="form-group">
-            <label for="keyDescription">Description (Optional)</label>
-            <textarea
-              id="keyDescription"
-              name="keyDescription"
-              placeholder="What is this key used for?"
-              rows="3"
-            ></textarea>
-            <div class="field-hint">Additional notes about this key's purpose</div>
-          </div>
+        <div id="keysContainer" class="keys-table-container" style="margin-top: 1.5rem;">
+          <div class="loading">Loading API keys...</div>
+        </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Generate Key</button>
-            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-          </div>
-        </form>
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
       </div>
     </div>
 
-    <div class="modal" id="displayKeyModal" style="display: none;">
-      <div class="modal-content">
+    <div class="modal-overlay" id="newKeyModal" style="display: none;">
+      <div class="modal">
         <div class="modal-header">
-          <h2>API Key Generated</h2>
-          <button class="modal-close" id="closeDisplayModal">&times;</button>
+          <h3 class="modal-title">Generate New API Key</h3>
+          <button class="modal-close" id="closeModal">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
         </div>
         
-        <div class="modal-body">
-          <p style="color: rgba(255, 255, 255, 0.8); margin: 0 0 1rem 0;">
-            <strong>Save this key somewhere safe.</strong> You won't be able to view it again!
-          </p>
+        <div class="modal-content">
+          <form id="newKeyForm" class="modal-form">
+            <div class="form-group">
+              <label for="keyName" class="form-label">Key Name</label>
+              <input
+                type="text"
+                id="keyName"
+                name="keyName"
+                class="form-input"
+                placeholder="e.g., Discord Bot, Game Server Client"
+                required
+              />
+              <div class="form-help">A descriptive name for this API key</div>
+            </div>
+
+            <div class="form-group">
+              <label for="keyDescription" class="form-label">Description (Optional)</label>
+              <textarea
+                id="keyDescription"
+                name="keyDescription"
+                class="form-textarea"
+                placeholder="What is this key used for?"
+                rows="3"
+              ></textarea>
+              <div class="form-help">Additional notes about this key's purpose</div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+              <button type="submit" class="btn btn-primary">Generate Key</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="displayKeyModal" style="display: none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">API Key Generated</h3>
+          <button class="modal-close" id="closeDisplayModal">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        
+        <div class="modal-content">
+          <div class="alert alert-warning mb-4">
+            <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+            <div class="alert-content">
+              <strong>Save this key somewhere safe.</strong> You won't be able to view it again!
+            </div>
+          </div>
           
-          <div class="key-display">
-            <input
-              type="text"
-              id="displayedKey"
-              class="key-input"
-              readonly
-              style="margin-bottom: 1rem;"
-            />
-            <button type="button" class="btn btn-primary" id="copyKeyBtn">Copy to Clipboard</button>
+          <div class="key-display mb-4">
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="displayedKey"
+                class="form-input font-mono"
+                readonly
+              />
+              <button type="button" class="btn btn-primary" id="copyKeyBtn">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                Copy
+              </button>
+            </div>
           </div>
 
-          <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin-top: 1rem;">
+          <p class="text-gray-500 text-sm">
             This key has been added to your active keys list and can now be used for API requests.
           </p>
         </div>
 
-        <div class="form-actions">
+        <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="closeDisplayKeyBtn">Done</button>
         </div>
       </div>
     </div>
   </div>
-
-  <style>
-    .content-container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    .page-header {
-      margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 1rem;
-    }
-
-    .page-header h1 {
-      margin: 0 0 0.5rem 0;
-      font-size: 2rem;
-      color: #fff;
-    }
-
-    .page-header p {
-      color: rgba(255, 255, 255, 0.7);
-      margin: 0;
-    }
-
-    .config-section {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .section-header {
-      margin-bottom: 1.5rem;
-    }
-
-    .section-header h2 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.5rem;
-      color: #fff;
-    }
-
-    .section-header p {
-      color: rgba(255, 255, 255, 0.6);
-      margin: 0;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-      background: #3b82f6;
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: rgba(239, 68, 68, 0.5);
-    }
-
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-    }
-
-    .loading {
-      text-align: center;
-      color: rgba(255, 255, 255, 0.6);
-      padding: 2rem;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .empty-state p {
-      margin: 0;
-    }
-
-    .status-message {
-      padding: 1rem;
-      border-radius: 4px;
-      font-weight: 500;
-      text-align: center;
-      margin-top: 1rem;
-    }
-
-    .status-message.success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #10b981;
-    }
-
-    .status-message.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #ef4444;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background: #1f2937;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 2rem;
-      max-width: 500px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 1rem;
-    }
-
-    .modal-header h2 {
-      margin: 0;
-      color: #fff;
-      font-size: 1.5rem;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-close:hover {
-      color: #fff;
-    }
-
-    .modal-body {
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-group label {
-      font-weight: 600;
-      color: #fff;
-      font-size: 0.95rem;
-    }
-
-    .form-group input,
-    .form-group textarea {
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 6px;
-      color: #fff;
-      font-family: inherit;
-      font-size: 0.95rem;
-      transition: all 0.2s ease;
-    }
-
-    .form-group input:hover,
-    .form-group textarea:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.15);
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-
-    .form-group input::placeholder,
-    .form-group textarea::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .field-hint {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .key-display {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      padding: 1rem;
-    }
-
-    .key-input {
-      width: 100%;
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      color: #fff;
-      font-family: 'Monaco', 'Courier New', monospace;
-      font-size: 0.85rem;
-    }
-
-    .info-section {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 2rem;
-    }
-
-    .info-section h3 {
-      margin: 0 0 1rem 0;
-      color: #fff;
-      font-size: 1.1rem;
-    }
-
-    .info-section h3:not(:first-child) {
-      margin-top: 2rem;
-    }
-
-    .info-section p,
-    .info-section ul {
-      margin: 0;
-      color: rgba(255, 255, 255, 0.8);
-      line-height: 1.6;
-    }
-
-    .info-section ul {
-      padding-left: 1.5rem;
-    }
-
-    .info-section li {
-      margin-bottom: 0.75rem;
-    }
-
-    .info-section pre {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      padding: 1rem;
-      overflow-x: auto;
-      margin: 0.5rem 0;
-    }
-
-    .info-section code {
-      font-family: 'Monaco', 'Courier New', monospace;
-      color: #a1d8ff;
-      font-size: 0.85rem;
-    }
-  </style>
 
   <script>
     interface ApiKey {
