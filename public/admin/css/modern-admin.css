@@ -3318,7 +3318,7 @@ select {
   padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(255, 255, 255, 0.05);
   color: #e2e8f0;
   font-family: 'Courier New', monospace;
   font-size: 0.875rem;
@@ -3410,7 +3410,7 @@ select {
 }
 
 .preview-content {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   padding: 1rem;
@@ -3925,7 +3925,7 @@ select {
   padding: 0.375rem 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(255, 255, 255, 0.05);
   color: #e2e8f0;
   font-size: 0.75rem;
   cursor: pointer;
@@ -3935,7 +3935,7 @@ select {
 .admin-card-body .role-select:focus {
   outline: none;
   border-color: rgba(86, 123, 243, 0.5);
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 0 2px rgba(86, 123, 243, 0.1);
 }
 
