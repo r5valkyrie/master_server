@@ -2664,6 +2664,7 @@ body {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.25em 1.25em;
+  color-scheme: dark; /* Forces browser native dropdowns to use dark theme */
 }
 
 .role-select {
@@ -2710,9 +2711,9 @@ select {
 /* Ensure select elements in modals have proper styling */
 .modal .form-select,
 .modal .role-select {
-  background-color: var(--gray-50);
-  color: var(--gray-900);
-  border-color: var(--gray-300);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .modal .form-select:focus,
