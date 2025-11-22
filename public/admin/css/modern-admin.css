@@ -763,14 +763,14 @@ body {
 .table-container {
   overflow-x: auto;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(25, 28, 34, 0.7);
+  /* border: 1px solid rgba(255, 255, 255, 0.1); */
+  background: transparent;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(25, 28, 34, 0.7);
+  background: transparent;
 }
 
 .table th,
@@ -782,7 +782,7 @@ body {
 }
 
 .table th {
-  background: rgba(28, 34, 40, 0.8);
+  background: rgba(255, 255, 255, 0.03);
   font-weight: 700;
   font-size: var(--text-sm);
   color: white;
@@ -808,13 +808,13 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-lg);
-  background: var(--gray-100);
-  border-top: 1px solid var(--gray-200);
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .pagination-info {
   font-size: var(--text-sm);
-  color: var(--gray-600);
+  color: #94a3b8;
 }
 
 .pagination-controls {
@@ -2570,54 +2570,13 @@ body {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* API Keys Table Styling */
-.keys-table-container {
-  overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  margin-top: 1.5rem;
+/* API Keys - Loading State */
+.loading {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
 }
-
-.keys-table {
-  width: 100%;
-  border-collapse: collapse;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.keys-table thead {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.keys-table th {
-  text-align: left;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-weight: 600;
-  color: #fff;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.keys-table td {
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  vertical-align: middle;
-}
-
-.keys-table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-.keys-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.keys-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Key Prefix Badge */
 .key-prefix {
   display: inline-block;
   font-family: 'Monaco', 'Courier New', monospace;
@@ -2675,13 +2634,6 @@ body {
   line-height: 1.5;
 }
 
-/* Loading State */
-.keys-table-container .loading {
-  text-align: center;
-  padding: 3rem 2rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0;
-}
 
 /* Select/Dropdown Styling */
 .form-select,
@@ -3220,38 +3172,6 @@ select {
   flex-shrink: 0;
 }
 
-/* Mods Page Pagination */
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.pagination-info {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pagination-controls .btn {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.pagination-controls span {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-}
 
 /* Mods Page - Mobile Responsive */
 @media (max-width: 1024px) {
@@ -3330,7 +3250,7 @@ select {
 .settings-panel-textarea:focus {
   outline: none;
   border-color: #567bf3;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 20px rgba(86, 123, 243, 0.3);
 }
 
@@ -3489,7 +3409,7 @@ select {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
 }
 
@@ -3722,7 +3642,7 @@ select {
 
 .checksum-item {
   padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -3905,7 +3825,7 @@ select {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
 }
 

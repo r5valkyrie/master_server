@@ -171,8 +171,14 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
           return;
         }
 
+        // Create table container structure
+        container.innerHTML = '';
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'table-container';
+        container.appendChild(tableContainer);
+
         const table = document.createElement('table');
-        table.className = 'keys-table';
+        table.className = 'table';
         table.innerHTML = `
           <thead>
             <tr>
