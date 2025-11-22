@@ -508,11 +508,13 @@ body {
 }
 
 .stat-card {
-  background: var(--gray-100);
+  background: rgba(25, 28, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: var(--space-lg);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--gray-200);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -932,9 +934,11 @@ body {
 .chart-container {
   position: relative;
   padding: var(--space-lg);
-  background: var(--gray-100);
+  background: rgba(25, 28, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--gray-200);
 }
 
 .chart-header {
@@ -1940,14 +1944,17 @@ body {
 /* .stats-grid is already defined above with responsive 4-card limit */
 
 .stat-card {
-  background: var(--gray-100);
-  border: 1px solid var(--gray-200);
+  background: rgba(25, 28, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   display: flex;
   align-items: center;
   gap: var(--space-md);
   transition: all 0.2s ease;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card:hover {
