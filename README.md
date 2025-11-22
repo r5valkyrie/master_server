@@ -87,7 +87,7 @@ public/               # Static assets (CSS, images)
 
 You have two options to run this project:
 
-### Option 1: Docker (Recommended for Quick Setup) 🐳
+### Option 1: Docker (Recommended for Quick Setup)
 
 **Perfect for users who want an easy, automated setup with all dependencies included.**
 
