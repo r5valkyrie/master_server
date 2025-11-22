@@ -3865,10 +3865,15 @@ select {
   background-size: 10px;
 }
 
+.admin-card-body .role-select:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
 .admin-card-body .role-select:focus {
   outline: none;
   border-color: rgba(86, 123, 243, 0.5);
-  background: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 0 2px rgba(86, 123, 243, 0.1);
 }
 
