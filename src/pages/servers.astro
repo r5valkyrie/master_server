@@ -320,13 +320,13 @@ import Main from "../layouts/Main.astro";
     text-align: center;
   }
 
-  /* Table Styles */
+  /* Table Styles - Redesigned */
   .servers-content {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    backdrop-filter: blur(10px);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    backdrop-filter: none;
   }
 
   .table-wrapper {
@@ -335,55 +335,89 @@ import Main from "../layouts/Main.astro";
 
   table {
     width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    min-width: 900px;
   }
 
   th {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 16px;
+    background: transparent;
+    padding: 12px 24px;
     text-align: left;
     font-weight: 600;
     color: var(--text-muted);
-    font-size: 0.9rem;
-    border-bottom: 1px solid var(--border-light);
-  }
-
-  td {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-light);
-    color: var(--text-main);
-    font-size: 0.95rem;
-  }
-
-  tr:last-child td {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     border-bottom: none;
   }
 
-  tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+  td {
+    padding: 20px 24px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    border: none;
+    background: rgba(20, 20, 25, 0.6);
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+  }
+
+  /* Rounded corners for rows */
+  tr.server-row td:first-child {
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+    border-left: 1px solid var(--border-light);
+  }
+
+  tr.server-row td:last-child {
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    border-right: 1px solid var(--border-light);
+  }
+
+  tr.server-row:hover td {
+    background: rgba(30, 30, 40, 0.8);
+    border-color: var(--primary-glow);
+    transform: translateY(-2px);
+  }
+
+  tr.server-row:hover td {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Specific Column Styles */
+  tr.server-row td:nth-child(3) {
+    /* Name Column */
+    font-family: "Outfit", sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
   }
 
   .w-icon {
-    width: 40px;
+    width: 50px;
   }
 
   .join-btn {
     display: inline-block;
-    padding: 6px 16px;
-    background-color: var(--primary);
-    color: white;
+    padding: 8px 24px;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
     text-decoration: none;
     border-radius: var(--radius-full);
-    font-weight: 500;
-    font-size: 0.85rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid var(--primary);
     transition: all 0.2s;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.1);
   }
 
   .join-btn:hover {
-    background-color: var(--primary-hover);
+    background: var(--primary);
+    color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px var(--primary-glow);
   }
 
   /* Loader */

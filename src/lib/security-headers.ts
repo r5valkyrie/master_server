@@ -14,9 +14,9 @@ export function addSecurityHeaders(response: Response): Response {
     const csp = [
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net", // Allow Chart.js CDN
-        "style-src 'self' 'unsafe-inline'", // Allow inline styles
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // Allow inline styles and Google Fonts
         "img-src 'self' data: https:", // Allow images from self, data URLs, and HTTPS
-        "font-src 'self' https://cdn.jsdelivr.net", // Allow fonts from CDN
+        "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com", // Allow fonts from CDN and Google Fonts
         "connect-src 'self' https://api.steampowered.com https://cdn.jsdelivr.net", // Allow Steam API and CDN
         "media-src 'self' https://blaze.playvalkyrie.org",
         "object-src 'none'", // Block object/embed/applet
@@ -32,11 +32,11 @@ export function addSecurityHeaders(response: Response): Response {
     newResponse.headers.set('X-Frame-Options', 'DENY');
     newResponse.headers.set('X-XSS-Protection', '1; mode=block');
     newResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
+
     // HSTS for HTTPS (only in production)
     if (process.env.NODE_ENV === 'production') {
         newResponse.headers.set(
-            'Strict-Transport-Security', 
+            'Strict-Transport-Security',
             'max-age=31536000; includeSubDomains; preload'
         );
     }
@@ -75,7 +75,7 @@ export function addCorsHeaders(response: Response, allowOrigins: string[] = []):
     } else {
         newResponse.headers.set('Access-Control-Allow-Origin', 'same-origin');
     }
-    
+
     newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     newResponse.headers.set('Access-Control-Max-Age', '86400'); // 24 hours

@@ -1,28 +1,30 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
 
-const GITHUB_REPO = 'r5valkyrie/docs';
-const GITHUB_BRANCH = 'main';
-const GITHUB_CONTRIBUTORS_PATH = 'contributors';
+const GITHUB_REPO = "r5valkyrie/docs";
+const GITHUB_BRANCH = "main";
+const GITHUB_CONTRIBUTORS_PATH = "contributors";
 
 async function fetchContributors(fileName: string) {
-    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.error(`Failed to fetch ${fileName}. Status: ${response.status}`);
-            return [];
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(`Error fetching ${fileName}:`, error);
-        return [];
-    }
+	const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			console.error(
+				`Failed to fetch ${fileName}. Status: ${response.status}`,
+			);
+			return [];
+		}
+		return await response.json();
+	} catch (error) {
+		console.error(`Error fetching ${fileName}:`, error);
+		return [];
+	}
 }
 
 const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
-    fetchContributors('contributors.json'),
-    fetchContributors('r5reloaded_contributors.json')
+	fetchContributors("contributors.json"),
+	fetchContributors("r5reloaded_contributors.json"),
 ]);
 ---
 
@@ -30,40 +32,68 @@ const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
 	<div class="container page-container fade-in">
 		<div class="page-header centered">
 			<h1>Contributors</h1>
-			<p class="subtitle">The amazing people who make this project possible</p>
+			<p class="subtitle">
+				The amazing people who make this project possible
+			</p>
 		</div>
 
 		<section class="contributors-section">
-			<h2>Valkyrie Team</h2>
+			<h2>R5Valkyrie Team</h2>
 			<div class="contributors-grid">
-				{valkyrieContributors.map((contributor: any) => (
-					<a href={contributor.url} target="_blank" class="contributor-card">
-						<div class="avatar-wrapper">
-							<img src={contributor.avatar} alt={contributor.name} loading="lazy" />
-						</div>
-						<div class="contributor-info">
-							<h3>{contributor.name}</h3>
-							<span class="role">{contributor.role || 'Contributor'}</span>
-						</div>
-					</a>
-				))}
+				{
+					valkyrieContributors.map((contributor: any) => (
+						<a
+							href={contributor.url}
+							target="_blank"
+							class="contributor-card"
+						>
+							<div class="avatar-wrapper">
+								<img
+									src={contributor.avatar}
+									alt={contributor.name}
+									loading="lazy"
+									crossorigin="anonymous"
+								/>
+							</div>
+							<div class="contributor-info">
+								<h3>{contributor.name}</h3>
+								<span class="role">
+									{contributor.description || "Contributor"}
+								</span>
+							</div>
+						</a>
+					))
+				}
 			</div>
 		</section>
 
 		<section class="contributors-section">
 			<h2>R5Reloaded Contributors</h2>
 			<div class="contributors-grid">
-				{r5reloadedContributors.map((contributor: any) => (
-					<a href={contributor.url} target="_blank" class="contributor-card">
-						<div class="avatar-wrapper">
-							<img src={contributor.avatar} alt={contributor.name} loading="lazy" />
-						</div>
-						<div class="contributor-info">
-							<h3>{contributor.name}</h3>
-							<span class="role">R5Reloaded</span>
-						</div>
-					</a>
-				))}
+				{
+					r5reloadedContributors.map((contributor: any) => (
+						<a
+							href={contributor.url}
+							target="_blank"
+							class="contributor-card"
+						>
+							<div class="avatar-wrapper">
+								<img
+									src={contributor.avatar}
+									alt={contributor.name}
+									loading="lazy"
+									crossorigin="anonymous"
+								/>
+							</div>
+							<div class="contributor-info">
+								<h3>{contributor.name}</h3>
+								<span class="role">
+									{contributor.description || "Contributor"}
+								</span>
+							</div>
+						</a>
+					))
+				}
 			</div>
 		</section>
 	</div>
@@ -129,7 +159,7 @@ const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
 		overflow: hidden;
 		margin-bottom: 16px;
 		border: 2px solid var(--border-light);
-		background: rgba(0,0,0,0.2);
+		background: rgba(0, 0, 0, 0.2);
 	}
 
 	.avatar-wrapper img {
