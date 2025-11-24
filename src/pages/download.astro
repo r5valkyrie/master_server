@@ -57,20 +57,22 @@ import Main from "../layouts/Main.astro";
 				<div class="step">
 					<div class="step-number">1</div>
 					<div class="step-content">
-						<h4>Download</h4>
+						<h4>Download & Install the Launcher</h4>
 						<p>
 							Download the R5Valkyrie Launcher using the button
-							above.
+							above. Run the installer and follow the on-screen
+							instructions to set up the R5Valkyrie Launcher.
 						</p>
 					</div>
 				</div>
 				<div class="step">
 					<div class="step-number">2</div>
 					<div class="step-content">
-						<h4>Install</h4>
+						<h4>Download the game</h4>
 						<p>
-							Run the installer and follow the on-screen
-							instructions to set up the R5Valkyrie Launcher.
+							Open the R5Valkyrie Launcher and click on the
+							"Install" button. Follow the on-screen instructions
+							to download and install the game.
 						</p>
 					</div>
 				</div>
@@ -79,9 +81,8 @@ import Main from "../layouts/Main.astro";
 					<div class="step-content">
 						<h4>Play</h4>
 						<p>
-							Launch the R5Valkyrie Launcher, click on the
-							"Install" button, and follow the on-screen
-							instructions to download and install R5Valkyrie.
+							Click on the "Play" button in the R5Valkyrie
+							Launcher to start playing.
 						</p>
 					</div>
 				</div>
@@ -108,7 +109,10 @@ import Main from "../layouts/Main.astro";
 	}
 
 	.download-card {
-		background: var(--bg-card);
+		background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+			url("/assets/launcher.jpeg");
+		background-size: cover;
+		background-position: center;
 		border: 1px solid var(--border-light);
 		border-radius: var(--radius-lg);
 		padding: 60px 40px;
@@ -116,6 +120,8 @@ import Main from "../layouts/Main.astro";
 		backdrop-filter: blur(10px);
 		margin-bottom: 60px;
 		box-shadow: var(--shadow-glow);
+		position: relative;
+		overflow: hidden;
 	}
 
 	.download-icon {

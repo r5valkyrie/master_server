@@ -1,5 +1,15 @@
 ---
 import Main from "../layouts/Main.astro";
+
+let initialMods = [];
+try {
+	const response = await fetch(new URL("/api/client/mods", Astro.url));
+	if (response.ok) {
+		initialMods = await response.json();
+	}
+} catch (error) {
+	console.error("Failed to fetch mods server-side:", error);
+}
 ---
 
 <Main title="Mods">
@@ -38,9 +48,71 @@ import Main from "../layouts/Main.astro";
 		</div>
 
 		<div class="mods-grid" id="mods-grid">
-			<div class="loader-wrapper">
-				<div class="loader"></div>
-			</div>
+			{
+				initialMods.length > 0 ? (
+					initialMods.slice(0, 12).map((mod: any) => {
+						const latestVersion = mod.versions?.[0] || {};
+						const iconUrl =
+							mod.icon ||
+							latestVersion.icon ||
+							"https://placehold.co/100?text=Mod";
+						const description =
+							latestVersion?.description ||
+							"No description available.";
+						const downloadUrl =
+							"r5v://mod/install?name=" + mod.full_name || "#";
+						const packageUrl = mod.package_url || "#";
+						const displayName = (mod.name || "").replace(/_/g, " ");
+
+						return (
+							<div class="mod-card fade-in-on-scroll">
+								<div class="mod-header">
+									<div class="mod-icon-wrapper">
+										<img
+											src={iconUrl}
+											alt={displayName}
+											class="mod-icon"
+											loading="lazy"
+											onerror="this.src='https://placehold.co/100?text=Mod'"
+										/>
+									</div>
+									<div class="mod-title">
+										<h2>{displayName}</h2>
+									</div>
+								</div>
+								<div class="mod-body">
+									<p class="mod-desc">{description}</p>
+									<div class="mod-actions">
+										<a
+											href={downloadUrl}
+											class="mod-btn mod-btn-primary"
+										>
+											Install
+										</a>
+										<a
+											href={packageUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="mod-btn mod-btn-secondary"
+										>
+											Details
+										</a>
+									</div>
+								</div>
+							</div>
+						);
+					})
+				) : (
+					<div class="loader-wrapper">
+						<div class="loader" />
+					</div>
+				)
+			}
+		</div>
+		<div
+			id="mods-sentinel"
+			style="height: 1px; width: 100%; grid-column: 1 / -1;"
+		>
 		</div>
 	</div>
 </Main>
@@ -248,14 +320,14 @@ import Main from "../layouts/Main.astro";
 	}
 </style>
 
-<script>
-	let allMods: any[] = [];
-	let filteredMods: any[] = [];
-	let renderedCount = 0;
+<script define:vars={{ initialMods }}>
+	let allMods = initialMods || [];
+	let filteredMods = initialMods || [];
+	let renderedCount = initialMods ? Math.min(initialMods.length, 12) : 0;
 	const BATCH_SIZE = 12;
-	let infiniteObserver: IntersectionObserver | null = null;
+	let infiniteObserver = null;
 
-	function createModCard(mod: any) {
+	function createModCard(mod) {
 		const card = document.createElement("div");
 		card.className = "mod-card fade-in-on-scroll";
 
@@ -291,7 +363,7 @@ import Main from "../layouts/Main.astro";
 		return card;
 	}
 
-	function ensureSentinel(grid: HTMLElement) {
+	function ensureSentinel(grid) {
 		let sentinel = document.getElementById("mods-sentinel");
 		if (!sentinel) {
 			sentinel = document.createElement("div");
@@ -301,7 +373,7 @@ import Main from "../layouts/Main.astro";
 			sentinel.style.gridColumn = "1 / -1";
 			grid.appendChild(sentinel);
 		}
-		return sentinel as HTMLElement;
+		return sentinel;
 	}
 
 	function appendNextBatch() {
@@ -321,8 +393,8 @@ import Main from "../layouts/Main.astro";
 		}
 		renderedCount = end;
 
-		if ((window as any).setupObserver) {
-			(window as any).setupObserver();
+		if (window.setupObserver) {
+			window.setupObserver();
 		}
 
 		if (renderedCount >= filteredMods.length && infiniteObserver) {
@@ -361,7 +433,7 @@ import Main from "../layouts/Main.astro";
 		infiniteObserver.observe(sentinel);
 	}
 
-	function renderMods(modsToRender: any[]) {
+	function renderMods(modsToRender) {
 		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 
@@ -381,9 +453,9 @@ import Main from "../layouts/Main.astro";
 	}
 
 	function filterAndRenderMods() {
-		const searchTerm = (
-			document.getElementById("search-bar") as HTMLInputElement
-		).value.toLowerCase();
+		const searchTerm = document
+			.getElementById("search-bar")
+			.value.toLowerCase();
 		const filtered = allMods.filter(
 			(mod) =>
 				!mod?.is_deprecated &&
@@ -394,21 +466,20 @@ import Main from "../layouts/Main.astro";
 	}
 
 	function fetchMods() {
+		// If we already have mods (from server), just setup scroll and return
+		if (allMods.length > 0) {
+			setupInfiniteScroll();
+			return;
+		}
+
 		(async () => {
 			const grid = document.getElementById("mods-grid");
 			if (grid)
 				grid.innerHTML =
 					'<div class="loader-wrapper"><div class="loader"></div></div>';
 
-			if (allMods.length > 0) {
-				filterAndRenderMods();
-				return;
-			}
-
 			try {
-				const q =
-					(document.getElementById("search-bar") as HTMLInputElement)
-						?.value || "";
+				const q = document.getElementById("search-bar")?.value || "";
 				const endpoint = q
 					? `/api/client/mods?q=${encodeURIComponent(q)}`
 					: "/api/client/mods";

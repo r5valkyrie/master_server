@@ -4,13 +4,6 @@ import Main from "../layouts/Main.astro";
 
 <Main title="Home" fullWidth={true}>
 	<section class="hero">
-		<div class="video-background">
-			<video autoplay loop muted playsinline>
-				<source src="/assets/shortshowcr5v.mp4" type="video/mp4" />
-			</video>
-			<div class="overlay"></div>
-		</div>
-
 		<div class="hero-content fade-in">
 			<h1>
 				The Future of <span class="text-gradient">Apex Legends</span>
@@ -250,31 +243,6 @@ import Main from "../layouts/Main.astro";
 		padding: 60px 20px;
 		position: relative;
 		overflow: hidden;
-	}
-
-	.video-background {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-	}
-
-	.video-background video {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.video-background .overlay {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(5, 5, 5, 0.7); /* Dark overlay */
-		backdrop-filter: blur(3px);
 	}
 
 	.hero-content {
@@ -622,150 +590,188 @@ import Main from "../layouts/Main.astro";
 </style>
 
 <script>
-	const track = document.querySelector(
-		".carousel-track",
-	) as HTMLElement | null;
-	const slides = Array.from(track?.children || []) as HTMLElement[];
-	const nextButton = document.querySelector(
-		".carousel-button--right",
-	) as HTMLElement | null;
-	const prevButton = document.querySelector(
-		".carousel-button--left",
-	) as HTMLElement | null;
-	const dotsNav = document.querySelector(
-		".carousel-nav",
-	) as HTMLElement | null;
-	const dots = Array.from(dotsNav?.children || []) as HTMLElement[];
+	function setupCarousel() {
+		const track = document.querySelector(
+			".carousel-track",
+		) as HTMLElement | null;
+		if (!track) return;
 
-	if (track && slides.length > 0) {
-		const slideWidth = slides[0].getBoundingClientRect().width;
+		const slides = Array.from(track.children) as HTMLElement[];
+		const nextButton = document.querySelector(
+			".carousel-button--right",
+		) as HTMLElement | null;
+		const prevButton = document.querySelector(
+			".carousel-button--left",
+		) as HTMLElement | null;
+		const dotsNav = document.querySelector(
+			".carousel-nav",
+		) as HTMLElement | null;
+		const dots = Array.from(dotsNav?.children || []) as HTMLElement[];
 
-		// Arrange the slides next to one another
-		const setSlidePosition = (slide: HTMLElement, index: number) => {
-			slide.style.left = slideWidth * index + "px";
-		};
-		slides.forEach(setSlidePosition);
+		if (slides.length > 0) {
+			const slideWidth = slides[0].getBoundingClientRect().width;
 
-		const moveToSlide = (
-			track: HTMLElement,
-			currentSlide: HTMLElement,
-			targetSlide: HTMLElement,
-		) => {
-			track.style.transform =
-				"translateX(-" + targetSlide.style.left + ")";
-			currentSlide.classList.remove("current-slide");
-			targetSlide.classList.add("current-slide");
-		};
+			// Arrange the slides next to one another
+			const setSlidePosition = (slide: HTMLElement, index: number) => {
+				slide.style.left = slideWidth * index + "px";
+			};
+			slides.forEach(setSlidePosition);
 
-		const updateDots = (
-			currentDot: HTMLElement,
-			targetDot: HTMLElement,
-		) => {
-			currentDot.classList.remove("current-slide");
-			targetDot.classList.add("current-slide");
-		};
+			const moveToSlide = (
+				track: HTMLElement,
+				currentSlide: HTMLElement,
+				targetSlide: HTMLElement,
+			) => {
+				track.style.transform =
+					"translateX(-" + targetSlide.style.left + ")";
+				currentSlide.classList.remove("current-slide");
+				targetSlide.classList.add("current-slide");
+			};
 
-		const hideShowArrows = (
-			slides: HTMLElement[],
-			prevButton: HTMLElement,
-			nextButton: HTMLElement,
-			targetIndex: number,
-		) => {
-			if (targetIndex === 0) {
-				prevButton.classList.add("is-hidden");
-				nextButton.classList.remove("is-hidden");
-			} else if (targetIndex === slides.length - 1) {
-				prevButton.classList.remove("is-hidden");
-				nextButton.classList.add("is-hidden");
-			} else {
-				prevButton.classList.remove("is-hidden");
-				nextButton.classList.remove("is-hidden");
+			const updateDots = (
+				currentDot: HTMLElement,
+				targetDot: HTMLElement,
+			) => {
+				currentDot.classList.remove("current-slide");
+				targetDot.classList.add("current-slide");
+			};
+
+			const hideShowArrows = (
+				slides: HTMLElement[],
+				prevButton: HTMLElement,
+				nextButton: HTMLElement,
+				targetIndex: number,
+			) => {
+				if (targetIndex === 0) {
+					prevButton.classList.add("is-hidden");
+					nextButton.classList.remove("is-hidden");
+				} else if (targetIndex === slides.length - 1) {
+					prevButton.classList.remove("is-hidden");
+					nextButton.classList.add("is-hidden");
+				} else {
+					prevButton.classList.remove("is-hidden");
+					nextButton.classList.remove("is-hidden");
+				}
+			};
+
+			// When I click left, move slides to the left
+			if (prevButton) {
+				prevButton.addEventListener("click", (e) => {
+					const currentSlide = track.querySelector(
+						".current-slide",
+					) as HTMLElement;
+					const prevSlide =
+						currentSlide.previousElementSibling as HTMLElement;
+					const currentDot = dotsNav?.querySelector(
+						".current-slide",
+					) as HTMLElement;
+					const prevDot =
+						currentDot.previousElementSibling as HTMLElement;
+					const prevIndex = slides.findIndex(
+						(slide) => slide === prevSlide,
+					);
+
+					moveToSlide(track, currentSlide, prevSlide);
+					updateDots(currentDot, prevDot);
+					if (nextButton)
+						hideShowArrows(
+							slides,
+							prevButton,
+							nextButton,
+							prevIndex,
+						);
+				});
 			}
-		};
 
-		// When I click left, move slides to the left
-		if (prevButton) {
-			prevButton.addEventListener("click", (e) => {
+			// When I click right, move slides to the right
+			if (nextButton) {
+				nextButton.addEventListener("click", (e) => {
+					const currentSlide = track.querySelector(
+						".current-slide",
+					) as HTMLElement;
+					const nextSlide =
+						currentSlide.nextElementSibling as HTMLElement;
+					const currentDot = dotsNav?.querySelector(
+						".current-slide",
+					) as HTMLElement;
+					const nextDot =
+						currentDot.nextElementSibling as HTMLElement;
+					const nextIndex = slides.findIndex(
+						(slide) => slide === nextSlide,
+					);
+
+					moveToSlide(track, currentSlide, nextSlide);
+					updateDots(currentDot, nextDot);
+					if (prevButton)
+						hideShowArrows(
+							slides,
+							prevButton,
+							nextButton,
+							nextIndex,
+						);
+				});
+			}
+
+			// When I click the nav indicators, move to that slide
+			if (dotsNav) {
+				dotsNav.addEventListener("click", (e) => {
+					// what indicator was clicked on?
+					const targetDot = (e.target as HTMLElement).closest(
+						"button",
+					);
+
+					if (!targetDot) return;
+
+					const currentSlide = track.querySelector(
+						".current-slide",
+					) as HTMLElement;
+					const currentDot = dotsNav.querySelector(
+						".current-slide",
+					) as HTMLElement;
+					const targetIndex = dots.findIndex(
+						(dot) => dot === targetDot,
+					);
+					const targetSlide = slides[targetIndex];
+
+					moveToSlide(track, currentSlide, targetSlide);
+					updateDots(currentDot, targetDot);
+					if (prevButton && nextButton)
+						hideShowArrows(
+							slides,
+							prevButton,
+							nextButton,
+							targetIndex,
+						);
+				});
+			}
+
+			// Handle window resize to adjust slide positions
+			const resizeHandler = () => {
+				const newSlideWidth = slides[0].getBoundingClientRect().width;
+				slides.forEach((slide, index) => {
+					slide.style.left = newSlideWidth * index + "px";
+				});
+				// Re-center current slide
 				const currentSlide = track.querySelector(
 					".current-slide",
 				) as HTMLElement;
-				const prevSlide =
-					currentSlide.previousElementSibling as HTMLElement;
-				const currentDot = dotsNav?.querySelector(
-					".current-slide",
-				) as HTMLElement;
-				const prevDot =
-					currentDot.previousElementSibling as HTMLElement;
-				const prevIndex = slides.findIndex(
-					(slide) => slide === prevSlide,
-				);
+				track.style.transform =
+					"translateX(-" + currentSlide.style.left + ")";
+			};
 
-				moveToSlide(track, currentSlide, prevSlide);
-				updateDots(currentDot, prevDot);
-				if (nextButton)
-					hideShowArrows(slides, prevButton, nextButton, prevIndex);
-			});
+			window.addEventListener("resize", resizeHandler);
+
+			// Cleanup resize listener on navigation
+			document.addEventListener(
+				"astro:before-swap",
+				() => {
+					window.removeEventListener("resize", resizeHandler);
+				},
+				{ once: true },
+			);
 		}
-
-		// When I click right, move slides to the right
-		if (nextButton) {
-			nextButton.addEventListener("click", (e) => {
-				const currentSlide = track.querySelector(
-					".current-slide",
-				) as HTMLElement;
-				const nextSlide =
-					currentSlide.nextElementSibling as HTMLElement;
-				const currentDot = dotsNav?.querySelector(
-					".current-slide",
-				) as HTMLElement;
-				const nextDot = currentDot.nextElementSibling as HTMLElement;
-				const nextIndex = slides.findIndex(
-					(slide) => slide === nextSlide,
-				);
-
-				moveToSlide(track, currentSlide, nextSlide);
-				updateDots(currentDot, nextDot);
-				if (prevButton)
-					hideShowArrows(slides, prevButton, nextButton, nextIndex);
-			});
-		}
-
-		// When I click the nav indicators, move to that slide
-		if (dotsNav) {
-			dotsNav.addEventListener("click", (e) => {
-				// what indicator was clicked on?
-				const targetDot = (e.target as HTMLElement).closest("button");
-
-				if (!targetDot) return;
-
-				const currentSlide = track.querySelector(
-					".current-slide",
-				) as HTMLElement;
-				const currentDot = dotsNav.querySelector(
-					".current-slide",
-				) as HTMLElement;
-				const targetIndex = dots.findIndex((dot) => dot === targetDot);
-				const targetSlide = slides[targetIndex];
-
-				moveToSlide(track, currentSlide, targetSlide);
-				updateDots(currentDot, targetDot);
-				if (prevButton && nextButton)
-					hideShowArrows(slides, prevButton, nextButton, targetIndex);
-			});
-		}
-
-		// Handle window resize to adjust slide positions
-		window.addEventListener("resize", () => {
-			const newSlideWidth = slides[0].getBoundingClientRect().width;
-			slides.forEach((slide, index) => {
-				slide.style.left = newSlideWidth * index + "px";
-			});
-			// Re-center current slide
-			const currentSlide = track.querySelector(
-				".current-slide",
-			) as HTMLElement;
-			track.style.transform =
-				"translateX(-" + currentSlide.style.left + ")";
-		});
 	}
+
+	// Run on initial load and after every navigation
+	document.addEventListener("astro:page-load", setupCarousel);
 </script>
