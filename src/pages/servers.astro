@@ -1,253 +1,630 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
 ---
-<Main>
-  <div class="refresh-servers-container">
-    <button id="refresh-servers-btn" class="refresh-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-      <span>Refresh</span>
-    </button>
-  </div>
-  <div class="servers-container fade-in-on-scroll">
-    <aside class="filters-sidebar">
-      <div class="filter-group">
-        <label for="search-input">Search servers...</label>
-        <input type="text" id="search-input" placeholder="Search servers...">
-      </div>
-      <div class="filter-group">
-        <label for="regions">Regions:</label>
-        <select id="regions" name="regions">
-          <option value="all">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="gamemodes">Gamemodes:</label>
-        <select id="gamemodes" name="gamemodes">
-          <option value="all">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="maps">Maps:</label>
-        <select id="maps" name="maps">
-          <option value="all">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="mods">Mods:</label>
-        <select id="mods" name="mods">
-          <option value="all">All</option>
-        </select>
-      </div>
-      <div class="filter-group checkboxes">
-        <div>
-          <input type="checkbox" id="include-full" checked>
-          <label for="include-full">Include full</label>
+
+<Main title="Servers" fullWidth={true}>
+  <div class="servers-container fade-in">
+    <div class="page-header">
+      <h1>Server Browser</h1>
+      <button id="refresh-servers-btn" class="btn btn-primary">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><polyline points="23 4 23 10 17 10"></polyline><path
+            d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg
+        >
+        Refresh
+      </button>
+    </div>
+
+    <div class="servers-layout">
+      <aside class="filters-sidebar">
+        <div class="sidebar-header">
+          <h3>Filters</h3>
         </div>
-        <div>
-          <input type="checkbox" id="include-empty" checked>
-          <label for="include-empty">Include empty</label>
+
+        <div class="filter-group">
+          <label for="search-input">Search</label>
+          <div class="input-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><circle cx="11" cy="11" r="8"></circle><line
+                x1="21"
+                y1="21"
+                x2="16.65"
+                y2="16.65"></line></svg
+            >
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Find a server..."
+            />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label for="regions">Region</label>
+          <select id="regions" name="regions">
+            <option value="all">All Regions</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="gamemodes">Gamemode</label>
+          <select id="gamemodes" name="gamemodes">
+            <option value="all">All Gamemodes</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="maps">Map</label>
+          <select id="maps" name="maps">
+            <option value="all">All Maps</option>
+          </select>
+        </div>
+
+        <div class="filter-group checkboxes">
+          <label class="checkbox-label">
+            <input type="checkbox" id="include-full" checked />
+            <span class="checkmark"></span>
+            Show Full
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="include-empty" checked />
+            <span class="checkmark"></span>
+            Show Empty
+          </label>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="stat-item">
+            <span class="label">Servers</span>
+            <span class="value" id="server-count">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="label">Players</span>
+            <span class="value" id="player-count">0</span>
+          </div>
+          <div class="last-updated">
+            Updated: <span id="last-updated">--:--</span>
+          </div>
+        </div>
+      </aside>
+
+      <div class="servers-content">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="w-icon"></th>
+                <!-- Lock icon -->
+                <th>Region</th>
+                <th>Name</th>
+                <th>Players</th>
+                <th>Gamemode</th>
+                <th>Map</th>
+                <th>Mods</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="servers-table-body">
+              <tr class="loading-row">
+                <td colspan="8" style="text-align: center; padding: 40px;">
+                  <div class="loader"></div>
+                </td>
+              </tr>
+              <tr class="no-servers-row" style="display: none;">
+                <td colspan="8" style="text-align: center; padding: 40px;"
+                  >No servers found matching your criteria.</td
+                >
+              </tr>
+              <!-- Server rows will be dynamically inserted here -->
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="sidebar-footer">
-        <p>Last updated: <span id="last-updated">...</span></p>
-        <p><span id="server-count">...</span> servers listed</p>
-        <p><span id="player-count">...</span> players listed</p>
-      </div>
-    </aside>
-    <div class="servers-content">
-      <table>
-        <thead>
-          <tr>
-            <th></th> <!-- Lock icon -->
-            <th>Region</th>
-            <th>Name</th>
-            <th>Players</th>
-            <th>Gamemode</th>
-            <th>Map</th>
-            <th>Required Mods</th>
-          </tr>
-        </thead>
-        <tbody id="servers-table-body">
-          <tr class="loading-row" style="display: none;">
-            <td colspan="7" style="text-align: center;">
-              <div class="loader"></div>
-            </td>
-          </tr>
-          <tr class="no-servers-row" style="display: none;">
-            <td colspan="7" style="text-align: center;">No servers found.</td>
-          </tr>
-          <!-- Server rows will be dynamically inserted here -->
-        </tbody>
-      </table>
     </div>
   </div>
 </Main>
 
 <style>
-  .lock-icon {
-    margin-right: 5px;
-    vertical-align: middle;
+  .servers-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-top: calc(var(--nav-height) + 40px);
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .servers-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+
+  /* Sidebar Styles */
+  .filters-sidebar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 120px;
+  }
+
+  .sidebar-header h3 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+  }
+
+  .filter-group {
+    margin-bottom: 20px;
+  }
+
+  .filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+
+  .input-wrapper input {
+    padding-left: 36px;
+  }
+
+  input[type="text"]:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  /* Checkboxes */
+  .checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text-main) !important;
+  }
+
+  .checkbox-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    height: 18px;
+    width: 18px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .checkbox-label:hover input ~ .checkmark {
+    border-color: var(--primary);
+  }
+
+  .checkbox-label input:checked ~ .checkmark {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-label input:checked ~ .checkmark:after {
+    display: block;
+  }
+
+  /* Sidebar Footer */
+  .sidebar-footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+  }
+
+  .stat-item .label {
+    color: var(--text-muted);
+  }
+  .stat-item .value {
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .last-updated {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* Table Styles */
+  .servers-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+
+  th {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-main);
+    font-size: 0.95rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .w-icon {
+    width: 40px;
+  }
+
+  .join-btn {
     display: inline-block;
+    padding: 6px 16px;
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+  .join-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  /* Loader */
+  .loader {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .servers-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .filters-sidebar {
+      position: static;
+    }
   }
 </style>
 
 <script>
   function GetGamemode(playlist: string): string {
     switch (playlist) {
-      case "fs_dm": return "TDM";
-      case "fs_prophunt": return "Prophunt";
-      case "fs_1v1": return "1v1";
-      case "fs_duckhunt": return "Duckhunt";
-      case "fs_mantlejumppractice": return "Mantle Jump";
-      case "fs_infected": return "Infected";
-      case "custom_tdm": return "TDM";
-      case "custom_ctf": return "Capture The Flag";
-      case "survival": return "Battle Royal";
-      case "fs_movementgym": return "Movement Gym";
-      case "fs_survival_solos": return "BR Solo";
-      default: return playlist;
+      case "fs_dm":
+        return "TDM";
+      case "fs_prophunt":
+        return "Prophunt";
+      case "fs_1v1":
+        return "1v1";
+      case "fs_duckhunt":
+        return "Duckhunt";
+      case "fs_mantlejumppractice":
+        return "Mantle Jump";
+      case "fs_infected":
+        return "Infected";
+      case "custom_tdm":
+        return "TDM";
+      case "custom_ctf":
+        return "Capture The Flag";
+      case "survival":
+        return "Battle Royal";
+      case "fs_movementgym":
+        return "Movement Gym";
+      case "fs_survival_solos":
+        return "BR Solo";
+      default:
+        return playlist;
     }
   }
 
   function GetMapName(mapname: string): string {
     switch (mapname) {
-      case "mp_rr_canyonlands_staging": return "Firing Range";
-      case "mp_rr_aqueduct": return "Overflow";
-      case "mp_rr_aqueduct_night": return "Overflow After Dark";
-      case "mp_rr_ashs_redemption": return "Ashs Redemption";
-      case "mp_rr_canyonlands_64k_x_64k": return "Kings Canyon S1";
-      case "mp_rr_canyonlands_mu1": return "Kings Canyon S2";
-      case "mp_rr_canyonlands_mu1_night": return "Kings Canyon S2 After Dark";
-      case "mp_rr_desertlands_64k_x_64k": return "Worlds Edge";
-      case "mp_rr_desertlands_64k_x_64k_nx": return "Worlds Edge After Dark";
-      case "mp_rr_desertlands_64k_x_64k_tt": return "Worlds Edge Mirage Voyage";
-      case "mp_rr_arena_composite": return "Drop Off";
-      case "mp_rr_arena_skygarden": return "Encore";
-      case "mp_rr_party_crasher": return "Party Crasher";
-      case "mp_lobby": return "Lobby";
-      default: return mapname;
+      case "mp_rr_canyonlands_staging":
+        return "Firing Range";
+      case "mp_rr_aqueduct":
+        return "Overflow";
+      case "mp_rr_aqueduct_night":
+        return "Overflow After Dark";
+      case "mp_rr_ashs_redemption":
+        return "Ashs Redemption";
+      case "mp_rr_canyonlands_64k_x_64k":
+        return "Kings Canyon S1";
+      case "mp_rr_canyonlands_mu1":
+        return "Kings Canyon S2";
+      case "mp_rr_canyonlands_mu1_night":
+        return "Kings Canyon S2 After Dark";
+      case "mp_rr_desertlands_64k_x_64k":
+        return "Worlds Edge";
+      case "mp_rr_desertlands_64k_x_64k_nx":
+        return "Worlds Edge After Dark";
+      case "mp_rr_desertlands_64k_x_64k_tt":
+        return "Worlds Edge Mirage Voyage";
+      case "mp_rr_arena_composite":
+        return "Drop Off";
+      case "mp_rr_arena_skygarden":
+        return "Encore";
+      case "mp_rr_party_crasher":
+        return "Party Crasher";
+      case "mp_lobby":
+        return "Lobby";
+      default:
+        return mapname;
     }
   }
 
   async function fetchServers() {
-    const tableBody = document.getElementById('servers-table-body');
-    const loadingRow = document.querySelector('.loading-row') as HTMLElement;
-    const noServersRow = document.querySelector('.no-servers-row') as HTMLElement;
+    const tableBody = document.getElementById("servers-table-body");
+    const loadingRow = document.querySelector(".loading-row") as HTMLElement;
+    const noServersRow = document.querySelector(
+      ".no-servers-row",
+    ) as HTMLElement;
 
     if (!tableBody || !loadingRow || !noServersRow) return;
 
     // Show loader and hide other messages
-    loadingRow.style.display = '';
-    noServersRow.style.display = 'none';
-    const serverRows = tableBody.querySelectorAll('tr.server-row');
-    serverRows.forEach(row => row.remove());
-    
-    const response = await fetch('/api/servers', {
-      method: 'POST',
-      body: JSON.stringify({}),
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const { servers } = await response.json();
-    
-    // Hide loader
-    loadingRow.style.display = 'none';
+    loadingRow.style.display = "";
+    noServersRow.style.display = "none";
+    const serverRows = tableBody.querySelectorAll("tr.server-row");
+    serverRows.forEach((row) => row.remove());
 
-    const serverCount = document.getElementById('server-count');
-    const playerCount = document.getElementById('player-count');
-    const lastUpdated = document.getElementById('last-updated');
-
-    if (!serverCount || !playerCount || !lastUpdated) return;
-
-    let totalPlayers = 0;
-    let totalMaxPlayers = 0;
-
-    if (servers.length === 0) {
-      noServersRow.style.display = '';
-    } else {
-      servers.forEach((server: any) => {
-        totalPlayers += server.playerCount;
-        totalMaxPlayers += server.maxPlayers;
-
-        const joinButtonHTML = server.playlist === 'discord.gg/GcJSMUGJyD' 
-          ? '' 
-          : `<a href="r5valk://join?ip=${server.ip}&port=${server.port}" class="join-btn">Join</a>`;
-
-        const passwordIcon = server.hasPassword 
-          ? `<svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
-          : '';
-
-        // Normalize requiredMods: backend may return JSON string or array
-        let requiredMods: string[] = [];
-        if (Array.isArray(server.requiredMods)) {
-          requiredMods = server.requiredMods.filter((m: any) => typeof m === 'string' && m.trim().length > 0);
-        } else if (typeof server.requiredMods === 'string') {
-          try {
-            const parsed = JSON.parse(server.requiredMods);
-            if (Array.isArray(parsed)) {
-              requiredMods = parsed.filter((m: any) => typeof m === 'string' && m.trim().length > 0);
-            }
-          } catch {}
-        }
-        const requiredModsText = requiredMods.length > 0 ? requiredMods.join(', ') : '-';
-
-        const row = document.createElement('tr');
-        row.className = 'server-row';
-        row.dataset.name = server.name.toLowerCase();
-        const rowHTML = `
-            <td>${passwordIcon}</td>
-            <td>${server.region || 'N/A'}</td>
-            <td>${server.name}</td>
-            <td>${server.playerCount}/${server.maxPlayers}</td>
-            <td>${GetGamemode(server.playlist)}</td>
-            <td>${GetMapName(server.map)}</td>
-            <td>${requiredModsText}</td>
-        `;
-        row.innerHTML = rowHTML;
-        tableBody.appendChild(row);
+    try {
+      const response = await fetch("/api/servers", {
+        method: "POST",
+        body: JSON.stringify({}),
+        headers: { "Content-Type": "application/json" },
       });
+      const { servers } = await response.json();
+
+      // Hide loader
+      loadingRow.style.display = "none";
+
+      const serverCount = document.getElementById("server-count");
+      const playerCount = document.getElementById("player-count");
+      const lastUpdated = document.getElementById("last-updated");
+
+      if (!serverCount || !playerCount || !lastUpdated) return;
+
+      let totalPlayers = 0;
+      let totalMaxPlayers = 0;
+
+      if (servers.length === 0) {
+        noServersRow.style.display = "";
+      } else {
+        servers.forEach((server: any) => {
+          totalPlayers += server.playerCount;
+          totalMaxPlayers += server.maxPlayers;
+
+          const joinButtonHTML =
+            server.playlist === "discord.gg/GcJSMUGJyD"
+              ? ""
+              : `<a href="r5valk://join?ip=${server.ip}&port=${server.port}" class="join-btn">Join</a>`;
+
+          const passwordIcon = server.hasPassword
+            ? `<svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
+            : "";
+
+          // Normalize requiredMods: backend may return JSON string or array
+          let requiredMods: string[] = [];
+          if (Array.isArray(server.requiredMods)) {
+            requiredMods = server.requiredMods.filter(
+              (m: any) => typeof m === "string" && m.trim().length > 0,
+            );
+          } else if (typeof server.requiredMods === "string") {
+            try {
+              const parsed = JSON.parse(server.requiredMods);
+              if (Array.isArray(parsed)) {
+                requiredMods = parsed.filter(
+                  (m: any) => typeof m === "string" && m.trim().length > 0,
+                );
+              }
+            } catch {}
+          }
+          const requiredModsText =
+            requiredMods.length > 0 ? requiredMods.join(", ") : "-";
+
+          const row = document.createElement("tr");
+          row.className = "server-row";
+          row.dataset.name = server.name.toLowerCase();
+          const rowHTML = `
+                <td>${passwordIcon}</td>
+                <td>${server.region || "N/A"}</td>
+                <td>${server.name}</td>
+                <td>${server.playerCount}/${server.maxPlayers}</td>
+                <td>${GetGamemode(server.playlist)}</td>
+                <td>${GetMapName(server.map)}</td>
+                <td>${requiredModsText}</td>
+                <td>${joinButtonHTML}</td>
+            `;
+          row.innerHTML = rowHTML;
+          tableBody.appendChild(row);
+        });
+      }
+
+      serverCount.textContent = `${servers.length}`;
+      playerCount.textContent = `${totalPlayers}`;
+      lastUpdated.textContent = new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Failed to fetch servers", error);
+      loadingRow.style.display = "none";
+      noServersRow.textContent = "Failed to load servers.";
+      noServersRow.style.display = "";
     }
-    
-    serverCount.textContent = `${servers.length} / ${servers.length}`;
-    playerCount.textContent = `${totalPlayers} / ${totalMaxPlayers}`;
-    lastUpdated.textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   function filterServers() {
-    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const searchInput = document.getElementById(
+      "search-input",
+    ) as HTMLInputElement;
     if (!searchInput) return;
     const filter = searchInput.value.toLowerCase();
-    const rows = document.querySelectorAll('.server-row');
-    const noServersRow = document.querySelector('.no-servers-row') as HTMLElement;
+    const rows = document.querySelectorAll(".server-row");
+    const noServersRow = document.querySelector(
+      ".no-servers-row",
+    ) as HTMLElement;
     if (!noServersRow) return;
 
     let visibleRows = 0;
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const name = (row as HTMLElement).dataset.name;
       if (name && name.includes(filter)) {
-        (row as HTMLElement).style.display = '';
+        (row as HTMLElement).style.display = "";
         visibleRows++;
       } else {
-        (row as HTMLElement).style.display = 'none';
+        (row as HTMLElement).style.display = "none";
       }
     });
 
     if (rows.length > 0) {
-      noServersRow.style.display = visibleRows > 0 ? 'none' : '';
+      noServersRow.style.display = visibleRows > 0 ? "none" : "";
     }
   }
 
   function initializeServersPage() {
     // Guard to ensure this only runs on the servers page
-    if (!document.getElementById('servers-table-body')) return;
+    if (!document.getElementById("servers-table-body")) return;
 
     fetchServers();
-    const searchInput = document.getElementById('search-input');
-    if(searchInput) {
-        searchInput.addEventListener('keyup', filterServers);
+    const searchInput = document.getElementById("search-input");
+    if (searchInput) {
+      searchInput.addEventListener("keyup", filterServers);
     }
-    const refreshBtn = document.getElementById('refresh-servers-btn');
+    const refreshBtn = document.getElementById("refresh-servers-btn");
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', fetchServers);
+      refreshBtn.addEventListener("click", fetchServers);
     }
   }
 
@@ -255,5 +632,5 @@ import Main from '../layouts/Main.astro';
   initializeServersPage();
 
   // Run on subsequent page loads
-  document.addEventListener('astro:after-swap', initializeServersPage);
+  document.addEventListener("astro:after-swap", initializeServersPage);
 </script>

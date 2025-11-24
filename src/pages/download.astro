@@ -1,23 +1,206 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
 ---
-<Main>
-  <div class="download-container fade-in-on-scroll">
-    <h1>Valkyrie Launcher Download</h1>
-    <p>Click the button below to download the official launcher.</p>
-    <a href="https://github.com/r5valkyrie/launcher_releases/releases/latest" class="download-btn" download>Download</a>
 
-    <div class="instructions">
-      <h2>Installation Instructions</h2>
-      <ol>
-        <li>Download the ` R5-Valkyrie-Launcher-Setup-*.exe ` file using the button above.</li>
-        <li>Run the installer and follow the on-screen prompts.</li>
-        <li>Once installed, the launcher will open.</li>
-        <li>Choose what release branch you want to play on.</li>
-        <li>Click on the "Install" button to download the game files.</li>
-        <li>Once the game files are downloaded, you can launch the game by clicking on the "Play" button.</li>
-        <li>You're all set!</li>
-      </ol>
-    </div>
-  </div>
+<Main title="Download">
+	<div class="container page-container fade-in">
+		<div class="page-header centered">
+			<h1>Download Valkyrie</h1>
+			<p class="subtitle">
+				Get started with the ultimate Apex Legends modding platform
+			</p>
+		</div>
+
+		<div class="download-card">
+			<div class="download-icon">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="48"
+					height="48"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+					></path><polyline points="7 10 12 15 17 10"></polyline><line
+						x1="12"
+						y1="15"
+						x2="12"
+						y2="3"></line></svg
+				>
+			</div>
+			<h2>Valkyrie Launcher</h2>
+			<p class="version-info">Latest Version • Windows 10/11</p>
+
+			<div class="download-actions">
+				<a
+					href="https://github.com/r5valkyrie/r5valkyrie/releases/latest/download/Valkyrie.exe"
+					class="btn btn-primary btn-lg"
+				>
+					Download Installer
+				</a>
+				<a
+					href="https://github.com/r5valkyrie/launcher"
+					target="_blank"
+					class="btn btn-glass"
+				>
+					View Source Code
+				</a>
+			</div>
+		</div>
+
+		<div class="installation-guide">
+			<h3>Installation Instructions</h3>
+			<div class="steps">
+				<div class="step">
+					<div class="step-number">1</div>
+					<div class="step-content">
+						<h4>Download</h4>
+						<p>
+							Download the Valkyrie Launcher using the button
+							above.
+						</p>
+					</div>
+				</div>
+				<div class="step">
+					<div class="step-number">2</div>
+					<div class="step-content">
+						<h4>Install</h4>
+						<p>
+							Run the installer and follow the on-screen
+							instructions to set up Valkyrie.
+						</p>
+					</div>
+				</div>
+				<div class="step">
+					<div class="step-number">3</div>
+					<div class="step-content">
+						<h4>Play</h4>
+						<p>
+							Launch Valkyrie, select your game directory if
+							prompted, and start playing!
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </Main>
+
+<style>
+	.page-container {
+		padding-top: 40px;
+		max-width: 800px;
+	}
+
+	.page-header.centered {
+		text-align: center;
+		margin-bottom: 60px;
+	}
+
+	.subtitle {
+		color: var(--text-muted);
+		font-size: 1.2rem;
+		margin-top: 10px;
+	}
+
+	.download-card {
+		background: var(--bg-card);
+		border: 1px solid var(--border-light);
+		border-radius: var(--radius-lg);
+		padding: 60px 40px;
+		text-align: center;
+		backdrop-filter: blur(10px);
+		margin-bottom: 60px;
+		box-shadow: var(--shadow-glow);
+	}
+
+	.download-icon {
+		width: 80px;
+		height: 80px;
+		background: rgba(99, 102, 241, 0.1);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto 24px;
+		color: var(--primary);
+	}
+
+	.download-card h2 {
+		font-size: 2rem;
+		margin-bottom: 8px;
+	}
+
+	.version-info {
+		color: var(--text-muted);
+		margin-bottom: 32px;
+	}
+
+	.download-actions {
+		display: flex;
+		justify-content: center;
+		gap: 20px;
+		flex-wrap: wrap;
+	}
+
+	.btn-lg {
+		padding: 16px 32px;
+		font-size: 1.1rem;
+	}
+
+	.installation-guide h3 {
+		text-align: center;
+		margin-bottom: 40px;
+	}
+
+	.steps {
+		display: grid;
+		gap: 30px;
+	}
+
+	.step {
+		display: flex;
+		gap: 20px;
+		background: rgba(255, 255, 255, 0.03);
+		padding: 24px;
+		border-radius: var(--radius-md);
+		border: 1px solid var(--border-light);
+	}
+
+	.step-number {
+		width: 40px;
+		height: 40px;
+		background: var(--bg-dark);
+		border: 1px solid var(--border-light);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+		color: var(--primary);
+		flex-shrink: 0;
+	}
+
+	.step-content h4 {
+		font-size: 1.1rem;
+		margin-bottom: 8px;
+	}
+
+	.step-content p {
+		color: var(--text-muted);
+		font-size: 0.95rem;
+	}
+
+	@media (max-width: 600px) {
+		.download-actions {
+			flex-direction: column;
+		}
+
+		.btn {
+			width: 100%;
+		}
+	}
+</style>

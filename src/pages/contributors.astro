@@ -5,99 +5,150 @@ const GITHUB_REPO = 'r5valkyrie/docs';
 const GITHUB_BRANCH = 'main';
 const GITHUB_CONTRIBUTORS_PATH = 'contributors';
 
-async function fetchFile(fileName: string) {
-    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}?t=${Date.now()}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch ${fileName}`);
+async function fetchContributors(fileName: string) {
+    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error(`Failed to fetch ${fileName}. Status: ${response.status}`);
+            return [];
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching ${fileName}:`, error);
+        return [];
     }
-    return response.json();
 }
 
 const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
-    fetchFile('contributors.json'),
-    fetchFile('r5reloaded_contributors.json')
+    fetchContributors('contributors.json'),
+    fetchContributors('r5reloaded_contributors.json')
 ]);
 ---
 
-<Main>
-    <div class="contributors-container">
-        <h1>Valkyrie Contributors</h1>
-        <div class="contributors-grid">
-            {valkyrieContributors.map((contributor: any) => (
-                <div class="contributor-card fade-in-on-scroll">
-                    <img src={contributor.avatar} alt={contributor.name} class="contributor-avatar" />
-                    <h2>{contributor.name}</h2>
-                    <p>{contributor.description}</p>
-                </div>
-            ))}
-        </div>
+<Main title="Contributors">
+	<div class="container page-container fade-in">
+		<div class="page-header centered">
+			<h1>Contributors</h1>
+			<p class="subtitle">The amazing people who make this project possible</p>
+		</div>
 
-        <h1 class="section-title">Original R5Reloaded Contributors</h1>
-        <div class="contributors-grid">
-            {r5reloadedContributors.map((contributor: any) => (
-                <div class="contributor-card fade-in-on-scroll">
-                    <img src={contributor.avatar} alt={contributor.name} class="contributor-avatar" />
-                    <h2>{contributor.name}</h2>
-                    <p>{contributor.description}</p>
-                </div>
-            ))}
-        </div>
-    </div>
+		<section class="contributors-section">
+			<h2>Valkyrie Team</h2>
+			<div class="contributors-grid">
+				{valkyrieContributors.map((contributor: any) => (
+					<a href={contributor.url} target="_blank" class="contributor-card">
+						<div class="avatar-wrapper">
+							<img src={contributor.avatar} alt={contributor.name} loading="lazy" />
+						</div>
+						<div class="contributor-info">
+							<h3>{contributor.name}</h3>
+							<span class="role">{contributor.role || 'Contributor'}</span>
+						</div>
+					</a>
+				))}
+			</div>
+		</section>
+
+		<section class="contributors-section">
+			<h2>R5Reloaded Contributors</h2>
+			<div class="contributors-grid">
+				{r5reloadedContributors.map((contributor: any) => (
+					<a href={contributor.url} target="_blank" class="contributor-card">
+						<div class="avatar-wrapper">
+							<img src={contributor.avatar} alt={contributor.name} loading="lazy" />
+						</div>
+						<div class="contributor-info">
+							<h3>{contributor.name}</h3>
+							<span class="role">R5Reloaded</span>
+						</div>
+					</a>
+				))}
+			</div>
+		</section>
+	</div>
 </Main>
 
 <style>
-    .contributors-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        color: var(--text-color);
-        width: 100%;
-    }
+	.page-container {
+		padding-top: 40px;
+	}
 
-    h1 {
-        font-size: 2.5rem;
-        text-align: center;
-        margin-bottom: 2rem;
-        color: white;
-    }
-    
-    .section-title {
-        margin-top: 4rem;
-    }
+	.page-header.centered {
+		text-align: center;
+		margin-bottom: 60px;
+	}
 
-    .contributors-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 2rem;
-    }
+	.subtitle {
+		color: var(--text-muted);
+		font-size: 1.2rem;
+		margin-top: 10px;
+	}
 
-    .contributor-card {
-        background-color: rgba(25, 28, 34, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 8px;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+	.contributors-section {
+		margin-bottom: 80px;
+	}
 
-    .contributor-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        margin-bottom: 1rem;
-        border: 3px solid var(--primary-color);
-    }
+	.contributors-section h2 {
+		font-size: 1.8rem;
+		margin-bottom: 30px;
+		padding-bottom: 10px;
+		border-bottom: 1px solid var(--border-light);
+	}
 
-    .contributor-card h2 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-        color: white;
-    }
+	.contributors-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 24px;
+	}
 
-    .contributor-card p {
-        line-height: 1.6;
-    }
+	.contributor-card {
+		background: var(--bg-card);
+		border: 1px solid var(--border-light);
+		border-radius: var(--radius-lg);
+		padding: 24px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		transition: all 0.3s ease;
+		text-decoration: none;
+	}
+
+	.contributor-card:hover {
+		transform: translateY(-4px);
+		background: var(--bg-card-hover);
+		border-color: var(--border-hover);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.avatar-wrapper {
+		width: 80px;
+		height: 80px;
+		border-radius: 50%;
+		overflow: hidden;
+		margin-bottom: 16px;
+		border: 2px solid var(--border-light);
+		background: rgba(0,0,0,0.2);
+	}
+
+	.avatar-wrapper img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.contributor-info h3 {
+		font-size: 1.1rem;
+		margin-bottom: 4px;
+		color: var(--text-main);
+	}
+
+	.role {
+		font-size: 0.85rem;
+		color: var(--text-muted);
+		background: rgba(255, 255, 255, 0.05);
+		padding: 4px 10px;
+		border-radius: var(--radius-full);
+	}
 </style>

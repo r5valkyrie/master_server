@@ -18,7 +18,7 @@ export function addSecurityHeaders(response: Response): Response {
         "img-src 'self' data: https:", // Allow images from self, data URLs, and HTTPS
         "font-src 'self' https://cdn.jsdelivr.net", // Allow fonts from CDN
         "connect-src 'self' https://api.steampowered.com https://cdn.jsdelivr.net", // Allow Steam API and CDN
-        "media-src 'self'",
+        "media-src 'self' https://blaze.playvalkyrie.org",
         "object-src 'none'", // Block object/embed/applet
         "base-uri 'self'",
         "form-action 'self'",

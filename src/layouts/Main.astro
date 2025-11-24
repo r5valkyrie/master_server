@@ -1,136 +1,177 @@
 ---
-import { ClientRouter } from 'astro:transitions';
+import { ClientRouter } from "astro:transitions";
 const { pathname } = Astro.url;
 
-// Preload contributor images
-const GITHUB_REPO = 'r5valkyrie/docs';
-const GITHUB_BRANCH = 'main';
-const GITHUB_CONTRIBUTORS_PATH = 'contributors';
+// Preload contributor images logic remains same
+const GITHUB_REPO = "r5valkyrie/docs";
+const GITHUB_BRANCH = "main";
+const GITHUB_CONTRIBUTORS_PATH = "contributors";
 
 async function fetchContributorsForPreload(fileName: string) {
-    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.error(`Failed to fetch ${fileName} for preloading.`);
-            return [];
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(`Error preloading ${fileName}:`, error);
-        return [];
-    }
+  const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error(`Error preloading ${fileName}:`, error);
+    return [];
+  }
 }
 
 const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
-    fetchContributorsForPreload('contributors.json'),
-    fetchContributorsForPreload('r5reloaded_contributors.json')
+  fetchContributorsForPreload("contributors.json"),
+  fetchContributorsForPreload("r5reloaded_contributors.json"),
 ]);
 
 const contributorImages = [
-    ...valkyrieContributors.map((c: any) => c.avatar),
-    ...r5reloadedContributors.map((c: any) => c.avatar)
+  ...valkyrieContributors.map((c: any) => c.avatar),
+  ...r5reloadedContributors.map((c: any) => c.avatar),
 ].filter(Boolean);
+
+interface Props {
+  title?: string;
+  fullWidth?: boolean;
+}
+
+const { title, fullWidth = false } = Astro.props;
+const pageTitle = title ? `${title} | Valkyrie` : "Valkyrie";
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valkyrie</title>
-  <link rel="stylesheet" type="text/css" href="/css/styles.css">
-  <ClientRouter />
-  {contributorImages.map(imageUrl => <link rel="preload" href={imageUrl} as="image" />)}
-</head>
-<body>
-  <div id="bg-blur"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+    <ClientRouter />
+    {
+      contributorImages.map((imageUrl) => (
+        <link rel="preload" href={imageUrl} as="image" />
+      ))
+    }
+  </head>
+  <body>
+    <div id="bg-fixed"></div>
 
-  {pathname.startsWith('/servers') ? (
-    <div class="brand-toggle-pill">
-      <button id="sidebar-toggle" class="sidebar-toggle-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    <header class="main-header">
+      <a href="/" class="logo">
+        <!-- Placeholder for Logo Icon if needed -->
+        <span class="text-gradient">Valkyrie</span>
+      </a>
+
+      <button class="mobile-toggle" aria-label="Toggle Menu">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><line x1="3" y1="12" x2="21" y2="12"></line><line
+            x1="3"
+            y1="6"
+            x2="21"
+            y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg
+        >
       </button>
-      <a href="/" class="logo">Valkyrie</a>
-    </div>
-  ) : (
-    <a href="/" class="logo-pill">Valkyrie</a>
-  )}
 
-  <!-- Center Bar for Main Nav -->
-  <header class="main-header">
-    <nav class="main-nav">
-        <a href="/" class={pathname === '/' ? 'active' : ''}>Home</a>
-        <a href="/servers" class={pathname.startsWith('/servers') ? 'active' : ''}>Servers</a>
-        <a href="/mods" class={pathname.startsWith('/mods') ? 'active' : ''}>Mods</a>
-        <a href="/download" class={pathname.startsWith('/download') ? 'active' : ''}>Download</a>
-        <a href="/docs" class={pathname.startsWith('/docs') ? 'active' : ''}>Docs</a>
-        <a href="/contributors" class={pathname.startsWith('/contributors') ? 'active' : ''}>Contributors</a>
-        <a href="https://discord.gg/GcJSMUGJyD" target="_blank">Discord</a>
-    </nav>
-  </header>
-  <main transition:animate="slide">
-    <slot />
-  </main>
-  <footer style="margin: 24px 0; text-align: center; opacity: .8;">
-    <a href="/eula" style="color: #cfd6dd; text-decoration: underline;">EULA</a>
-  </footer>
-  <script>
-    function setupToggle() {
-      const serversContainer = document.querySelector('.servers-container');
-      const toggleBtn = document.getElementById('sidebar-toggle');
-      if (toggleBtn && serversContainer) {
-        toggleBtn.addEventListener('click', () => {
-          serversContainer.classList.toggle('sidebar-collapsed');
-        });
-      }
-    }
+      <nav class="main-nav">
+        <a href="/" class={`nav-link ${pathname === "/" ? "active" : ""}`}
+          >Home</a
+        >
+        <a
+          href="/servers"
+          class={`nav-link ${pathname.startsWith("/servers") ? "active" : ""}`}
+          >Servers</a
+        >
+        <a
+          href="/mods"
+          class={`nav-link ${pathname.startsWith("/mods") ? "active" : ""}`}
+          >Mods</a
+        >
+        <a
+          href="/download"
+          class={`nav-link ${pathname.startsWith("/download") ? "active" : ""}`}
+          >Download</a
+        >
+        <a
+          href="/docs"
+          class={`nav-link ${pathname.startsWith("/docs") ? "active" : ""}`}
+          >Docs</a
+        >
+        <a
+          href="/contributors"
+          class={`nav-link ${pathname.startsWith("/contributors") ? "active" : ""}`}
+          >Contributors</a
+        >
+        <a href="https://discord.gg/GcJSMUGJyD" target="_blank" class="nav-link"
+          >Discord</a
+        >
+      </nav>
+    </header>
 
-    function setupObserver() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting || entry.intersectionRatio > 0) {
-            entry.target.classList.add('is-visible');
-          }
-        });
-      }, {
-        threshold: 0
-      });
+    <main class={!fullWidth ? "main-container" : ""} transition:animate="fade">
+      <slot />
+    </main>
 
-      const isInViewport = (el: Element) => {
-        const rect = el.getBoundingClientRect();
-        const vh = window.innerHeight || document.documentElement.clientHeight;
-        const vw = window.innerWidth || document.documentElement.clientWidth;
-        return (
-          rect.bottom >= 0 &&
-          rect.right >= 0 &&
-          rect.top <= vh &&
-          rect.left <= vw
-        );
-      };
+    <footer class="main-footer">
+      <div class="footer-content">
+        <div style="opacity: 0.7;">
+          &copy; {new Date().getFullYear()} Valkyrie. All rights reserved.
+        </div>
+        <div class="footer-links">
+          <a href="/eula">EULA</a>
+          <a href="https://github.com/r5valkyrie" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </footer>
 
-      const targets = document.querySelectorAll('.fade-in-on-scroll');
-      targets.forEach(target => {
-        if (isInViewport(target)) {
-          target.classList.add('is-visible');
-        } else {
-          observer.observe(target);
+    <script>
+      function setupMobileMenu() {
+        const toggle = document.querySelector(".mobile-toggle");
+        const nav = document.querySelector(".main-nav");
+
+        if (toggle && nav) {
+          toggle.addEventListener("click", () => {
+            nav.classList.toggle("open");
+          });
         }
-      });
-    }
+      }
 
-    // Expose setupObserver globally
-    (window as any).setupObserver = setupObserver;
+      function setupObserver() {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+              }
+            });
+          },
+          { threshold: 0.1 },
+        );
 
-    document.addEventListener('DOMContentLoaded', () => {
-      setupToggle();
-      setupObserver();
-    });
+        document
+          .querySelectorAll(".fade-in-on-scroll")
+          .forEach((el) => observer.observe(el));
+      }
 
-    document.addEventListener('astro:after-swap', () => {
-        setupToggle();
+      // Expose globally if needed by pages
+      (window as any).setupObserver = setupObserver;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setupMobileMenu();
         setupObserver();
-    });
-  </script>
-</body>
+      });
+
+      document.addEventListener("astro:after-swap", () => {
+        setupMobileMenu();
+        setupObserver();
+      });
+    </script>
+  </body>
 </html>

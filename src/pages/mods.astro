@@ -1,105 +1,316 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
 ---
 
 <Main title="Mods">
-	<div class="container mods-page">
-		<div class="search-container">
-			<input type="text" id="search-bar" placeholder="Search for mods...">
+	<div class="container page-container fade-in">
+		<div class="page-header centered">
+			<h1>Community Mods</h1>
+			<p class="subtitle">
+				Enhance your game with community-created content
+			</p>
 		</div>
-		<div class="grid" id="mods-grid">
-			<div class="loader"></div>
+
+		<div class="search-section sticky-search">
+			<div class="search-wrapper">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					><circle cx="11" cy="11" r="8"></circle><line
+						x1="21"
+						y1="21"
+						x2="16.65"
+						y2="16.65"></line></svg
+				>
+				<input
+					type="text"
+					id="search-bar"
+					placeholder="Search for mods..."
+				/>
+			</div>
+		</div>
+
+		<div class="mods-grid" id="mods-grid">
+			<div class="loader-wrapper">
+				<div class="loader"></div>
+			</div>
 		</div>
 	</div>
 </Main>
+
+<style>
+	.page-container {
+		padding-top: 40px;
+	}
+
+	.page-header.centered {
+		text-align: center;
+		margin-bottom: 40px;
+	}
+
+	.subtitle {
+		color: var(--text-muted);
+		font-size: 1.1rem;
+		margin-top: 10px;
+	}
+
+	.search-section {
+		margin-bottom: 40px;
+		display: flex;
+		justify-content: center;
+	}
+
+	.sticky-search {
+		position: sticky;
+		top: 100px;
+		z-index: 100;
+		padding: 10px 0;
+	}
+
+	.search-wrapper {
+		position: relative;
+		width: 100%;
+		max-width: 600px;
+	}
+
+	.search-wrapper svg {
+		position: absolute;
+		left: 16px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: var(--text-dim);
+	}
+
+	#search-bar {
+		width: 100%;
+		background: rgba(20, 20, 25, 0.8);
+		backdrop-filter: blur(10px);
+		border: 1px solid var(--border-light);
+		border-radius: var(--radius-full);
+		padding: 16px 16px 16px 48px;
+		color: var(--text-main);
+		font-size: 1rem;
+		box-shadow: var(--shadow-sm);
+		transition: all 0.2s;
+	}
+
+	#search-bar:focus {
+		outline: none;
+		border-color: var(--primary);
+		box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+	}
+
+	.mods-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 24px;
+		padding-bottom: 40px;
+		min-height: 100vh;
+		align-content: start;
+	}
+
+	.loader-wrapper {
+		grid-column: 1 / -1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
+		min-height: 50vh;
+		padding: 40px;
+	}
+
+	.loader {
+		border: 3px solid rgba(255, 255, 255, 0.1);
+		border-top: 3px solid var(--primary);
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+</style>
+
+<!-- Global styles for dynamically created cards -->
+<style is:global>
+	.mod-card {
+		background: var(--bg-card);
+		border: 1px solid var(--border-light);
+		border-radius: var(--radius-lg);
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		transition: all 0.3s ease;
+		height: 100%;
+	}
+
+	.mod-card:hover {
+		transform: translateY(-4px);
+		background: var(--bg-card-hover);
+		border-color: var(--border-hover);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.mod-header {
+		padding: 24px;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		border-bottom: 1px solid var(--border-light);
+	}
+
+	.mod-icon-wrapper {
+		width: 64px;
+		height: 64px;
+		border-radius: 12px;
+		overflow: hidden;
+		background: rgba(0, 0, 0, 0.2);
+		flex-shrink: 0;
+	}
+
+	.mod-icon {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.mod-title h2 {
+		font-size: 1.25rem;
+		margin-bottom: 4px;
+		line-height: 1.3;
+	}
+
+	.mod-body {
+		padding: 24px;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.mod-desc {
+		color: var(--text-muted);
+		font-size: 0.95rem;
+		margin-bottom: 20px;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.mod-actions {
+		margin-top: auto;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+
+	.mod-btn {
+		padding: 8px 16px;
+		border-radius: var(--radius-sm);
+		text-align: center;
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: all 0.2s;
+	}
+
+	.mod-btn-primary {
+		background: var(--primary);
+		color: white;
+	}
+
+	.mod-btn-primary:hover {
+		background: var(--primary-hover);
+	}
+
+	.mod-btn-secondary {
+		background: rgba(255, 255, 255, 0.05);
+		color: var(--text-main);
+		border: 1px solid var(--border-light);
+	}
+
+	.mod-btn-secondary:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+</style>
 
 <script>
 	let allMods: any[] = [];
 	let filteredMods: any[] = [];
 	let renderedCount = 0;
-	const BATCH_SIZE = 9;
+	const BATCH_SIZE = 12;
 	let infiniteObserver: IntersectionObserver | null = null;
-	let scrollFallbackAttached = false;
 
 	function createModCard(mod: any) {
-		const card = document.createElement('div');
-		card.className = 'card fade-in-on-scroll';
+		const card = document.createElement("div");
+		card.className = "mod-card fade-in-on-scroll";
 
 		const latestVersion = mod.versions?.[0] || {};
-		const iconUrl = mod.icon || latestVersion.icon || 'https://placehold.co/100?text=PlaceHolder';
-		const description = latestVersion?.description || 'No description available.';
-		const downloadUrl = 'r5v://mod/install?name=' + mod.full_name || '#';
-		const packageUrl = mod.package_url || '#';
-		const displayName = (mod.name || '').replace(/_/g, ' ');
+		const iconUrl =
+			mod.icon ||
+			latestVersion.icon ||
+			"https://placehold.co/100?text=Mod";
+		const description =
+			latestVersion?.description || "No description available.";
+		const downloadUrl = "r5v://mod/install?name=" + mod.full_name || "#";
+		const packageUrl = mod.package_url || "#";
+		const displayName = (mod.name || "").replace(/_/g, " ");
 
 		card.innerHTML = `
-			<div class="mod-icon-wrapper">
-				<div class="img-loader"></div>
-				<img alt="${displayName}" class="mod-icon" loading="lazy" style="opacity: 0;" />
-			</div>
-			<div class="card-content">
-				<div class="card-main-content">
-					<h2>${displayName}</h2>
-					<p>${description}</p>
+			<div class="mod-header">
+				<div class="mod-icon-wrapper">
+					<img src="${iconUrl}" alt="${displayName}" class="mod-icon" loading="lazy" onerror="this.src='https://placehold.co/100?text=Mod'">
 				</div>
-				<div class="card-actions">
-					<a href="${downloadUrl}" class="btn download-btn">Download</a>
-					<a href="${packageUrl}" target="_blank" rel="noopener noreferrer" class="btn thunder-btn">View on Thunderstore</a>
+				<div class="mod-title">
+					<h2>${displayName}</h2>
+				</div>
+			</div>
+			<div class="mod-body">
+				<p class="mod-desc">${description}</p>
+				<div class="mod-actions">
+					<a href="${downloadUrl}" class="mod-btn mod-btn-primary">Install</a>
+					<a href="${packageUrl}" target="_blank" rel="noopener noreferrer" class="mod-btn mod-btn-secondary">Details</a>
 				</div>
 			</div>
 		`;
-
-		const img = card.querySelector('.mod-icon') as HTMLImageElement;
-		const loader = card.querySelector('.img-loader') as HTMLElement;
-
-		function showImage() {
-			if (loader) loader.style.display = 'none';
-			img.style.opacity = '1';
-		}
-
-		// Preload to ensure onload fires consistently across browsers
-		const pre = new Image();
-		const placeholder = 'https://placehold.co/100?text=PlaceHolder';
-		let settled = false;
-		const settle = (src: string) => {
-			if (settled) return;
-			settled = true;
-			img.src = src;
-			showImage();
-		};
-		pre.onload = () => settle(iconUrl);
-		pre.onerror = () => settle(placeholder);
-		pre.decoding = 'async';
-		pre.loading = 'eager';
-		pre.src = iconUrl;
-
-		// Safety timeout
-		window.setTimeout(() => {
-			if (!settled) settle(placeholder);
-		}, 5000);
 
 		return card;
 	}
 
 	function ensureSentinel(grid: HTMLElement) {
-		let sentinel = document.getElementById('mods-sentinel');
+		let sentinel = document.getElementById("mods-sentinel");
 		if (!sentinel) {
-			sentinel = document.createElement('div');
-			sentinel.id = 'mods-sentinel';
-			sentinel.style.height = '1px';
-			sentinel.style.width = '100%';
-			sentinel.style.gridColumn = '1 / -1';
+			sentinel = document.createElement("div");
+			sentinel.id = "mods-sentinel";
+			sentinel.style.height = "1px";
+			sentinel.style.width = "100%";
+			sentinel.style.gridColumn = "1 / -1";
 			grid.appendChild(sentinel);
 		}
 		return sentinel as HTMLElement;
 	}
 
 	function appendNextBatch() {
-		const grid = document.getElementById('mods-grid');
+		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 
 		const end = Math.min(renderedCount + BATCH_SIZE, filteredMods.length);
-		const ref = document.getElementById('mods-sentinel');
+		const ref = document.getElementById("mods-sentinel");
+
 		for (let i = renderedCount; i < end; i++) {
 			const card = createModCard(filteredMods[i]);
 			if (ref && ref.parentElement === grid) {
@@ -120,11 +331,11 @@ import Main from '../layouts/Main.astro';
 	}
 
 	function setupInfiniteScroll() {
-		const grid = document.getElementById('mods-grid');
+		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 		const sentinel = ensureSentinel(grid);
 
-		if (!('IntersectionObserver' in window)) {
+		if (!("IntersectionObserver" in window)) {
 			while (renderedCount < filteredMods.length) appendNextBatch();
 			return;
 		}
@@ -133,35 +344,36 @@ import Main from '../layouts/Main.astro';
 			infiniteObserver.disconnect();
 		}
 
-		infiniteObserver = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting && renderedCount < filteredMods.length) {
-					appendNextBatch();
-				}
-			});
-		}, { rootMargin: '600px 0px' });
+		infiniteObserver = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (
+						entry.isIntersecting &&
+						renderedCount < filteredMods.length
+					) {
+						appendNextBatch();
+					}
+				});
+			},
+			{ rootMargin: "400px 0px" },
+		);
 
 		infiniteObserver.observe(sentinel);
-
-		// Scroll fallback: if near bottom and IO didn't trigger
-		if (!scrollFallbackAttached) {
-			scrollFallbackAttached = true;
-			window.addEventListener('scroll', () => {
-				const nearBottom = window.innerHeight + window.scrollY >= (document.body.offsetHeight - 800);
-				if (nearBottom && renderedCount < filteredMods.length) {
-					appendNextBatch();
-				}
-			}, { passive: true });
-		}
 	}
 
 	function renderMods(modsToRender: any[]) {
-		const grid = document.getElementById('mods-grid');
+		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 
-		grid.innerHTML = '';
+		grid.innerHTML = "";
 		filteredMods = modsToRender;
 		renderedCount = 0;
+
+		if (filteredMods.length === 0) {
+			grid.innerHTML =
+				'<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No mods found.</div>';
+			return;
+		}
 
 		ensureSentinel(grid);
 		appendNextBatch();
@@ -169,41 +381,50 @@ import Main from '../layouts/Main.astro';
 	}
 
 	function filterAndRenderMods() {
-		const searchTerm = (document.getElementById('search-bar') as HTMLInputElement).value.toLowerCase();
-		const filtered = allMods.filter(mod => !mod?.is_deprecated && !mod?.has_nsfw_content && (mod.name || '').toLowerCase().includes(searchTerm));
+		const searchTerm = (
+			document.getElementById("search-bar") as HTMLInputElement
+		).value.toLowerCase();
+		const filtered = allMods.filter(
+			(mod) =>
+				!mod?.is_deprecated &&
+				!mod?.has_nsfw_content &&
+				(mod.name || "").toLowerCase().includes(searchTerm),
+		);
 		renderMods(filtered);
 	}
 
 	function fetchMods() {
 		(async () => {
-			const grid = document.getElementById('mods-grid');
-			const pageRoot = document.querySelector('.mods-page');
-
-			pageRoot?.classList.add('is-loading');
-			if (grid) grid.innerHTML = '<div class="loader"></div>';
+			const grid = document.getElementById("mods-grid");
+			if (grid)
+				grid.innerHTML =
+					'<div class="loader-wrapper"><div class="loader"></div></div>';
 
 			if (allMods.length > 0) {
 				filterAndRenderMods();
-				pageRoot?.classList.remove('is-loading');
 				return;
 			}
 
 			try {
-				const q = (document.getElementById('search-bar') as HTMLInputElement)?.value || '';
-				const endpoint = q ? `/api/client/mods?q=${encodeURIComponent(q)}` : '/api/client/mods';
-				const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
-				if (!response.ok) {
-					throw new Error(`HTTP ${response.status}`);
-				}
+				const q =
+					(document.getElementById("search-bar") as HTMLInputElement)
+						?.value || "";
+				const endpoint = q
+					? `/api/client/mods?q=${encodeURIComponent(q)}`
+					: "/api/client/mods";
+				const response = await fetch(endpoint, {
+					headers: { Accept: "application/json" },
+				});
+				if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
 				allMods = await response.json();
 				filterAndRenderMods();
-				pageRoot?.classList.remove('is-loading');
 			} catch (error) {
 				if (grid) {
-					grid.innerHTML = '<p>Failed to load mods. Please try again later.</p>';
+					grid.innerHTML =
+						'<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Failed to load mods. Please try again later.</div>';
 				}
-				pageRoot?.classList.remove('is-loading');
-				console.error('Failed to fetch mods:', error);
+				console.error("Failed to fetch mods:", error);
 			}
 		})();
 	}
@@ -211,9 +432,9 @@ import Main from '../layouts/Main.astro';
 	// Run on initial page load
 	fetchMods();
 	// Run on subsequent page loads
-	document.addEventListener('astro:page-load', fetchMods);
+	document.addEventListener("astro:page-load", fetchMods);
 
-	document.getElementById('search-bar')?.addEventListener('input', () => {
+	document.getElementById("search-bar")?.addEventListener("input", () => {
 		filterAndRenderMods();
 	});
 </script>
