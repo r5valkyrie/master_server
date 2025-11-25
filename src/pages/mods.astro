@@ -168,21 +168,48 @@ const initialMods: any[] = [];
 	#sort-select,
 	#category-select {
 		width: 100%;
-		background: rgba(0, 0, 0, 0.3);
+		background-color: rgba(15, 15, 18, 0.95);
 		border: 1px solid var(--border-light);
 		border-radius: 8px;
-		padding: 10px 12px;
+		padding: 10px 36px 10px 12px;
 		color: var(--text-main);
 		font-family: inherit;
 		font-size: 0.95rem;
 		transition: all 0.2s ease;
 		cursor: pointer;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 12px center;
+		background-size: 12px;
+	}
+
+	#sort-select:hover,
+	#category-select:hover {
+		border-color: rgba(255, 255, 255, 0.2);
+		background-color: rgba(20, 20, 25, 0.95);
 	}
 
 	#sort-select:focus,
 	#category-select:focus {
 		outline: none;
 		border-color: var(--primary);
+	}
+
+	#sort-select option,
+	#category-select option {
+		background-color: #15151a;
+		color: #e0e0e0;
+		padding: 12px;
+	}
+
+	#sort-select option:hover,
+	#category-select option:hover,
+	#sort-select option:checked,
+	#category-select option:checked {
+		background-color: #252530;
 	}
 
 	/* Sidebar Stats */
