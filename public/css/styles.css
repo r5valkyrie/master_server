@@ -213,6 +213,7 @@ a {
   height: 40px;
   width: auto;
   object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .main-nav {
@@ -337,6 +338,20 @@ a {
 
 .footer-links a:hover {
   color: var(--primary);
+}
+
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-social svg {
+  transition: transform 0.2s ease;
+}
+
+.footer-social:hover svg {
+  transform: scale(1.1);
 }
 
 /* Animations */

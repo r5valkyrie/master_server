@@ -5,7 +5,7 @@ import Main from "../layouts/Main.astro";
 <Main title="Home" fullWidth={true}>
 	<section class="hero">
 		<div class="hero-content fade-in">
-			<img src="/assets/logo.png" alt="Valkyrie" class="hero-logo" />
+			<img src="/assets/logo.svg" alt="Valkyrie" class="hero-logo" />
 			<h1>
 				The Future of <span class="text-gradient">Apex Legends</span>
 			</h1>
@@ -33,8 +33,7 @@ import Main from "../layouts/Main.astro";
 	<section class="showcase-section">
 		<div class="container">
 			<div class="section-header centered fade-in-on-scroll">
-				<h2>Experience the Difference</h2>
-				<p>See what makes R5Valkyrie unique.</p>
+				<h2>Explore R5Valkyrie</h2>
 			</div>
 
 			<div class="carousel-wrapper fade-in-on-scroll">
@@ -56,23 +55,21 @@ import Main from "../layouts/Main.astro";
 				<div class="carousel-container" tabindex="0">
 					<div class="carousel-track-container">
 						<ul class="carousel-track">
-							<li class="carousel-slide current-slide">
+							<li class="carousel-slide">
 								<div class="showcase-item">
 									<div class="showcase-image">
 										<img
-											src="/assets/showcase1.png"
-											alt="Custom Gamemodes"
+											src="/assets/community.png"
+											alt="Amazing Community"
 										/>
 									</div>
 									<div class="showcase-text">
-										<span class="slide-number">01</span>
-										<h3>Downloadable Mods</h3>
+										<h3>Amazing Community</h3>
 										<p>
-											Download mods created by the community to
-											enhance your experience.
+											Join our amazingcommunity of players and modders to get help, share your creations, and more.
 										</p>
-										<a href="/mods" class="slide-cta">
-											Browse Mods
+										<a href="https://discord.gg/GcJSMUGJyD" target="_blank" class="slide-cta">
+											Join Discord
 											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 										</a>
 									</div>
@@ -82,12 +79,11 @@ import Main from "../layouts/Main.astro";
 								<div class="showcase-item">
 									<div class="showcase-image">
 										<img
-											src="/assets/showcase2.png"
+											src="/assets/modding.png"
 											alt="Modding Support"
 										/>
 									</div>
 									<div class="showcase-text">
-										<span class="slide-number">02</span>
 										<h3>Full Modding Support</h3>
 										<p>
 											Customize every aspect of the game.
@@ -105,12 +101,11 @@ import Main from "../layouts/Main.astro";
 								<div class="showcase-item">
 									<div class="showcase-image">
 										<img
-											src="/assets/showcase3.png"
+											src="/assets/serverbrowser.png"
 											alt="Community Servers"
 										/>
 									</div>
 									<div class="showcase-text">
-										<span class="slide-number">03</span>
 										<h3>Community Servers</h3>
 										<p>
 											Host your own dedicated servers with
@@ -125,20 +120,49 @@ import Main from "../layouts/Main.astro";
 									</div>
 								</div>
 							</li>
+							<li class="carousel-slide current-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img
+											src="/assets/modmanager.jpeg"
+											alt="Mod Manager"
+										/>
+									</div>
+									<div class="showcase-text">
+										<h3>Mod Manager</h3>
+										<p>
+											Install and manage mods with a single click using our integrated mod manager.
+										</p>
+										<a href="/mods" class="slide-cta">
+											Browse Mods
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li class="carousel-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img src="/assets/github.png" alt="Open Source" />
+									</div>
+								</div>
+								<div class="showcase-text">
+									<h3>Open Source</h3>
+									<p>
+										R5Valkyrie is open source and community driven.
+									</p>
+									<a href="https://github.com/r5valkyrie/" target="_blank" class="slide-cta">
+										View on GitHub
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+									</a>
+								</div>
+							</li>
 						</ul>
 					</div>
 
 					<div class="carousel-controls">
 						<div class="carousel-nav">
-							<button class="carousel-indicator current-slide" aria-label="Go to slide 1">
-								<span class="indicator-progress"></span>
-							</button>
-							<button class="carousel-indicator" aria-label="Go to slide 2">
-								<span class="indicator-progress"></span>
-							</button>
-							<button class="carousel-indicator" aria-label="Go to slide 3">
-								<span class="indicator-progress"></span>
-							</button>
+							<!-- Indicators are dynamically generated based on slide count -->
 						</div>
 						<button class="carousel-pause" aria-label="Pause autoplay">
 							<svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
@@ -161,96 +185,6 @@ import Main from "../layouts/Main.astro";
 						><polyline points="9 18 15 12 9 6"></polyline></svg
 					>
 				</button>
-			</div>
-		</div>
-	</section>
-
-	<section class="features">
-		<div class="container">
-			<div class="grid-3">
-				<div class="feature-card fade-in-on-scroll">
-					<div class="icon-box">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><rect
-								x="2"
-								y="3"
-								width="20"
-								height="14"
-								rx="2"
-								ry="2"></rect><line
-								x1="8"
-								y1="21"
-								x2="16"
-								y2="21"></line><line
-								x1="12"
-								y1="17"
-								x2="12"
-								y2="21"></line></svg
-						>
-					</div>
-					<h3>Server Browser</h3>
-					<p>
-						Easily find and join community servers with our advanced
-						server browser.
-					</p>
-				</div>
-				<div class="feature-card fade-in-on-scroll">
-					<div class="icon-box">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><polygon points="12 2 2 7 12 12 22 7 12 2"
-							></polygon><polyline points="2 17 12 22 22 17"
-							></polyline><polyline points="2 12 12 17 22 12"
-							></polyline></svg
-						>
-					</div>
-					<h3>Mod Manager</h3>
-					<p>
-						Install and manage mods with a single click using our
-						integrated mod manager.
-					</p>
-				</div>
-				<div class="feature-card fade-in-on-scroll">
-					<div class="icon-box">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-							></path><circle cx="9" cy="7" r="4"></circle><path
-								d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path
-								d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg
-						>
-					</div>
-					<h3>Open Source</h3>
-					<p>
-						R5Valkyrie is open source and community driven. Join us
-						on GitHub!
-					</p>
-				</div>
 			</div>
 		</div>
 	</section>
@@ -282,7 +216,7 @@ import Main from "../layouts/Main.astro";
 		height: 120px;
 		width: auto;
 		margin-bottom: 8px;
-		filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.3));
+		filter: brightness(0) invert(1) drop-shadow(0 0 30px rgba(99, 102, 241, 0.3));
 	}
 
 	.hero-badge {
@@ -604,51 +538,7 @@ import Main from "../layouts/Main.astro";
 	.carousel-nav {
 		display: flex;
 		gap: 6px;
-	}
-
-	.carousel-indicator {
-		border: 0;
-		border-radius: 3px;
-		width: 32px;
-		height: 4px;
-		background: rgba(255, 255, 255, 0.25);
-		cursor: pointer;
-		transition: all 0.3s ease;
-		position: relative;
-		overflow: hidden;
-		padding: 0;
-	}
-
-	.indicator-progress {
-		position: absolute;
-		left: 0;
-		top: 0;
-		height: 100%;
-		width: 0%;
-		background: var(--primary);
-		border-radius: 3px;
-	}
-
-	.carousel-indicator.current-slide {
-		background: rgba(255, 255, 255, 0.3);
-		width: 48px;
-	}
-
-	.carousel-indicator.current-slide .indicator-progress {
-		animation: progress-fill 6s linear forwards;
-	}
-
-	.carousel-container.paused .carousel-indicator.current-slide .indicator-progress {
-		animation-play-state: paused;
-	}
-
-	@keyframes progress-fill {
-		from { width: 0%; }
-		to { width: 100%; }
-	}
-
-	.carousel-indicator:hover {
-		background: rgba(255, 255, 255, 0.4);
+		align-items: center;
 	}
 
 	/* Pause Button */
@@ -765,91 +655,6 @@ import Main from "../layouts/Main.astro";
 		}
 	}
 
-	.features {
-		padding: 100px 0;
-		background: linear-gradient(
-			180deg,
-			rgba(8, 8, 12, 1) 0%,
-			rgba(5, 5, 8, 1) 100%
-		);
-		position: relative;
-	}
-
-	.features::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 150%;
-		height: 1px;
-		background: linear-gradient(
-			90deg,
-			transparent 0%,
-			rgba(99, 102, 241, 0.3) 50%,
-			transparent 100%
-		);
-	}
-
-	.features::after {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 600px;
-		height: 600px;
-		background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
-		pointer-events: none;
-	}
-
-	.grid-3 {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 30px;
-		position: relative;
-		z-index: 1;
-	}
-
-	.feature-card {
-		background: rgba(15, 15, 20, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		padding: 40px 30px;
-		border-radius: var(--radius-lg);
-		transition: all 0.3s ease;
-		backdrop-filter: blur(10px);
-		position: relative;
-		z-index: 1;
-	}
-
-	.feature-card:hover {
-		transform: translateY(-5px);
-		background: rgba(20, 20, 28, 0.9);
-		border-color: rgba(99, 102, 241, 0.3);
-		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-	}
-
-	.icon-box {
-		width: 50px;
-		height: 50px;
-		background: rgba(255, 255, 255, 0.05);
-		border-radius: 12px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 20px;
-		color: var(--primary);
-	}
-
-	.feature-card h3 {
-		margin-bottom: 10px;
-		font-size: 1.5rem;
-	}
-
-	.feature-card p {
-		color: var(--text-muted);
-	}
-
 	@media (max-width: 768px) {
 		.hero-actions {
 			flex-direction: column;
@@ -859,6 +664,59 @@ import Main from "../layouts/Main.astro";
 		.btn {
 			width: 100%;
 		}
+	}
+</style>
+
+<style is:global>
+	/* Carousel Indicators - global for dynamically created elements */
+	.carousel-indicator {
+		display: block;
+		border: none;
+		border-radius: 3px;
+		width: 32px;
+		min-width: 32px;
+		height: 4px;
+		min-height: 4px;
+		background: rgba(255, 255, 255, 0.25);
+		cursor: pointer;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		padding: 0;
+		margin: 0;
+	}
+
+	.carousel-indicator .indicator-progress {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 0%;
+		background: var(--primary);
+		border-radius: 3px;
+	}
+
+	.carousel-indicator.current-slide {
+		background: rgba(255, 255, 255, 0.3);
+		width: 48px;
+		min-width: 48px;
+	}
+
+	.carousel-indicator.current-slide .indicator-progress {
+		animation: carousel-progress-fill 6s linear forwards;
+	}
+
+	.carousel-container.paused .carousel-indicator.current-slide .indicator-progress {
+		animation-play-state: paused;
+	}
+
+	@keyframes carousel-progress-fill {
+		from { width: 0%; }
+		to { width: 100%; }
+	}
+
+	.carousel-indicator:hover {
+		background: rgba(255, 255, 255, 0.4);
 	}
 </style>
 
@@ -873,10 +731,25 @@ import Main from "../layouts/Main.astro";
 		const nextButton = wrapper.querySelector('.carousel-button--right') as HTMLElement | null;
 		const prevButton = wrapper.querySelector('.carousel-button--left') as HTMLElement | null;
 		const dotsNav = container.querySelector('.carousel-nav') as HTMLElement | null;
-		const dots = Array.from(dotsNav?.children || []) as HTMLElement[];
 		const pauseButton = container.querySelector('.carousel-pause') as HTMLElement | null;
 
 		if (slides.length === 0) return;
+
+		// Dynamically create indicators based on slide count
+		const dots: HTMLElement[] = [];
+		if (dotsNav) {
+			dotsNav.innerHTML = '';
+			slides.forEach((_, index) => {
+				const dot = document.createElement('div');
+				dot.className = 'carousel-indicator' + (index === 0 ? ' current-slide' : '');
+				dot.setAttribute('role', 'button');
+				dot.setAttribute('tabindex', '0');
+				dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+				dot.innerHTML = '<span class="indicator-progress"></span>';
+				dotsNav.appendChild(dot);
+				dots.push(dot);
+			});
+		}
 
 		const AUTOPLAY_INTERVAL = 6000;
 		let autoplayTimer: number | null = null;
@@ -891,14 +764,26 @@ import Main from "../layouts/Main.astro";
 			slide.style.left = slideWidth * index + 'px';
 		});
 
-		// Trigger zoom animation on first slide
+		// Trigger zoom animation on first slide and first dot progress
 		const firstSlide = slides[0];
+		const firstDot = dots[0];
 		if (firstSlide) {
 			// Remove class, wait for next frame, then re-add to trigger animation
 			firstSlide.classList.remove('current-slide');
+			if (firstDot) firstDot.classList.remove('current-slide');
 			requestAnimationFrame(() => {
 				requestAnimationFrame(() => {
 					firstSlide.classList.add('current-slide');
+					if (firstDot) {
+						// Reset progress animation
+						const progress = firstDot.querySelector('.indicator-progress') as HTMLElement;
+						if (progress) {
+							progress.style.animation = 'none';
+							progress.offsetHeight; // Force reflow
+							progress.style.animation = '';
+						}
+						firstDot.classList.add('current-slide');
+					}
 				});
 			});
 		}
@@ -918,9 +803,16 @@ import Main from "../layouts/Main.astro";
 			currentSlide.classList.remove('current-slide');
 			targetSlide.classList.add('current-slide');
 
-			// Update dots
+			// Update dots and reset animation
 			if (currentDot && targetDot) {
 				currentDot.classList.remove('current-slide');
+				// Reset the progress animation by forcing reflow
+				const targetProgress = targetDot.querySelector('.indicator-progress') as HTMLElement;
+				if (targetProgress) {
+					targetProgress.style.animation = 'none';
+					targetProgress.offsetHeight; // Force reflow
+					targetProgress.style.animation = '';
+				}
 				targetDot.classList.add('current-slide');
 			}
 
@@ -989,7 +881,7 @@ import Main from "../layouts/Main.astro";
 
 		if (dotsNav) {
 			dotsNav.addEventListener('click', (e) => {
-				const targetDot = (e.target as HTMLElement).closest('button.carousel-indicator');
+				const targetDot = (e.target as HTMLElement).closest('.carousel-indicator');
 				if (!targetDot) return;
 				const targetIndex = dots.indexOf(targetDot as HTMLElement);
 				if (targetIndex !== -1 && targetIndex !== currentIndex) {
