@@ -2,33 +2,6 @@
 import { ClientRouter, fade } from "astro:transitions";
 const { pathname } = Astro.url;
 
-// Preload contributor images logic remains same
-const GITHUB_REPO = "r5valkyrie/docs";
-const GITHUB_BRANCH = "main";
-const GITHUB_CONTRIBUTORS_PATH = "contributors";
-
-async function fetchContributorsForPreload(fileName: string) {
-  const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return [];
-    return await response.json();
-  } catch (error) {
-    console.error(`Error preloading ${fileName}:`, error);
-    return [];
-  }
-}
-
-const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
-  fetchContributorsForPreload("contributors.json"),
-  fetchContributorsForPreload("r5reloaded_contributors.json"),
-]);
-
-const contributorImages = [
-  ...valkyrieContributors.map((c: any) => c.avatar),
-  ...r5reloadedContributors.map((c: any) => c.avatar),
-].filter(Boolean);
-
 interface Props {
   title?: string;
   fullWidth?: boolean;
@@ -47,11 +20,6 @@ const customTransition = fade({ duration: "0.5s" });
     <title>{pageTitle}</title>
     <link rel="stylesheet" type="text/css" href="/css/styles.css" />
     <ClientRouter />
-    {
-      contributorImages.map((imageUrl) => (
-        <link rel="preload" href={imageUrl} as="image" />
-      ))
-    }
   </head>
   <body>
     <div id="bg-fixed"></div>

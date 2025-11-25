@@ -5,6 +5,20 @@ const GITHUB_REPO = "r5valkyrie/docs";
 const GITHUB_BRANCH = "main";
 const GITHUB_CONTRIBUTORS_PATH = "contributors";
 
+// Fix GitHub blob URLs to raw URLs to avoid CORS issues
+function normalizeGitHubUrl(url: string): string {
+	if (!url) return url;
+	
+	// Convert github.com/user/repo/blob/branch/path?raw=true to raw.githubusercontent.com/user/repo/branch/path
+	const blobMatch = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+?)(\?raw=true)?$/);
+	if (blobMatch) {
+		const [, user, repo, branch, path] = blobMatch;
+		return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+	}
+	
+	return url;
+}
+
 async function fetchContributors(fileName: string) {
 	const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
 	try {
@@ -15,7 +29,12 @@ async function fetchContributors(fileName: string) {
 			);
 			return [];
 		}
-		return await response.json();
+		const contributors = await response.json();
+		// Normalize avatar URLs
+		return contributors.map((c: any) => ({
+			...c,
+			avatar: normalizeGitHubUrl(c.avatar)
+		}));
 	} catch (error) {
 		console.error(`Error fetching ${fileName}:`, error);
 		return [];
