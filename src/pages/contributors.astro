@@ -66,6 +66,7 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 	fetchContributors("r5reloaded_contributors.json"),
 	fetchSupporters(),
 ]);
+
 ---
 
 <Main title="Contributors" fullWidth={true}>
@@ -152,7 +153,7 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 					}
 				</div>
 			</section>
-
+			
 			<section id="valkyrie" class="contributors-section">
 				<div class="section-header">
 					<h2>R5Valkyrie Contributors</h2>
@@ -352,10 +353,12 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 
 	/* Sidebar CTA */
 	.sidebar-cta {
+		border-top: 1px solid var(--border-light);
 		text-align: center;
 	}
 
 	.sidebar-cta p {
+		padding-top: 20px;
 		color: var(--text-dim);
 		font-size: 0.85rem;
 		margin-bottom: 12px;
