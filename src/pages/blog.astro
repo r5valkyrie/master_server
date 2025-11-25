@@ -440,9 +440,7 @@ function getRelativeTime(dateString: string): string {
 	</div>
 </Main>
 
-<script define:vars={{ postsDataMap }}>
-	window.postsData = postsDataMap;
-</script>
+<script type="application/json" id="posts-data" set:html={JSON.stringify(postsDataMap)}></script>
 
 <style>
 	.blog-wrapper {
@@ -1178,6 +1176,19 @@ function getRelativeTime(dateString: string): string {
 		});
 	}
 
+	function getPostsData(): Record<string, any> {
+		const dataElement = document.getElementById('posts-data');
+		if (dataElement && dataElement.textContent) {
+			try {
+				return JSON.parse(dataElement.textContent);
+			} catch (e) {
+				console.error('Failed to parse posts data:', e);
+				return {};
+			}
+		}
+		return {};
+	}
+
 	function setupBlog() {
 		const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
 		const sections = document.querySelectorAll('.posts-section');
@@ -1185,6 +1196,7 @@ function getRelativeTime(dateString: string): string {
 		const modal = document.getElementById('post-modal');
 		const modalClose = modal?.querySelector('.modal-close');
 		const modalBackdrop = modal?.querySelector('.modal-backdrop');
+		const postsData = getPostsData();
 
 		// Category navigation
 		navItems.forEach(item => {
@@ -1208,11 +1220,8 @@ function getRelativeTime(dateString: string): string {
 		postCards.forEach(card => {
 			card.addEventListener('click', () => {
 				const postId = card.getAttribute('data-post-id');
-				if (postId && (window as any).postsData) {
-					const post = (window as any).postsData[postId];
-					if (post) {
-						openModal(post);
-					}
+				if (postId && postsData[postId]) {
+					openModal(postsData[postId]);
 				}
 			});
 		});
@@ -1273,7 +1282,15 @@ function getRelativeTime(dateString: string): string {
 		}
 	}
 
-	document.addEventListener('DOMContentLoaded', setupBlog);
-	document.addEventListener('astro:after-swap', setupBlog);
+	// Setup on page load - covers all scenarios
+	document.addEventListener('astro:page-load', setupBlog);
+	
+	// Fallback for direct page load without View Transitions
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', setupBlog);
+	} else {
+		// DOM already loaded, run setup immediately
+		setupBlog();
+	}
 </script>
 
