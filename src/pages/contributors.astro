@@ -66,8 +66,6 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 	fetchContributors("r5reloaded_contributors.json"),
 	fetchSupporters(),
 ]);
-
-const totalContributors = valkyrieContributors.length + r5reloadedContributors.length;
 ---
 
 <Main title="Contributors" fullWidth={true}>
@@ -104,13 +102,6 @@ const totalContributors = valkyrieContributors.length + r5reloadedContributors.l
 						<span class="count">{r5reloadedContributors.length}</span>
 					</a>
 				</nav>
-
-				<div class="sidebar-stats">
-					<div class="stat-item">
-						<span class="label">Total Contributors</span>
-						<span class="value">{totalContributors}</span>
-					</div>
-				</div>
 
 				<div class="sidebar-cta">
 					<p>Want to contribute?</p>
@@ -161,7 +152,7 @@ const totalContributors = valkyrieContributors.length + r5reloadedContributors.l
 					}
 				</div>
 			</section>
-			
+
 			<section id="valkyrie" class="contributors-section">
 				<div class="section-header">
 					<h2>R5Valkyrie Contributors</h2>
