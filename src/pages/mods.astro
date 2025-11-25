@@ -571,15 +571,23 @@ const initialMods: any[] = [];
 </style>
 
 <script>
+	// Extend Window interface for TypeScript
+	declare global {
+		interface Window {
+			__modsCache: { data: any[] | null; timestamp: number };
+			setupObserver?: () => void;
+		}
+	}
+
 	// Use a global cache so data persists across navigations
 	window.__modsCache = window.__modsCache || { data: null, timestamp: 0 };
 	const CACHE_TTL = 5 * 60 * 1000; // 5 minutes client-side cache
 
 	const BATCH_SIZE = 16;
-	let allMods = [];
-	let filteredMods = [];
+	let allMods: any[] = [];
+	let filteredMods: any[] = [];
 	let renderedCount = 0;
-	let infiniteObserver = null;
+	let infiniteObserver: IntersectionObserver | null = null;
 	let currentSort = 'downloads';
 	let currentCategory = 'all';
 
@@ -590,15 +598,15 @@ const initialMods: any[] = [];
 		if (showingEl) showingEl.textContent = filteredMods.length.toString();
 	}
 
-	function populateCategories() {
+	function populateCategories(): void {
 		const categorySelect = document.getElementById('category-select');
 		if (!categorySelect) return;
 
 		// Collect all unique categories
-		const categories = new Set();
+		const categories = new Set<string>();
 		allMods.forEach(mod => {
 			if (!mod?.is_deprecated && !mod?.has_nsfw_content && mod.categories) {
-				mod.categories.forEach(cat => categories.add(cat));
+				mod.categories.forEach((cat: string) => categories.add(cat));
 			}
 		});
 
@@ -613,7 +621,7 @@ const initialMods: any[] = [];
 		});
 	}
 
-	function sortMods(mods, sortType) {
+	function sortMods(mods: any[], sortType: string): any[] {
 		const sorted = [...mods];
 		switch (sortType) {
 			case 'name':
@@ -622,8 +630,8 @@ const initialMods: any[] = [];
 				return sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
 			case 'downloads':
 				return sorted.sort((a, b) => {
-					const aDownloads = (a.versions || []).reduce((sum, v) => sum + (v.downloads || 0), 0);
-					const bDownloads = (b.versions || []).reduce((sum, v) => sum + (v.downloads || 0), 0);
+					const aDownloads = (a.versions || []).reduce((sum: number, v: any) => sum + (v.downloads || 0), 0);
+					const bDownloads = (b.versions || []).reduce((sum: number, v: any) => sum + (v.downloads || 0), 0);
 					return bDownloads - aDownloads;
 				});
 			case 'rating':
@@ -639,7 +647,7 @@ const initialMods: any[] = [];
 		}
 	}
 
-	function formatBytes(bytes) {
+	function formatBytes(bytes: number): string {
 		if (!bytes) return '0 B';
 		const k = 1024;
 		const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -647,14 +655,14 @@ const initialMods: any[] = [];
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 	}
 
-	function formatDownloads(num) {
+	function formatDownloads(num: number): string {
 		if (!num) return '0';
 		if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
 		if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
 		return num.toString();
 	}
 
-	function createModCard(mod) {
+	function createModCard(mod: any): HTMLDivElement {
 		const card = document.createElement("div");
 		card.className = "mod-card";
 
@@ -668,12 +676,12 @@ const initialMods: any[] = [];
 		const version = latestVersion.version_number || "1.0.0";
 		const rating = mod.rating_score || 0;
 		const downloads = latestVersion.downloads || 0;
-		const totalDownloads = (mod.versions || []).reduce((sum, v) => sum + (v.downloads || 0), 0);
+		const totalDownloads = (mod.versions || []).reduce((sum: number, v: any) => sum + (v.downloads || 0), 0);
 		const fileSize = latestVersion.file_size || 0;
 		const categories = (mod.categories || []).slice(0, 3); // Limit to 3 categories
 
 		const categoriesHtml = categories.length > 0 
-			? `<div class="mod-categories">${categories.map(c => `<span class="mod-category">${c}</span>`).join('')}</div>`
+			? `<div class="mod-categories">${categories.map((c: string) => `<span class="mod-category">${c}</span>`).join('')}</div>`
 			: '';
 
 		card.innerHTML = `
@@ -720,7 +728,7 @@ const initialMods: any[] = [];
 		return card;
 	}
 
-	function ensureSentinel(grid) {
+	function ensureSentinel(grid: HTMLElement): HTMLElement {
 		let sentinel = document.getElementById("mods-sentinel");
 		if (!sentinel) {
 			sentinel = document.createElement("div");
@@ -790,7 +798,7 @@ const initialMods: any[] = [];
 		infiniteObserver.observe(sentinel);
 	}
 
-	function renderMods(modsToRender) {
+	function renderMods(modsToRender: any[]): void {
 		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 
@@ -811,8 +819,8 @@ const initialMods: any[] = [];
 		setupInfiniteScroll();
 	}
 
-	function filterAndRenderMods() {
-		const searchBar = document.getElementById("search-bar");
+	function filterAndRenderMods(): void {
+		const searchBar = document.getElementById("search-bar") as HTMLInputElement | null;
 		const searchTerm = searchBar ? searchBar.value.toLowerCase() : "";
 		
 		let filtered = allMods.filter((mod) => {
@@ -885,14 +893,14 @@ const initialMods: any[] = [];
 		
 		if (sortSelect) {
 			sortSelect.addEventListener("change", (e) => {
-				currentSort = e.target.value;
+				currentSort = (e.target as HTMLSelectElement).value;
 				filterAndRenderMods();
 			});
 		}
 		
 		if (categorySelect) {
 			categorySelect.addEventListener("change", (e) => {
-				currentCategory = e.target.value;
+				currentCategory = (e.target as HTMLSelectElement).value;
 				filterAndRenderMods();
 			});
 		}
