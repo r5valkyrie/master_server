@@ -26,7 +26,7 @@ import Main from "../layouts/Main.astro";
 				<p>See what makes R5Valkyrie unique.</p>
 			</div>
 
-			<div class="carousel-container fade-in-on-scroll">
+			<div class="carousel-container fade-in-on-scroll" tabindex="0">
 				<div class="carousel-track-container">
 					<ul class="carousel-track">
 						<li class="carousel-slide current-slide">
@@ -38,14 +38,17 @@ import Main from "../layouts/Main.astro";
 									/>
 								</div>
 								<div class="showcase-text">
-									<h3>Custom Gamemodes</h3>
+									<span class="slide-number">01</span>
+									<h3>Downloadable Mods</h3>
 									<p>
-										Play unique gamemodes created by the
-										community, or build your own with Apex
-										Legends powerful scripting language.
-										From TDM to Prop Hunt, the possibilities
-										are endless.
+										Download mods created by the community to
+										enhance your experience.
 									</p>
+									<a href="/mods" class="slide-cta">
+										Browse Mods
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+									</a>
+									
 								</div>
 							</div>
 						</li>
@@ -58,12 +61,17 @@ import Main from "../layouts/Main.astro";
 									/>
 								</div>
 								<div class="showcase-text">
+									<span class="slide-number">02</span>
 									<h3>Full Modding Support</h3>
 									<p>
 										Customize every aspect of the game.
 										Import custom assets, create new maps,
 										and tweak weapon stats to your liking.
 									</p>
+									<a href="/docs" class="slide-cta">
+										Read the Docs
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+									</a>
 								</div>
 							</div>
 						</li>
@@ -76,6 +84,7 @@ import Main from "../layouts/Main.astro";
 									/>
 								</div>
 								<div class="showcase-text">
+									<span class="slide-number">03</span>
 									<h3>Community Servers</h3>
 									<p>
 										Host your own dedicated servers with
@@ -83,13 +92,17 @@ import Main from "../layouts/Main.astro";
 										permissions. Join a community that fits
 										your playstyle.
 									</p>
+									<a href="/servers" class="slide-cta">
+										Browse Servers
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+									</a>
 								</div>
 							</div>
 						</li>
 					</ul>
 				</div>
 
-				<button class="carousel-button carousel-button--left is-hidden">
+				<button class="carousel-button carousel-button--left is-hidden" aria-label="Previous slide">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"
@@ -104,7 +117,7 @@ import Main from "../layouts/Main.astro";
 					>
 				</button>
 
-				<button class="carousel-button carousel-button--right">
+				<button class="carousel-button carousel-button--right" aria-label="Next slide">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"
@@ -119,10 +132,22 @@ import Main from "../layouts/Main.astro";
 					>
 				</button>
 
-				<div class="carousel-nav">
-					<button class="carousel-indicator current-slide"></button>
-					<button class="carousel-indicator"></button>
-					<button class="carousel-indicator"></button>
+				<div class="carousel-controls">
+					<div class="carousel-nav">
+						<button class="carousel-indicator current-slide" aria-label="Go to slide 1">
+							<span class="indicator-progress"></span>
+						</button>
+						<button class="carousel-indicator" aria-label="Go to slide 2">
+							<span class="indicator-progress"></span>
+						</button>
+						<button class="carousel-indicator" aria-label="Go to slide 3">
+							<span class="indicator-progress"></span>
+						</button>
+					</div>
+					<button class="carousel-pause" aria-label="Pause autoplay">
+						<svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+						<svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -281,13 +306,48 @@ import Main from "../layouts/Main.astro";
 	/* Showcase Section */
 	.showcase-section {
 		padding: 100px 0;
-		background: linear-gradient(to bottom, var(--bg-dark), #0a0a0c);
+		background: linear-gradient(
+			180deg,
+			rgba(8, 8, 12, 1) 0%,
+			rgba(5, 5, 8, 1) 100%
+		);
 		overflow: hidden;
+		position: relative;
+	}
+
+	.showcase-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 150%;
+		height: 1px;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			rgba(99, 102, 241, 0.3) 50%,
+			transparent 100%
+		);
+	}
+
+	.showcase-section::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 800px;
+		height: 800px;
+		background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+		pointer-events: none;
 	}
 
 	.section-header.centered {
 		text-align: center;
 		margin-bottom: 60px;
+		position: relative;
+		z-index: 1;
 	}
 
 	.section-header h2 {
@@ -300,7 +360,7 @@ import Main from "../layouts/Main.astro";
 		font-size: 1.2rem;
 	}
 
-	/* Carousel Styles - Redesigned */
+	/* Carousel Styles - Enhanced */
 	.carousel-container {
 		position: relative;
 		height: 600px;
@@ -308,8 +368,13 @@ import Main from "../layouts/Main.astro";
 		max-width: 1400px;
 		margin: 0 auto;
 		overflow: hidden;
-		border-radius: var(--radius-lg);
-		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); /* Neutral dark shadow */
+		border-radius: 20px;
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+		outline: none;
+	}
+
+	.carousel-container:focus-visible {
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--primary);
 	}
 
 	.carousel-track-container {
@@ -324,7 +389,7 @@ import Main from "../layouts/Main.astro";
 		list-style: none;
 		position: relative;
 		height: 100%;
-		transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+		transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.carousel-slide {
@@ -333,6 +398,12 @@ import Main from "../layouts/Main.astro";
 		bottom: 0;
 		width: 100%;
 		height: 100%;
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.carousel-slide.current-slide {
+		opacity: 1;
 	}
 
 	.showcase-item {
@@ -352,178 +423,362 @@ import Main from "../layouts/Main.astro";
 		height: 100%;
 	}
 
+	.showcase-image::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			135deg,
+			rgba(0, 0, 0, 0.4) 0%,
+			rgba(0, 0, 0, 0.1) 50%,
+			rgba(0, 0, 0, 0.3) 100%
+		);
+		z-index: 2;
+	}
+
 	.showcase-image img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: transform 0.5s ease;
+		transition: transform 8s ease;
 	}
 
-	.carousel-container:hover .showcase-image img {
-		transform: scale(1.02);
+	.carousel-slide.current-slide .showcase-image img {
+		transform: scale(1.08);
 	}
 
 	/* Text as Glass Overlay */
 	.showcase-text {
 		position: absolute;
-		bottom: 40px;
-		left: 40px;
-		z-index: 2;
-		max-width: 550px;
-		background: rgba(5, 5, 5, 0.75);
-		backdrop-filter: blur(16px);
-		padding: 40px;
-		border-radius: 24px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+		bottom: 50px;
+		left: 50px;
+		z-index: 3;
+		max-width: 520px;
+		background: rgba(10, 10, 15, 0.8);
+		backdrop-filter: blur(20px);
+		padding: 32px 36px;
+		border-radius: 16px;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+		transform: translateY(20px);
+		opacity: 0;
+		transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+	}
+
+	.carousel-slide.current-slide .showcase-text {
 		transform: translateY(0);
 		opacity: 1;
-		transition: all 0.5s ease 0.2s;
+	}
+
+	.slide-number {
+		display: inline-block;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.15em;
+		color: var(--primary);
+		margin-bottom: 12px;
+		padding: 4px 10px;
+		background: rgba(99, 102, 241, 0.15);
+		border-radius: 4px;
 	}
 
 	.showcase-text h3 {
-		font-size: 2.5rem;
-		margin-bottom: 16px;
-		background: linear-gradient(to right, #fff, #ccc);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		line-height: 1.1;
+		font-size: 2rem;
+		margin-bottom: 12px;
+		color: #fff;
+		line-height: 1.2;
+		font-weight: 700;
 	}
 
 	.showcase-text p {
-		font-size: 1.1rem;
-		line-height: 1.6;
-		margin-bottom: 24px;
-		color: rgba(255, 255, 255, 0.9);
+		font-size: 1rem;
+		line-height: 1.7;
+		margin-bottom: 20px;
+		color: rgba(255, 255, 255, 0.75);
 	}
 
-	/* Buttons - Larger and Floating */
+	.slide-cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--primary);
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.slide-cta:hover {
+		color: #fff;
+		gap: 12px;
+	}
+
+	.slide-cta svg {
+		transition: transform 0.2s ease;
+	}
+
+	.slide-cta:hover svg {
+		transform: translateX(4px);
+	}
+
+	/* Navigation Buttons */
 	.carousel-button {
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		background: rgba(255, 255, 255, 0.1);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		background: rgba(0, 0, 0, 0.4);
+		border: 1px solid rgba(255, 255, 255, 0.15);
 		color: white;
-		width: 56px;
-		height: 56px;
+		width: 52px;
+		height: 52px;
 		border-radius: 50%;
 		cursor: pointer;
 		z-index: 10;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all 0.3s ease;
-		backdrop-filter: blur(8px);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		backdrop-filter: blur(10px);
+		opacity: 0;
+	}
+
+	.carousel-container:hover .carousel-button {
+		opacity: 1;
 	}
 
 	.carousel-button:hover {
-		background: white; /* Neutral hover */
-		color: black;
-		border-color: white;
-		box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); /* White glow */
+		background: var(--primary);
+		border-color: var(--primary);
+		box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
 		transform: translateY(-50%) scale(1.1);
 	}
 
+	.carousel-button:active {
+		transform: translateY(-50%) scale(0.95);
+	}
+
 	.carousel-button--left {
-		left: 24px;
+		left: 20px;
 	}
 
 	.carousel-button--right {
-		right: 24px;
+		right: 20px;
 	}
 
 	.carousel-button.is-hidden {
-		opacity: 0;
+		opacity: 0 !important;
 		pointer-events: none;
 	}
 
-	/* Indicators - Bars instead of dots */
-	.carousel-nav {
+	/* Controls Container */
+	.carousel-controls {
 		position: absolute;
-		bottom: 30px;
-		right: 40px;
+		bottom: 24px;
+		right: 24px;
 		z-index: 10;
 		display: flex;
-		gap: 8px;
-		padding: 0;
+		align-items: center;
+		gap: 16px;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(12px);
+		padding: 10px 14px;
+		border-radius: 30px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	/* Indicators */
+	.carousel-nav {
+		display: flex;
+		gap: 6px;
 	}
 
 	.carousel-indicator {
 		border: 0;
-		border-radius: 4px;
-		width: 30px;
+		border-radius: 3px;
+		width: 32px;
 		height: 4px;
-		background: rgba(255, 255, 255, 0.3);
+		background: rgba(255, 255, 255, 0.25);
 		cursor: pointer;
 		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		padding: 0;
+	}
+
+	.indicator-progress {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 0%;
+		background: var(--primary);
+		border-radius: 3px;
 	}
 
 	.carousel-indicator.current-slide {
-		background: white; /* Neutral active state */
-		width: 45px;
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* White glow */
+		background: rgba(255, 255, 255, 0.3);
+		width: 48px;
+	}
+
+	.carousel-indicator.current-slide .indicator-progress {
+		animation: progress-fill 6s linear forwards;
+	}
+
+	.carousel-container.paused .carousel-indicator.current-slide .indicator-progress {
+		animation-play-state: paused;
+	}
+
+	@keyframes progress-fill {
+		from { width: 0%; }
+		to { width: 100%; }
 	}
 
 	.carousel-indicator:hover {
-		background: rgba(255, 255, 255, 0.8);
+		background: rgba(255, 255, 255, 0.4);
 	}
 
+	/* Pause Button */
+	.carousel-pause {
+		background: transparent;
+		border: none;
+		color: rgba(255, 255, 255, 0.7);
+		cursor: pointer;
+		padding: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		border-radius: 4px;
+	}
+
+	.carousel-pause:hover {
+		color: white;
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.carousel-pause .play-icon {
+		display: none;
+	}
+
+	.carousel-container.paused .carousel-pause .pause-icon {
+		display: none;
+	}
+
+	.carousel-container.paused .carousel-pause .play-icon {
+		display: block;
+	}
+
+	/* Mobile Responsive */
 	@media (max-width: 768px) {
 		.carousel-container {
-			height: 500px;
-			border-radius: 0; /* Full width on mobile often looks better without radius */
+			height: 550px;
+			border-radius: 0;
 		}
 
 		.showcase-text {
 			bottom: 0;
 			left: 0;
-			width: 100%;
+			right: 0;
 			max-width: 100%;
-			border-radius: 0;
+			border-radius: 20px 20px 0 0;
+			padding: 24px 20px;
+			border: none;
 			border-top: 1px solid rgba(255, 255, 255, 0.1);
-			background: rgba(5, 5, 5, 0.85);
-			padding: 24px;
 		}
 
 		.showcase-text h3 {
-			font-size: 1.8rem;
+			font-size: 1.5rem;
 		}
 
-		.carousel-nav {
-			bottom: 200px; /* Move up above text */
-			right: 50%;
-			transform: translateX(50%);
+		.showcase-text p {
+			font-size: 0.9rem;
+			margin-bottom: 16px;
+		}
+
+		.carousel-controls {
+			bottom: auto;
+			top: 16px;
+			right: 16px;
+			padding: 8px 12px;
 		}
 
 		.carousel-button {
 			width: 40px;
 			height: 40px;
+			opacity: 1;
+		}
+
+		.carousel-button--left {
+			left: 12px;
+		}
+
+		.carousel-button--right {
+			right: 12px;
 		}
 	}
 
 	.features {
 		padding: 100px 0;
+		background: linear-gradient(
+			180deg,
+			rgba(8, 8, 12, 1) 0%,
+			rgba(5, 5, 8, 1) 100%
+		);
+		position: relative;
+	}
+
+	.features::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 150%;
+		height: 1px;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			rgba(99, 102, 241, 0.3) 50%,
+			transparent 100%
+		);
+	}
+
+	.features::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 600px;
+		height: 600px;
+		background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
+		pointer-events: none;
 	}
 
 	.grid-3 {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 		gap: 30px;
+		position: relative;
+		z-index: 1;
 	}
 
 	.feature-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-light);
+		background: rgba(15, 15, 20, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.06);
 		padding: 40px 30px;
 		border-radius: var(--radius-lg);
 		transition: all 0.3s ease;
+		backdrop-filter: blur(10px);
+		position: relative;
+		z-index: 1;
 	}
 
 	.feature-card:hover {
 		transform: translateY(-5px);
-		background: var(--bg-card-hover);
-		border-color: var(--border-hover);
+		background: rgba(20, 20, 28, 0.9);
+		border-color: rgba(99, 102, 241, 0.3);
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 	}
 
 	.icon-box {
@@ -548,21 +803,55 @@ import Main from "../layouts/Main.astro";
 	}
 
 	.cta-section {
-		padding: 60px 0 100px;
+		padding: 80px 0 120px;
+		background: linear-gradient(
+			180deg,
+			rgba(10, 10, 15, 1) 0%,
+			rgba(8, 8, 12, 1) 100%
+		);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.cta-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 150%;
+		height: 1px;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			rgba(99, 102, 241, 0.3) 50%,
+			transparent 100%
+		);
+	}
+
+	.cta-section::after {
+		content: '';
+		position: absolute;
+		bottom: -200px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 600px;
+		height: 600px;
+		background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+		pointer-events: none;
 	}
 
 	.cta-box {
-		background: linear-gradient(
-			135deg,
-			rgba(99, 102, 241, 0.1) 0%,
-			rgba(236, 72, 153, 0.1) 100%
-		);
-		border: 1px solid var(--border-light);
+		background: rgba(15, 15, 20, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: var(--radius-lg);
-		padding: 60px;
+		padding: 70px 60px;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
+		position: relative;
+		z-index: 1;
+		backdrop-filter: blur(10px);
 		align-items: center;
 		gap: 20px;
 	}
@@ -591,187 +880,205 @@ import Main from "../layouts/Main.astro";
 
 <script>
 	function setupCarousel() {
-		const track = document.querySelector(
-			".carousel-track",
-		) as HTMLElement | null;
-		if (!track) return;
+		const container = document.querySelector('.carousel-container') as HTMLElement | null;
+		const track = document.querySelector('.carousel-track') as HTMLElement | null;
+		if (!track || !container) return;
 
 		const slides = Array.from(track.children) as HTMLElement[];
-		const nextButton = document.querySelector(
-			".carousel-button--right",
-		) as HTMLElement | null;
-		const prevButton = document.querySelector(
-			".carousel-button--left",
-		) as HTMLElement | null;
-		const dotsNav = document.querySelector(
-			".carousel-nav",
-		) as HTMLElement | null;
+		const nextButton = document.querySelector('.carousel-button--right') as HTMLElement | null;
+		const prevButton = document.querySelector('.carousel-button--left') as HTMLElement | null;
+		const dotsNav = document.querySelector('.carousel-nav') as HTMLElement | null;
 		const dots = Array.from(dotsNav?.children || []) as HTMLElement[];
+		const pauseButton = document.querySelector('.carousel-pause') as HTMLElement | null;
 
-		if (slides.length > 0) {
-			const slideWidth = slides[0].getBoundingClientRect().width;
+		if (slides.length === 0) return;
 
-			// Arrange the slides next to one another
-			const setSlidePosition = (slide: HTMLElement, index: number) => {
-				slide.style.left = slideWidth * index + "px";
-			};
-			slides.forEach(setSlidePosition);
+		const AUTOPLAY_INTERVAL = 6000;
+		let autoplayTimer: number | null = null;
+		let isPaused = false;
+		let currentIndex = 0;
+		let touchStartX = 0;
+		let touchEndX = 0;
 
-			const moveToSlide = (
-				track: HTMLElement,
-				currentSlide: HTMLElement,
-				targetSlide: HTMLElement,
-			) => {
-				track.style.transform =
-					"translateX(-" + targetSlide.style.left + ")";
-				currentSlide.classList.remove("current-slide");
-				targetSlide.classList.add("current-slide");
-			};
+		// Set up slide positions
+		const slideWidth = slides[0].getBoundingClientRect().width;
+		slides.forEach((slide, index) => {
+			slide.style.left = slideWidth * index + 'px';
+		});
 
-			const updateDots = (
-				currentDot: HTMLElement,
-				targetDot: HTMLElement,
-			) => {
-				currentDot.classList.remove("current-slide");
-				targetDot.classList.add("current-slide");
-			};
-
-			const hideShowArrows = (
-				slides: HTMLElement[],
-				prevButton: HTMLElement,
-				nextButton: HTMLElement,
-				targetIndex: number,
-			) => {
-				if (targetIndex === 0) {
-					prevButton.classList.add("is-hidden");
-					nextButton.classList.remove("is-hidden");
-				} else if (targetIndex === slides.length - 1) {
-					prevButton.classList.remove("is-hidden");
-					nextButton.classList.add("is-hidden");
-				} else {
-					prevButton.classList.remove("is-hidden");
-					nextButton.classList.remove("is-hidden");
-				}
-			};
-
-			// When I click left, move slides to the left
-			if (prevButton) {
-				prevButton.addEventListener("click", (e) => {
-					const currentSlide = track.querySelector(
-						".current-slide",
-					) as HTMLElement;
-					const prevSlide =
-						currentSlide.previousElementSibling as HTMLElement;
-					const currentDot = dotsNav?.querySelector(
-						".current-slide",
-					) as HTMLElement;
-					const prevDot =
-						currentDot.previousElementSibling as HTMLElement;
-					const prevIndex = slides.findIndex(
-						(slide) => slide === prevSlide,
-					);
-
-					moveToSlide(track, currentSlide, prevSlide);
-					updateDots(currentDot, prevDot);
-					if (nextButton)
-						hideShowArrows(
-							slides,
-							prevButton,
-							nextButton,
-							prevIndex,
-						);
+		// Trigger zoom animation on first slide
+		const firstSlide = slides[0];
+		if (firstSlide) {
+			// Remove class, wait for next frame, then re-add to trigger animation
+			firstSlide.classList.remove('current-slide');
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					firstSlide.classList.add('current-slide');
 				});
-			}
-
-			// When I click right, move slides to the right
-			if (nextButton) {
-				nextButton.addEventListener("click", (e) => {
-					const currentSlide = track.querySelector(
-						".current-slide",
-					) as HTMLElement;
-					const nextSlide =
-						currentSlide.nextElementSibling as HTMLElement;
-					const currentDot = dotsNav?.querySelector(
-						".current-slide",
-					) as HTMLElement;
-					const nextDot =
-						currentDot.nextElementSibling as HTMLElement;
-					const nextIndex = slides.findIndex(
-						(slide) => slide === nextSlide,
-					);
-
-					moveToSlide(track, currentSlide, nextSlide);
-					updateDots(currentDot, nextDot);
-					if (prevButton)
-						hideShowArrows(
-							slides,
-							prevButton,
-							nextButton,
-							nextIndex,
-						);
-				});
-			}
-
-			// When I click the nav indicators, move to that slide
-			if (dotsNav) {
-				dotsNav.addEventListener("click", (e) => {
-					// what indicator was clicked on?
-					const targetDot = (e.target as HTMLElement).closest(
-						"button",
-					);
-
-					if (!targetDot) return;
-
-					const currentSlide = track.querySelector(
-						".current-slide",
-					) as HTMLElement;
-					const currentDot = dotsNav.querySelector(
-						".current-slide",
-					) as HTMLElement;
-					const targetIndex = dots.findIndex(
-						(dot) => dot === targetDot,
-					);
-					const targetSlide = slides[targetIndex];
-
-					moveToSlide(track, currentSlide, targetSlide);
-					updateDots(currentDot, targetDot);
-					if (prevButton && nextButton)
-						hideShowArrows(
-							slides,
-							prevButton,
-							nextButton,
-							targetIndex,
-						);
-				});
-			}
-
-			// Handle window resize to adjust slide positions
-			const resizeHandler = () => {
-				const newSlideWidth = slides[0].getBoundingClientRect().width;
-				slides.forEach((slide, index) => {
-					slide.style.left = newSlideWidth * index + "px";
-				});
-				// Re-center current slide
-				const currentSlide = track.querySelector(
-					".current-slide",
-				) as HTMLElement;
-				track.style.transform =
-					"translateX(-" + currentSlide.style.left + ")";
-			};
-
-			window.addEventListener("resize", resizeHandler);
-
-			// Cleanup resize listener on navigation
-			document.addEventListener(
-				"astro:before-swap",
-				() => {
-					window.removeEventListener("resize", resizeHandler);
-				},
-				{ once: true },
-			);
+			});
 		}
+
+		const goToSlide = (targetIndex: number) => {
+			if (targetIndex < 0 || targetIndex >= slides.length) return;
+
+			const currentSlide = slides[currentIndex];
+			const targetSlide = slides[targetIndex];
+			const currentDot = dots[currentIndex];
+			const targetDot = dots[targetIndex];
+
+			// Update track position
+			track.style.transform = `translateX(-${targetSlide.style.left})`;
+
+			// Update slide classes
+			currentSlide.classList.remove('current-slide');
+			targetSlide.classList.add('current-slide');
+
+			// Update dots
+			if (currentDot && targetDot) {
+				currentDot.classList.remove('current-slide');
+				targetDot.classList.add('current-slide');
+			}
+
+			// Update arrows
+			if (prevButton && nextButton) {
+				prevButton.classList.toggle('is-hidden', targetIndex === 0);
+				nextButton.classList.toggle('is-hidden', targetIndex === slides.length - 1);
+			}
+
+			currentIndex = targetIndex;
+
+			// Restart autoplay timer
+			if (!isPaused) {
+				startAutoplay();
+			}
+		};
+
+		const nextSlide = () => {
+			const next = currentIndex < slides.length - 1 ? currentIndex + 1 : 0;
+			goToSlide(next);
+		};
+
+		const prevSlide = () => {
+			const prev = currentIndex > 0 ? currentIndex - 1 : slides.length - 1;
+			goToSlide(prev);
+		};
+
+		const startAutoplay = () => {
+			stopAutoplay();
+			if (isPaused) return;
+
+			autoplayTimer = window.setTimeout(() => {
+				nextSlide();
+			}, AUTOPLAY_INTERVAL);
+		};
+
+		const stopAutoplay = () => {
+			if (autoplayTimer) {
+				clearTimeout(autoplayTimer);
+				autoplayTimer = null;
+			}
+		};
+
+		const togglePause = () => {
+			isPaused = !isPaused;
+			container.classList.toggle('paused', isPaused);
+			if (isPaused) {
+				stopAutoplay();
+			} else {
+				startAutoplay();
+			}
+		};
+
+		// Event Listeners
+		if (prevButton) {
+			prevButton.addEventListener('click', () => {
+				prevSlide();
+			});
+		}
+
+		if (nextButton) {
+			nextButton.addEventListener('click', () => {
+				nextSlide();
+			});
+		}
+
+		if (dotsNav) {
+			dotsNav.addEventListener('click', (e) => {
+				const targetDot = (e.target as HTMLElement).closest('button.carousel-indicator');
+				if (!targetDot) return;
+				const targetIndex = dots.indexOf(targetDot as HTMLElement);
+				if (targetIndex !== -1 && targetIndex !== currentIndex) {
+					goToSlide(targetIndex);
+				}
+			});
+		}
+
+		if (pauseButton) {
+			pauseButton.addEventListener('click', togglePause);
+		}
+
+		// Keyboard navigation
+		container.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				prevSlide();
+			} else if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				nextSlide();
+			} else if (e.key === ' ') {
+				e.preventDefault();
+				togglePause();
+			}
+		});
+
+		// Touch/swipe support
+		container.addEventListener('touchstart', (e) => {
+			touchStartX = e.changedTouches[0].screenX;
+		}, { passive: true });
+
+		container.addEventListener('touchend', (e) => {
+			touchEndX = e.changedTouches[0].screenX;
+			const diff = touchStartX - touchEndX;
+			const threshold = 50;
+
+			if (Math.abs(diff) > threshold) {
+				if (diff > 0) {
+					nextSlide();
+				} else {
+					prevSlide();
+				}
+			}
+		}, { passive: true });
+
+		// Pause on hover (optional - can be annoying)
+		// container.addEventListener('mouseenter', () => {
+		// 	if (!isPaused) stopAutoplay();
+		// });
+		// container.addEventListener('mouseleave', () => {
+		// 	if (!isPaused) startAutoplay();
+		// });
+
+		// Handle window resize
+		const resizeHandler = () => {
+			const newSlideWidth = slides[0].getBoundingClientRect().width;
+			slides.forEach((slide, index) => {
+				slide.style.left = newSlideWidth * index + 'px';
+			});
+			track.style.transform = `translateX(-${slides[currentIndex].style.left})`;
+		};
+
+		window.addEventListener('resize', resizeHandler);
+
+		// Start autoplay
+		startAutoplay();
+
+		// Cleanup on navigation
+		document.addEventListener('astro:before-swap', () => {
+			stopAutoplay();
+			window.removeEventListener('resize', resizeHandler);
+		}, { once: true });
 	}
 
 	// Run on initial load and after every navigation
-	document.addEventListener("astro:page-load", setupCarousel);
+	document.addEventListener('astro:page-load', setupCarousel);
 </script>

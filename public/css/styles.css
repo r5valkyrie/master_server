@@ -292,6 +292,33 @@ a {
   background: rgba(0, 0, 0, 0.2);
 }
 
+.main-footer {
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 12, 1) 0%,
+    rgba(5, 5, 8, 1) 100%
+  );
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 40px 0;
+  position: relative;
+}
+
+.main-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.2) 50%,
+    transparent 100%
+  );
+}
+
 .footer-content {
   display: flex;
   justify-content: space-between;
@@ -305,6 +332,7 @@ a {
   color: var(--text-muted);
   margin-left: 20px;
   font-size: 0.9rem;
+  transition: color 0.2s ease;
 }
 
 .footer-links a:hover {
