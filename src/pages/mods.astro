@@ -1,15 +1,8 @@
 ---
 import Main from "../layouts/Main.astro";
 
-let initialMods = [];
-try {
-	const response = await fetch(new URL("/api/client/mods", Astro.url));
-	if (response.ok) {
-		initialMods = await response.json();
-	}
-} catch (error) {
-	console.error("Failed to fetch mods server-side:", error);
-}
+// Don't block on server-side fetch - let client handle it for faster initial page load
+const initialMods: any[] = [];
 ---
 
 <Main title="Mods">
@@ -320,11 +313,15 @@ try {
 	}
 </style>
 
-<script define:vars={{ initialMods }}>
-	let allMods = initialMods || [];
-	let filteredMods = initialMods || [];
-	let renderedCount = initialMods ? Math.min(initialMods.length, 12) : 0;
+<script>
+	// Use a global cache so data persists across navigations
+	window.__modsCache = window.__modsCache || { data: null, timestamp: 0 };
+	const CACHE_TTL = 5 * 60 * 1000; // 5 minutes client-side cache
+
 	const BATCH_SIZE = 12;
+	let allMods = [];
+	let filteredMods = [];
+	let renderedCount = 0;
 	let infiniteObserver = null;
 
 	function createModCard(mod) {
@@ -453,9 +450,8 @@ try {
 	}
 
 	function filterAndRenderMods() {
-		const searchTerm = document
-			.getElementById("search-bar")
-			.value.toLowerCase();
+		const searchBar = document.getElementById("search-bar");
+		const searchTerm = searchBar ? searchBar.value.toLowerCase() : "";
 		const filtered = allMods.filter(
 			(mod) =>
 				!mod?.is_deprecated &&
@@ -465,47 +461,69 @@ try {
 		renderMods(filtered);
 	}
 
-	function fetchMods() {
-		// If we already have mods (from server), just setup scroll and return
-		if (allMods.length > 0) {
-			setupInfiniteScroll();
+	async function initMods() {
+		const grid = document.getElementById("mods-grid");
+		if (!grid) return;
+
+		// Check if we have valid cached data
+		const cache = window.__modsCache;
+		const now = Date.now();
+		
+		if (cache.data && cache.data.length > 0 && (now - cache.timestamp) < CACHE_TTL) {
+			// Use cached data - instant render!
+			allMods = cache.data;
+			filterAndRenderMods();
 			return;
 		}
 
-		(async () => {
-			const grid = document.getElementById("mods-grid");
-			if (grid)
-				grid.innerHTML =
-					'<div class="loader-wrapper"><div class="loader"></div></div>';
+		// Show loader
+		grid.innerHTML = '<div class="loader-wrapper"><div class="loader"></div></div>';
 
-			try {
-				const q = document.getElementById("search-bar")?.value || "";
-				const endpoint = q
-					? `/api/client/mods?q=${encodeURIComponent(q)}`
-					: "/api/client/mods";
-				const response = await fetch(endpoint, {
-					headers: { Accept: "application/json" },
-				});
-				if (!response.ok) throw new Error(`HTTP ${response.status}`);
+		try {
+			const response = await fetch("/api/client/mods", {
+				headers: { Accept: "application/json" },
+			});
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-				allMods = await response.json();
-				filterAndRenderMods();
-			} catch (error) {
-				if (grid) {
-					grid.innerHTML =
-						'<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Failed to load mods. Please try again later.</div>';
-				}
-				console.error("Failed to fetch mods:", error);
-			}
-		})();
+			allMods = await response.json();
+			
+			// Update cache
+			window.__modsCache = { data: allMods, timestamp: Date.now() };
+			
+			filterAndRenderMods();
+		} catch (error) {
+			grid.innerHTML =
+				'<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Failed to load mods. Please try again later.</div>';
+			console.error("Failed to fetch mods:", error);
+		}
 	}
 
-	// Run on initial page load
-	fetchMods();
-	// Run on subsequent page loads
-	document.addEventListener("astro:page-load", fetchMods);
+	function setupSearchListener() {
+		const searchBar = document.getElementById("search-bar");
+		if (searchBar) {
+			searchBar.addEventListener("input", filterAndRenderMods);
+		}
+	}
 
-	document.getElementById("search-bar")?.addEventListener("input", () => {
-		filterAndRenderMods();
+	// Initialize on page load
+	initMods();
+	setupSearchListener();
+
+	// Re-initialize on Astro page transitions
+	document.addEventListener("astro:after-swap", () => {
+		// Reset local state for fresh render
+		allMods = [];
+		filteredMods = [];
+		renderedCount = 0;
+		if (infiniteObserver) {
+			infiniteObserver.disconnect();
+			infiniteObserver = null;
+		}
+		
+		// Only init if we're on the mods page
+		if (document.getElementById("mods-grid")) {
+			initMods();
+			setupSearchListener();
+		}
 	});
 </script>

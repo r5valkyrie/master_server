@@ -44,46 +44,49 @@ const currentPage =
     sidebarConfig?.startPage;
 ---
 
-<Main title="Documentation">
-    <div class="container page-container fade-in">
-        <div class="docs-layout">
-            <aside class="docs-sidebar">
-                <div class="sidebar-inner">
-                    <h3>Documentation</h3>
-                    {
-                        sidebar.length > 0 ? (
-                            <nav>
-                                {sidebar.map((section: any) => (
-                                    <div class="sidebar-section">
-                                        <h4>{section.title}</h4>
-                                        <ul>
-                                            {section.pages.map((page: any) => (
-                                                <li>
-                                                    <a
-                                                        href={`/docs?page=${encodeURIComponent(page.slug)}`}
-                                                        class={
-                                                            page.slug ===
-                                                            currentPage
-                                                                ? "active"
-                                                                : ""
-                                                        }
-                                                    >
-                                                        {page.title}
-                                                    </a>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
-                            </nav>
-                        ) : (
-                            <p class="error-text">Failed to load sidebar.</p>
-                        )
-                    }
-                </div>
-            </aside>
+<Main title="Documentation" fullWidth={true}>
+    <div class="docs-wrapper fade-in">
+        <aside class="docs-sidebar">
+            <div class="sidebar-header">
+                <h3>Documentation</h3>
+            </div>
+            <div class="sidebar-content custom-scrollbar">
+                {
+                    sidebar.length > 0 ? (
+                        <nav>
+                            {sidebar.map((section: any) => (
+                                <div class="sidebar-section">
+                                    <h4>{section.title}</h4>
+                                    <ul>
+                                        {section.pages.map((page: any) => (
+                                            <li>
+                                                <a
+                                                    href={`/docs?page=${encodeURIComponent(page.slug)}`}
+                                                    class={
+                                                        page.slug ===
+                                                        currentPage
+                                                            ? "active"
+                                                            : ""
+                                                    }
+                                                    data-astro-prefetch
+                                                >
+                                                    {page.title}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </nav>
+                    ) : (
+                        <p class="error-text">Failed to load sidebar.</p>
+                    )
+                }
+            </div>
+        </aside>
 
-            <div class="docs-content">
+        <div class="docs-main">
+            <div class="docs-container">
                 {
                     error ? (
                         <div class="alert-box error">
@@ -95,7 +98,7 @@ const currentPage =
                             <p class="error-details">{error.message}</p>
                         </div>
                     ) : (
-                        <div class="markdown-body" set:html={htmlContent} />
+                        <article class="markdown-body" set:html={htmlContent} />
                     )
                 }
             </div>
@@ -104,194 +107,299 @@ const currentPage =
 </Main>
 
 <style>
-    .page-container {
-        padding-top: 40px;
+    .docs-wrapper {
+        display: flex;
+        min-height: 100vh;
+        padding-top: 80px; /* Account for fixed header */
     }
 
-    .docs-layout {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 40px;
-        align-items: start;
-    }
-
+    /* Sidebar Styles */
     .docs-sidebar {
-        position: sticky;
-        top: 120px;
-        max-height: calc(100vh - 140px);
-        overflow-y: auto;
+        width: 300px;
+        position: fixed;
+        top: 80px;
+        bottom: 0;
+        left: 0;
+        background: rgba(10, 10, 12, 0.8);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid var(--border-light);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
     }
 
-    .sidebar-inner {
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-lg);
+    .sidebar-header {
         padding: 24px;
-        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-light);
     }
 
-    .sidebar-inner h3 {
+    .sidebar-header h3 {
         font-size: 1.2rem;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--border-light);
+        font-weight: 600;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
     }
 
     .sidebar-section {
-        margin-bottom: 20px;
+        margin-bottom: 32px;
     }
 
     .sidebar-section h4 {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.1em;
         color: var(--text-dim);
-        margin-bottom: 10px;
+        margin-bottom: 16px;
+        font-weight: 600;
     }
 
-    .sidebar-inner ul {
+    .sidebar-content ul {
         list-style: none;
         padding: 0;
+        margin: 0;
     }
 
-    .sidebar-inner li {
+    .sidebar-content li {
         margin-bottom: 4px;
     }
 
-    .sidebar-inner a {
+    .sidebar-content a {
         display: block;
         padding: 8px 12px;
-        border-radius: var(--radius-sm);
+        border-radius: 8px;
         color: var(--text-muted);
         font-size: 0.95rem;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
+        text-decoration: none;
     }
 
-    .sidebar-inner a:hover {
+    .sidebar-content a:hover {
         background: rgba(255, 255, 255, 0.05);
         color: var(--text-main);
+        transform: translateX(4px);
     }
 
-    .sidebar-inner a.active {
-        background: rgba(99, 102, 241, 0.1);
+    .sidebar-content a.active {
+        background: rgba(99, 102, 241, 0.15);
         color: var(--primary);
         font-weight: 500;
+        border: 1px solid rgba(99, 102, 241, 0.2);
     }
 
-    .docs-content {
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-lg);
-        padding: 60px;
-        min-height: 600px;
+    /* Main Content Styles */
+    .docs-main {
+        flex: 1;
+        margin-left: 300px; /* Width of sidebar */
+        padding: 40px;
+        background: radial-gradient(
+            circle at top right,
+            rgba(99, 102, 241, 0.05),
+            transparent 40%
+        );
+    }
+
+    .docs-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
     }
 
     /* Markdown Styles */
-    .markdown-body :global(h1) {
-        font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid var(--border-light);
+    .markdown-body {
+        color: var(--text-muted);
+        line-height: 1.8;
+        font-size: 1.05rem;
     }
+
+    .markdown-body :global(h1) {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-light);
+        background: linear-gradient(to right, #fff, #ccc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
     .markdown-body :global(h2) {
-        font-size: 1.8rem;
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .markdown-body :global(h3) {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-main);
         margin-top: 2rem;
         margin-bottom: 1rem;
-        color: var(--text-main);
     }
-    .markdown-body :global(h3) {
-        font-size: 1.4rem;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-    }
+
     .markdown-body :global(p) {
-        line-height: 1.7;
-        margin-bottom: 1.2rem;
-        color: var(--text-muted);
+        margin-bottom: 1.5rem;
     }
-    .markdown-body :global(ul),
-    .markdown-body :global(ol) {
-        margin-bottom: 1.2rem;
-        padding-left: 1.5rem;
-        color: var(--text-muted);
-    }
-    .markdown-body :global(li) {
-        margin-bottom: 0.5rem;
-    }
+
     .markdown-body :global(a) {
         color: var(--primary);
         text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s;
     }
+
     .markdown-body :global(a:hover) {
-        text-decoration: underline;
+        border-bottom-color: var(--primary);
     }
-    .markdown-body :global(code) {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 0.2em 0.4em;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 0.9em;
-    }
-    .markdown-body :global(pre) {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 1.5rem;
-        border-radius: var(--radius-md);
-        overflow-x: auto;
+
+    .markdown-body :global(ul),
+    .markdown-body :global(ol) {
         margin-bottom: 1.5rem;
-        border: 1px solid var(--border-light);
+        padding-left: 1.5rem;
     }
+
+    .markdown-body :global(li) {
+        margin-bottom: 0.5rem;
+    }
+
+    .markdown-body :global(code) {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.2em 0.4em;
+        border-radius: 6px;
+        font-family: "JetBrains Mono", monospace; /* Assuming a mono font is available or fallback */
+        font-size: 0.9em;
+        color: #e2e8f0;
+    }
+
+    .markdown-body :global(pre) {
+        background: #0f0f11;
+        padding: 1.5rem;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin: 2rem 0;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
     .markdown-body :global(pre code) {
         background: none;
         padding: 0;
+        color: inherit;
         font-size: 0.9em;
-        color: #e5e7eb;
     }
+
     .markdown-body :global(blockquote) {
         border-left: 4px solid var(--primary);
-        padding-left: 1rem;
-        margin-left: 0;
-        color: var(--text-dim);
+        background: rgba(99, 102, 241, 0.05);
+        padding: 1.5rem;
+        border-radius: 0 8px 8px 0;
+        margin: 2rem 0;
+        color: var(--text-main);
         font-style: italic;
     }
+
     .markdown-body :global(img) {
         max-width: 100%;
-        border-radius: var(--radius-md);
-        margin: 1rem 0;
+        border-radius: 12px;
+        margin: 2rem 0;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-light);
+    }
+
+    .markdown-body :global(table) {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+    }
+
+    .markdown-body :global(th),
+    .markdown-body :global(td) {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-light);
+        text-align: left;
+    }
+
+    .markdown-body :global(th) {
+        color: var(--text-main);
+        font-weight: 600;
     }
 
     .alert-box {
-        background: rgba(236, 72, 153, 0.1);
-        border: 1px solid rgba(236, 72, 153, 0.2);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
         padding: 24px;
-        border-radius: var(--radius-md);
-        color: #fce7f3;
+        border-radius: 12px;
+        color: #fca5a5;
     }
 
-    .error-text {
-        color: #ef4444;
-    }
     .error-details {
         font-family: monospace;
         font-size: 0.85rem;
-        background: rgba(0, 0, 0, 0.2);
-        padding: 10px;
-        border-radius: 4px;
-        margin-top: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 12px;
+        overflow-x: auto;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
+        .docs-sidebar {
+            width: 260px;
+        }
+        .docs-main {
+            margin-left: 260px;
+        }
     }
 
     @media (max-width: 768px) {
-        .docs-layout {
-            grid-template-columns: 1fr;
+        .docs-wrapper {
+            flex-direction: column;
+            padding-top: 60px;
         }
 
         .docs-sidebar {
-            position: static;
-            margin-bottom: 30px;
-            max-height: none;
+            position: relative;
+            width: 100%;
+            top: 0;
+            height: auto;
+            border-right: none;
+            border-bottom: 1px solid var(--border-light);
+            max-height: 300px; /* Collapsible feel */
         }
 
-        .docs-content {
-            padding: 30px;
+        .docs-main {
+            margin-left: 0;
+            padding: 24px;
+        }
+
+        .markdown-body :global(h1) {
+            font-size: 2.2rem;
         }
     }
 </style>

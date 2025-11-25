@@ -181,27 +181,26 @@ a {
 /* Navbar */
 .main-header {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: var(--container-width);
+  top: 0;
+  left: 0;
+  width: 100%;
   height: var(--nav-height);
   z-index: 1000;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
+  justify-content: center;
+  padding: 0 40px;
 
   background: var(--bg-glass);
   backdrop-filter: blur(var(--blur-lg));
   -webkit-backdrop-filter: blur(var(--blur-lg));
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-full);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: 0 4px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 .logo {
+  position: absolute;
+  left: 40px;
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -210,9 +209,16 @@ a {
   gap: 10px;
 }
 
+.logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
 .main-nav {
   display: flex;
   gap: 8px;
+  justify-content: center;
 }
 
 .nav-link {
@@ -233,6 +239,48 @@ a {
   color: var(--text-main);
   background: rgba(255, 255, 255, 0.1);
   font-weight: 600;
+}
+
+/* Download CTA Button */
+.download-btn {
+  position: absolute;
+  right: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+}
+
+.download-btn svg {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.download-btn:hover svg {
+  animation: bounce-down 0.4s ease;
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* Hide mobile download in desktop nav */
+.mobile-download {
+  display: none;
 }
 
 /* Mobile Menu Toggle */
@@ -300,6 +348,15 @@ a {
 
   .main-header {
     padding: 0 20px;
+    justify-content: space-between;
+  }
+
+  .logo {
+    position: static;
+  }
+
+  .download-btn {
+    display: none;
   }
 
   .main-nav {
@@ -313,12 +370,25 @@ a {
     background: #121212;
     padding: 20px;
     border-radius: var(--radius-md);
-    margin-top: 10px;
+    margin-top: 0;
     border: 1px solid var(--border-light);
+    border-top: none;
   }
 
   .main-nav.open {
     display: flex;
+  }
+
+  /* Show download link in mobile nav */
+  .mobile-download {
+    display: block;
+    margin-top: 10px;
+    padding: 12px 20px !important;
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    text-align: center;
   }
 
   .mobile-toggle {
@@ -347,7 +417,7 @@ a {
 /* Main Container for non-full-width pages */
 .main-container {
   max-width: var(--container-width);
-  padding-top: calc(var(--nav-height) + 60px);
+  padding-top: calc(var(--nav-height) + 40px);
   padding-bottom: 60px;
   padding-left: 20px;
   padding-right: 20px;
