@@ -1,0 +1,1279 @@
+---
+import Main from "../layouts/Main.astro";
+
+const GHOST_API_URL = "https://blog.playvalkyrie.org/ghost/api/content/posts/";
+const GHOST_API_KEY = "4d046cff94d3fdfeaab2bf9ccf";
+
+interface Post {
+	id: string;
+	slug: string;
+	title: string;
+	excerpt: string;
+	html: string;
+	published_at: string;
+	url: string;
+	feature_image: string | null;
+	reading_time: number;
+	tags: { name: string; slug: string }[];
+	authors: { name: string; slug: string; profile_image: string | null }[];
+}
+
+interface Category {
+	name: string;
+	slug: string;
+	icon: string;
+	description: string;
+}
+
+const categories: Category[] = [
+	{ name: "All Posts", slug: "all", icon: "grid", description: "Everything from the blog" },
+	{ name: "Community", slug: "community", icon: "users", description: "Community updates and highlights" },
+	{ name: "Live Patch Notes", slug: "live-patch-notes", icon: "rocket", description: "Live server patch notes" },
+	{ name: "PTU Patch Notes", slug: "ptu-patch-notes", icon: "flask", description: "Public test patch notes" },
+	{ name: "Dev Blog", slug: "dev-blog", icon: "terminal", description: "Behind the scenes development" },
+];
+
+async function fetchPosts(tag: string): Promise<Post[]> {
+	const url = `${GHOST_API_URL}?key=${GHOST_API_KEY}&include=tags,authors&filter=tag:${tag}&limit=10`;
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			console.error(`Failed to fetch ${tag} posts. Status: ${response.status}`);
+			return [];
+		}
+		const data = await response.json();
+		return data.posts || [];
+	} catch (error) {
+		console.error(`Error fetching ${tag} posts:`, error);
+		return [];
+	}
+}
+
+const [communityPosts, livePatchNotesPosts, ptuPatchNotesPosts, devBlogPosts] = await Promise.all([
+	fetchPosts("community"),
+	fetchPosts("live-patch-notes"),
+	fetchPosts("ptu-patch-notes"),
+	fetchPosts("dev-blog"),
+]);
+
+// Combine and dedupe all posts for the "All" view
+const allPostsMap = new Map<string, Post>();
+[...communityPosts, ...livePatchNotesPosts, ...ptuPatchNotesPosts, ...devBlogPosts].forEach(post => {
+	allPostsMap.set(post.id, post);
+});
+const allPosts = Array.from(allPostsMap.values()).sort(
+	(a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+);
+
+// Create a JSON-safe posts map for the client
+const postsDataMap: Record<string, Post> = {};
+allPosts.forEach(post => {
+	postsDataMap[post.id] = post;
+});
+
+function formatDate(dateString: string): string {
+	const date = new Date(dateString);
+	return date.toLocaleDateString('en-US', { 
+		year: 'numeric', 
+		month: 'short', 
+		day: 'numeric' 
+	});
+}
+
+function getRelativeTime(dateString: string): string {
+	const date = new Date(dateString);
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+	
+	if (diffDays === 0) return 'Today';
+	if (diffDays === 1) return 'Yesterday';
+	if (diffDays < 7) return `${diffDays} days ago`;
+	if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+	if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+	return `${Math.floor(diffDays / 365)} years ago`;
+}
+---
+
+<Main title="Blog" fullWidth={true}>
+	<div class="blog-wrapper fade-in">
+		<aside class="blog-sidebar">
+			<div class="sidebar-header">
+				<h3>Blog</h3>
+			</div>
+			<div class="sidebar-content custom-scrollbar">
+				<p class="sidebar-intro">
+					News, updates, and insights from the R5Valkyrie team.
+				</p>
+
+				<nav class="sidebar-nav">
+					{categories.map((category) => (
+						<button 
+							class={`nav-item ${category.slug === 'all' ? 'active' : ''}`}
+							data-category={category.slug}
+						>
+							<span class="nav-icon">
+								{category.icon === 'grid' && (
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+								)}
+								{category.icon === 'users' && (
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+								)}
+								{category.icon === 'rocket' && (
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+								)}
+								{category.icon === 'flask' && (
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+								)}
+								{category.icon === 'terminal' && (
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+								)}
+							</span>
+							{category.name}
+							<span class="count" data-count={category.slug}>
+								{category.slug === 'all' ? allPosts.length : 
+								 category.slug === 'community' ? communityPosts.length :
+								 category.slug === 'live-patch-notes' ? livePatchNotesPosts.length :
+								 category.slug === 'ptu-patch-notes' ? ptuPatchNotesPosts.length :
+								 devBlogPosts.length}
+							</span>
+						</button>
+					))}
+				</nav>
+
+				<div class="sidebar-stats">
+					<div class="stat-item">
+						<span class="label">Total Posts</span>
+						<span class="value">{allPosts.length}</span>
+					</div>
+				</div>
+
+				<div class="sidebar-cta">
+					<p>Read more on our blog</p>
+					<a href="https://blog.playvalkyrie.org" target="_blank" class="btn-blog">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+						Visit Full Blog
+					</a>
+				</div>
+			</div>
+		</aside>
+
+		<main class="blog-main">
+			<!-- All Posts -->
+			<section id="all" class="posts-section active" data-category="all">
+				<div class="section-header">
+					<h2>All Posts</h2>
+					<p>Everything from the R5Valkyrie blog</p>
+				</div>
+				{allPosts.length > 0 ? (
+					<div class="posts-grid">
+						{allPosts.map((post, index) => (
+							<button
+								type="button"
+								class="post-card"
+								data-post-id={post.id}
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="post-image">
+									{post.feature_image ? (
+										<img src={post.feature_image} alt={post.title} loading="lazy" />
+									) : (
+										<div class="placeholder-image">
+											<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+										</div>
+									)}
+									<div class="post-overlay"></div>
+								</div>
+								<div class="post-content">
+									<div class="post-meta">
+										<span class="post-date">{getRelativeTime(post.published_at)}</span>
+										{post.tags && post.tags[0] && (
+											<span class="post-tag">{post.tags[0].name}</span>
+										)}
+									</div>
+									<h3 class="post-title">{post.title}</h3>
+									<p class="post-excerpt">{post.excerpt}</p>
+									<div class="post-footer">
+										<span class="read-more">
+											Read more
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</span>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				) : (
+					<div class="empty-state">
+						<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+						<h3>No posts yet</h3>
+						<p>Check back soon for updates!</p>
+					</div>
+				)}
+			</section>
+
+			<!-- Community Posts -->
+			<section id="community" class="posts-section" data-category="community">
+				<div class="section-header">
+					<h2>Community</h2>
+					<p>Community updates and highlights</p>
+				</div>
+				{communityPosts.length > 0 ? (
+					<div class="posts-grid">
+						{communityPosts.map((post, index) => (
+							<button
+								type="button"
+								class="post-card"
+								data-post-id={post.id}
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="post-image">
+									{post.feature_image ? (
+										<img src={post.feature_image} alt={post.title} loading="lazy" />
+									) : (
+										<div class="placeholder-image">
+											<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+										</div>
+									)}
+									<div class="post-overlay"></div>
+								</div>
+								<div class="post-content">
+									<div class="post-meta">
+										<span class="post-date">{getRelativeTime(post.published_at)}</span>
+									</div>
+									<h3 class="post-title">{post.title}</h3>
+									<p class="post-excerpt">{post.excerpt}</p>
+									<div class="post-footer">
+										<span class="read-more">
+											Read more
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</span>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				) : (
+					<div class="empty-state">
+						<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+						<h3>No community posts yet</h3>
+						<p>Community updates will appear here!</p>
+					</div>
+				)}
+			</section>
+
+			<!-- Live Patch Notes -->
+			<section id="live-patch-notes" class="posts-section" data-category="live-patch-notes">
+				<div class="section-header">
+					<h2>Live Patch Notes</h2>
+					<p>Live server patch notes</p>
+				</div>
+				{livePatchNotesPosts.length > 0 ? (
+					<div class="posts-grid">
+						{livePatchNotesPosts.map((post, index) => (
+							<button
+								type="button"
+								class="post-card"
+								data-post-id={post.id}
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="post-image">
+									{post.feature_image ? (
+										<img src={post.feature_image} alt={post.title} loading="lazy" />
+									) : (
+										<div class="placeholder-image">
+											<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+										</div>
+									)}
+									<div class="post-overlay"></div>
+								</div>
+								<div class="post-content">
+									<div class="post-meta">
+										<span class="post-date">{getRelativeTime(post.published_at)}</span>
+									</div>
+									<h3 class="post-title">{post.title}</h3>
+									<p class="post-excerpt">{post.excerpt}</p>
+									<div class="post-footer">
+										<span class="read-more">
+											Read more
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</span>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				) : (
+					<div class="empty-state">
+						<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+						<h3>No live patch notes yet</h3>
+						<p>Live server updates will appear here!</p>
+					</div>
+				)}
+			</section>
+
+			<!-- PTU Patch Notes -->
+			<section id="ptu-patch-notes" class="posts-section" data-category="ptu-patch-notes">
+				<div class="section-header">
+					<h2>PTU Patch Notes</h2>
+					<p>Public test server patch notes</p>
+				</div>
+				{ptuPatchNotesPosts.length > 0 ? (
+					<div class="posts-grid">
+						{ptuPatchNotesPosts.map((post, index) => (
+							<button
+								type="button"
+								class="post-card"
+								data-post-id={post.id}
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="post-image">
+									{post.feature_image ? (
+										<img src={post.feature_image} alt={post.title} loading="lazy" />
+									) : (
+										<div class="placeholder-image">
+											<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+										</div>
+									)}
+									<div class="post-overlay"></div>
+								</div>
+								<div class="post-content">
+									<div class="post-meta">
+										<span class="post-date">{getRelativeTime(post.published_at)}</span>
+									</div>
+									<h3 class="post-title">{post.title}</h3>
+									<p class="post-excerpt">{post.excerpt}</p>
+									<div class="post-footer">
+										<span class="read-more">
+											Read more
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</span>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				) : (
+					<div class="empty-state">
+						<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+						<h3>No PTU patch notes yet</h3>
+						<p>Public test updates will appear here!</p>
+					</div>
+				)}
+			</section>
+
+			<!-- Dev Blog -->
+			<section id="dev-blog" class="posts-section" data-category="dev-blog">
+				<div class="section-header">
+					<h2>Dev Blog</h2>
+					<p>Behind the scenes development</p>
+				</div>
+				{devBlogPosts.length > 0 ? (
+					<div class="posts-grid">
+						{devBlogPosts.map((post, index) => (
+							<button
+								type="button"
+								class="post-card"
+								data-post-id={post.id}
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="post-image">
+									{post.feature_image ? (
+										<img src={post.feature_image} alt={post.title} loading="lazy" />
+									) : (
+										<div class="placeholder-image">
+											<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+										</div>
+									)}
+									<div class="post-overlay"></div>
+								</div>
+								<div class="post-content">
+									<div class="post-meta">
+										<span class="post-date">{getRelativeTime(post.published_at)}</span>
+									</div>
+									<h3 class="post-title">{post.title}</h3>
+									<p class="post-excerpt">{post.excerpt}</p>
+									<div class="post-footer">
+										<span class="read-more">
+											Read more
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</span>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				) : (
+					<div class="empty-state">
+						<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+						<h3>No dev blog posts yet</h3>
+						<p>Development updates will appear here!</p>
+					</div>
+				)}
+			</section>
+		</main>
+	</div>
+
+	<!-- Post Modal -->
+	<div id="post-modal" class="post-modal">
+		<div class="modal-backdrop"></div>
+		<div class="modal-container">
+			<button type="button" class="modal-close" aria-label="Close">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+			</button>
+			<article class="modal-content custom-scrollbar">
+				<div class="modal-header">
+					<img id="modal-feature-image" src="" alt="" class="modal-feature-image" />
+					<div class="modal-header-overlay"></div>
+					<div class="modal-header-content">
+						<div class="modal-meta">
+							<span id="modal-date" class="modal-date"></span>
+							<span id="modal-reading-time" class="modal-reading-time"></span>
+						</div>
+						<h1 id="modal-title" class="modal-title"></h1>
+						<div id="modal-author" class="modal-author"></div>
+					</div>
+				</div>
+				<div id="modal-body" class="modal-body markdown-body"></div>
+			</article>
+		</div>
+	</div>
+</Main>
+
+<script define:vars={{ postsDataMap }}>
+	window.postsData = postsDataMap;
+</script>
+
+<style>
+	.blog-wrapper {
+		display: flex;
+		min-height: 100vh;
+		padding-top: 80px;
+	}
+
+	/* Sidebar */
+	.blog-sidebar {
+		width: 300px;
+		position: fixed;
+		top: 80px;
+		bottom: 0;
+		left: 0;
+		background: rgba(10, 10, 12, 0.8);
+		backdrop-filter: blur(20px);
+		border-right: 1px solid var(--border-light);
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.sidebar-header {
+		padding: 24px;
+		border-bottom: 1px solid var(--border-light);
+	}
+
+	.sidebar-header h3 {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: var(--text-main);
+		margin: 0;
+	}
+
+	.sidebar-content {
+		flex: 1;
+		overflow-y: auto;
+		padding: 24px;
+	}
+
+	.sidebar-intro {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		line-height: 1.6;
+		margin-bottom: 24px;
+	}
+
+	/* Sidebar Navigation */
+	.sidebar-nav {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-bottom: 32px;
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 12px 14px;
+		border-radius: 10px;
+		color: var(--text-muted);
+		text-decoration: none;
+		transition: all 0.2s ease;
+		font-size: 0.9rem;
+		font-weight: 500;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		text-align: left;
+		width: 100%;
+	}
+
+	.nav-item:hover {
+		background: rgba(255, 255, 255, 0.05);
+		color: var(--text-main);
+	}
+
+	.nav-item.active {
+		background: rgba(99, 102, 241, 0.15);
+		color: var(--primary);
+	}
+
+	.nav-icon {
+		display: flex;
+		opacity: 0.7;
+	}
+
+	.nav-item .count {
+		margin-left: auto;
+		font-size: 0.75rem;
+		background: rgba(255, 255, 255, 0.1);
+		padding: 2px 8px;
+		border-radius: 10px;
+	}
+
+	.nav-item.active .count {
+		background: rgba(99, 102, 241, 0.3);
+	}
+
+	/* Sidebar Stats */
+	.sidebar-stats {
+		padding: 20px 0;
+		border-top: 1px solid var(--border-light);
+		border-bottom: 1px solid var(--border-light);
+		margin-bottom: 24px;
+	}
+
+	.stat-item {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.9rem;
+	}
+
+	.stat-item .label {
+		color: var(--text-muted);
+	}
+
+	.stat-item .value {
+		font-weight: 600;
+		color: var(--text-main);
+	}
+
+	/* Sidebar CTA */
+	.sidebar-cta {
+		text-align: center;
+	}
+
+	.sidebar-cta p {
+		color: var(--text-dim);
+		font-size: 0.85rem;
+		margin-bottom: 12px;
+	}
+
+	.btn-blog {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 20px;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid var(--border-light);
+		border-radius: 8px;
+		color: var(--text-main);
+		text-decoration: none;
+		font-size: 0.85rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		width: 100%;
+	}
+
+	.btn-blog:hover {
+		background: rgba(99, 102, 241, 0.15);
+		border-color: rgba(99, 102, 241, 0.3);
+		color: var(--primary);
+	}
+
+	/* Custom Scrollbar */
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	/* Main Content */
+	.blog-main {
+		flex: 1;
+		margin-left: 300px;
+		padding: 32px 40px;
+		background: linear-gradient(
+			180deg,
+			rgba(8, 8, 12, 1) 0%,
+			rgba(5, 5, 8, 1) 100%
+		);
+	}
+
+	.posts-section {
+		display: none;
+	}
+
+	.posts-section.active {
+		display: block;
+	}
+
+	.section-header {
+		margin-bottom: 32px;
+	}
+
+	.section-header h2 {
+		font-size: 1.75rem;
+		font-weight: 600;
+		margin-bottom: 8px;
+		color: var(--text-main);
+	}
+
+	.section-header p {
+		color: var(--text-muted);
+		font-size: 0.95rem;
+	}
+
+	/* Posts Grid */
+	.posts-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+		gap: 24px;
+	}
+
+	/* Post Card */
+	.post-card {
+		position: relative;
+		background: rgba(18, 18, 24, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 16px;
+		overflow: hidden;
+		text-decoration: none;
+		text-align: left;
+		transition: all 0.3s ease;
+		animation: fadeInUp 0.5s ease forwards;
+		opacity: 0;
+		display: flex;
+		flex-direction: column;
+		cursor: pointer;
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.post-card:hover {
+		transform: translateY(-4px);
+		background: rgba(25, 25, 35, 1);
+		border-color: rgba(99, 102, 241, 0.4);
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+	}
+
+	.post-image {
+		position: relative;
+		width: 100%;
+		height: 180px;
+		overflow: hidden;
+	}
+
+	.post-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
+	}
+
+	.post-card:hover .post-image img {
+		transform: scale(1.05);
+	}
+
+	.post-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to bottom, transparent 0%, rgba(15, 15, 20, 0.8) 100%);
+	}
+
+	.placeholder-image {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+		color: var(--text-dim);
+	}
+
+	.post-content {
+		padding: 20px;
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		background: rgba(12, 12, 16, 0.5);
+	}
+
+	.post-meta {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 12px;
+	}
+
+	.post-date {
+		font-size: 0.8rem;
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	.post-tag {
+		font-size: 0.7rem;
+		color: #a5b4fc;
+		background: rgba(99, 102, 241, 0.2);
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-weight: 500;
+	}
+
+	.post-title {
+		font-size: 1.15rem;
+		font-weight: 600;
+		color: #ffffff;
+		margin-bottom: 10px;
+		line-height: 1.4;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.post-excerpt {
+		font-size: 0.875rem;
+		color: rgba(255, 255, 255, 0.7);
+		line-height: 1.6;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		flex: 1;
+	}
+
+	.post-footer {
+		margin-top: 16px;
+		padding-top: 16px;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.read-more {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.85rem;
+		color: #818cf8;
+		font-weight: 500;
+		transition: gap 0.2s ease;
+	}
+
+	.post-card:hover .read-more {
+		gap: 10px;
+	}
+
+	/* Empty State */
+	.empty-state {
+		text-align: center;
+		padding: 80px 40px;
+		color: var(--text-dim);
+	}
+
+	.empty-state svg {
+		margin-bottom: 20px;
+		opacity: 0.3;
+	}
+
+	.empty-state h3 {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+		margin-bottom: 8px;
+	}
+
+	.empty-state p {
+		font-size: 0.9rem;
+	}
+
+	/* Mobile Responsive */
+	@media (max-width: 1024px) {
+		.blog-sidebar {
+			width: 260px;
+		}
+		.blog-main {
+			margin-left: 260px;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.blog-wrapper {
+			flex-direction: column;
+			padding-top: 60px;
+		}
+
+		.blog-sidebar {
+			position: relative;
+			width: 100%;
+			top: 0;
+			height: auto;
+			border-right: none;
+			border-bottom: 1px solid var(--border-light);
+		}
+
+		.sidebar-content {
+			padding: 16px;
+		}
+
+		.sidebar-intro {
+			display: none;
+		}
+
+		.sidebar-nav {
+			flex-direction: row;
+			overflow-x: auto;
+			margin-bottom: 16px;
+			gap: 12px;
+		}
+
+		.nav-item {
+			white-space: nowrap;
+			padding: 10px 16px;
+		}
+
+		.sidebar-stats {
+			display: none;
+		}
+
+		.sidebar-cta {
+			display: none;
+		}
+
+		.blog-main {
+			margin-left: 0;
+			padding: 24px 16px;
+		}
+
+		.posts-grid {
+			grid-template-columns: 1fr;
+			gap: 16px;
+		}
+	}
+
+	/* Post Modal Styles */
+	.post-modal {
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 100px 20px 20px;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.3s ease, visibility 0.3s ease;
+	}
+
+	.post-modal.open {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.modal-backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.85);
+		backdrop-filter: blur(8px);
+	}
+
+	.modal-container {
+		position: relative;
+		width: 100%;
+		max-width: 900px;
+		max-height: 85vh;
+		margin: auto;
+		background: rgba(12, 12, 16, 0.98);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		overflow: hidden;
+		transform: scale(0.95) translateY(20px);
+		transition: transform 0.3s ease;
+		box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+	}
+
+	.post-modal.open .modal-container {
+		transform: scale(1) translateY(0);
+	}
+
+	.modal-close {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		z-index: 10;
+		width: 44px;
+		height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.5);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 50%;
+		color: var(--text-main);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.modal-close:hover {
+		background: rgba(255, 255, 255, 0.1);
+		transform: scale(1.05);
+	}
+
+	.modal-content {
+		max-height: 90vh;
+		overflow-y: auto;
+	}
+
+	.modal-header {
+		position: relative;
+		min-height: 300px;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	.modal-feature-image {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.modal-feature-image[src=""] {
+		display: none;
+	}
+
+	.modal-header-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(12, 12, 16, 1) 0%, rgba(12, 12, 16, 0.8) 30%, transparent 100%);
+	}
+
+	.modal-header-content {
+		position: relative;
+		padding: 40px;
+		padding-top: 80px;
+	}
+
+	.modal-meta {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		margin-bottom: 16px;
+	}
+
+	.modal-date {
+		font-size: 0.85rem;
+		color: var(--text-muted);
+	}
+
+	.modal-reading-time {
+		font-size: 0.85rem;
+		color: rgba(255, 255, 255, 0.7);
+		padding: 4px 12px;
+		background: rgba(99, 102, 241, 0.5);
+		border-radius: 20px;
+	}
+
+	.modal-title {
+		font-size: 2.5rem;
+		font-weight: 700;
+		color: var(--text-main);
+		line-height: 1.2;
+		margin-bottom: 20px;
+	}
+
+	.modal-author {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		color: var(--text-muted);
+		font-size: 0.85rem;
+	}
+
+	.modal-author img {
+		width: 24px;
+		height: 24px;
+		min-width: 24px;
+		min-height: 24px;
+		max-width: 24px;
+		max-height: 24px;
+		border-radius: 50%;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		object-fit: cover;
+	}
+
+	.modal-body {
+		padding: 0 40px 40px;
+	}
+
+	/* Markdown styles for modal */
+	.modal-body.markdown-body {
+		color: var(--text-muted);
+		line-height: 1.8;
+		font-size: 1.05rem;
+	}
+
+	.modal-body.markdown-body :global(h1),
+	.modal-body.markdown-body :global(h2),
+	.modal-body.markdown-body :global(h3),
+	.modal-body.markdown-body :global(h4) {
+		color: var(--text-main);
+		margin-top: 2rem;
+		margin-bottom: 1rem;
+	}
+
+	.modal-body.markdown-body :global(h2) {
+		font-size: 1.75rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid var(--border-light);
+	}
+
+	.modal-body.markdown-body :global(h3) {
+		font-size: 1.4rem;
+	}
+
+	.modal-body.markdown-body :global(p) {
+		margin-bottom: 1.5rem;
+	}
+
+	.modal-body.markdown-body :global(a) {
+		color: var(--primary);
+		text-decoration: none;
+	}
+
+	.modal-body.markdown-body :global(a:hover) {
+		text-decoration: underline;
+	}
+
+	.modal-body.markdown-body :global(img) {
+		max-width: 100%;
+		height: auto;
+		border-radius: 12px;
+		margin: 1.5rem 0;
+		display: block;
+	}
+
+	.modal-body.markdown-body :global(ul),
+	.modal-body.markdown-body :global(ol) {
+		margin-bottom: 1.5rem;
+		padding-left: 1.5rem;
+	}
+
+	.modal-body.markdown-body :global(li) {
+		margin-bottom: 0.5rem;
+	}
+
+	.modal-body.markdown-body :global(blockquote) {
+		border-left: 4px solid var(--primary);
+		background: rgba(99, 102, 241, 0.1);
+		padding: 1rem 1.5rem;
+		margin: 1.5rem 0;
+		border-radius: 0 8px 8px 0;
+	}
+
+	.modal-body.markdown-body :global(pre) {
+		background: rgba(0, 0, 0, 0.4);
+		padding: 1rem;
+		border-radius: 8px;
+		overflow-x: auto;
+		margin: 1.5rem 0;
+	}
+
+	.modal-body.markdown-body :global(code) {
+		background: rgba(255, 255, 255, 0.1);
+		padding: 0.2em 0.4em;
+		border-radius: 4px;
+		font-size: 0.9em;
+	}
+
+	.modal-body.markdown-body :global(pre code) {
+		background: none;
+		padding: 0;
+	}
+
+	.modal-body.markdown-body :global(hr) {
+		border: none;
+		border-top: 1px solid var(--border-light);
+		margin: 2rem 0;
+	}
+
+	/* Mobile modal */
+	@media (max-width: 768px) {
+		.modal-container {
+			margin: 0;
+			max-height: 100vh;
+			border-radius: 0;
+		}
+
+		.modal-header {
+			min-height: 200px;
+		}
+
+		.modal-header-content {
+			padding: 20px;
+		}
+
+		.modal-title {
+			font-size: 1.75rem;
+		}
+
+		.modal-body {
+			padding: 0 20px 20px;
+		}
+
+		.modal-close {
+			top: 12px;
+			right: 12px;
+		}
+	}
+</style>
+
+<script>
+	function formatDate(dateString: string): string {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('en-US', { 
+			year: 'numeric', 
+			month: 'long', 
+			day: 'numeric' 
+		});
+	}
+
+	function setupBlog() {
+		const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+		const sections = document.querySelectorAll('.posts-section');
+		const postCards = document.querySelectorAll('.post-card');
+		const modal = document.getElementById('post-modal');
+		const modalClose = modal?.querySelector('.modal-close');
+		const modalBackdrop = modal?.querySelector('.modal-backdrop');
+
+		// Category navigation
+		navItems.forEach(item => {
+			item.addEventListener('click', () => {
+				const category = item.getAttribute('data-category');
+				
+				navItems.forEach(nav => nav.classList.remove('active'));
+				item.classList.add('active');
+				
+				sections.forEach(section => {
+					if (section.getAttribute('data-category') === category) {
+						section.classList.add('active');
+					} else {
+						section.classList.remove('active');
+					}
+				});
+			});
+		});
+
+		// Post card click handlers
+		postCards.forEach(card => {
+			card.addEventListener('click', () => {
+				const postId = card.getAttribute('data-post-id');
+				if (postId && (window as any).postsData) {
+					const post = (window as any).postsData[postId];
+					if (post) {
+						openModal(post);
+					}
+				}
+			});
+		});
+
+		// Close modal handlers
+		modalClose?.addEventListener('click', closeModal);
+		modalBackdrop?.addEventListener('click', closeModal);
+		
+		// Close on escape key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal?.classList.contains('open')) {
+				closeModal();
+			}
+		});
+	}
+
+	function openModal(post: any) {
+		const modal = document.getElementById('post-modal');
+		const featureImage = document.getElementById('modal-feature-image') as HTMLImageElement;
+		const title = document.getElementById('modal-title');
+		const date = document.getElementById('modal-date');
+		const readingTime = document.getElementById('modal-reading-time');
+		const author = document.getElementById('modal-author');
+		const body = document.getElementById('modal-body');
+
+		if (!modal || !title || !body) return;
+
+		// Set content
+		if (featureImage) {
+			featureImage.src = post.feature_image || '';
+			featureImage.alt = post.title;
+		}
+		title.textContent = post.title;
+		if (date) date.textContent = formatDate(post.published_at);
+		if (readingTime) readingTime.textContent = `${post.reading_time || 1} min read`;
+		
+		if (author && post.authors && post.authors[0]) {
+			const authorData = post.authors[0];
+			author.innerHTML = authorData.profile_image 
+				? `<img src="${authorData.profile_image}" alt="${authorData.name}" style="width:24px;height:24px;min-width:24px;max-width:24px;min-height:24px;max-height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" /><span>By ${authorData.name}</span>`
+				: `<span>By ${authorData.name}</span>`;
+		} else if (author) {
+			author.innerHTML = '';
+		}
+
+		body.innerHTML = post.html || '';
+
+		// Open modal
+		modal.classList.add('open');
+		document.body.style.overflow = 'hidden';
+	}
+
+	function closeModal() {
+		const modal = document.getElementById('post-modal');
+		if (modal) {
+			modal.classList.remove('open');
+			document.body.style.overflow = '';
+		}
+	}
+
+	document.addEventListener('DOMContentLoaded', setupBlog);
+	document.addEventListener('astro:after-swap', setupBlog);
+</script>
+

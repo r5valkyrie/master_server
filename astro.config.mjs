@@ -45,8 +45,9 @@ export default defineConfig({
       // Allow hosts from environment variable (comma-separated) or all hosts if not specified
       allowedHosts: process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(',').map(h => h.trim()) : undefined,
       fs: {
-        // Allow serving files from the public directory
-        strict: false
+        // Restrict file serving to the project directory only
+        strict: true,
+        allow: ['.']
       }
     }
   },

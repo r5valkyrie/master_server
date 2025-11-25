@@ -100,6 +100,11 @@ const customTransition = fade({ duration: "0.5s" });
           >Docs</a
         >
         <a
+          href="/blog"
+          class={`nav-link ${pathname.startsWith("/blog") ? "active" : ""}`}
+          >Blog</a
+        >
+        <a
           href="/contributors"
           class={`nav-link ${pathname.startsWith("/contributors") ? "active" : ""}`}
           >Contributors</a
