@@ -1,150 +1,405 @@
 ---
-import Main from '../layouts/Main.astro';
-import { marked } from 'marked';
-import fs from 'fs/promises';
-import path from 'path';
+import Main from "../layouts/Main.astro";
+import { marked } from "marked";
 
-const GITHUB_REPO = 'r5valkyrie/docs';
-const GITHUB_BRANCH = 'main';
-const GITHUB_DOCS_PATH = 'docs';
+const GITHUB_REPO = "r5valkyrie/docs";
+const GITHUB_BRANCH = "main";
 
-async function fetchFromGitHub(file: string) {
-    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_DOCS_PATH}/${file}?t=${Date.now()}`;
+async function fetchFromGitHub(path: string) {
+    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${path}`;
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error(`Failed to fetch ${file} from GitHub`);
+        throw new Error(`Failed to fetch ${path}`);
     }
     return response.text();
 }
 
-async function fetchFromLocal(file: string) {
-    const filePath = path.join(process.cwd(), 'docs', file);
-    try {
-        return await fs.readFile(filePath, 'utf-8');
-    } catch (error) {
-        return `# Error\n\nCould not load content for this page.`;
+let sidebarConfig;
+let content;
+let htmlContent;
+let error: any = null;
+
+try {
+    const sidebarConfigRaw = await fetchFromGitHub("docs/sidebar.json");
+    sidebarConfig = JSON.parse(sidebarConfigRaw);
+
+    const url = new URL(Astro.request.url);
+    const pageSlug = url.searchParams.get("page") || sidebarConfig.startPage;
+
+    // Validate pageSlug
+    if (!/^[a-zA-Z0-9_-]+$/.test(pageSlug)) {
+        throw new Error("Invalid page slug");
     }
+
+    const contentRaw = await fetchFromGitHub(`docs/${pageSlug}.md`);
+    htmlContent = marked(contentRaw);
+} catch (e) {
+    console.error(e);
+    error = e;
 }
 
-const sidebarConfigPromise = fetchFromGitHub('sidebar.json').then(res => JSON.parse(res));
-
-const sidebarConfig = await sidebarConfigPromise;
-const sidebar = sidebarConfig.sidebar;
-
-const url = new URL(Astro.request.url);
-const pageSlug = url.searchParams.get('page') || sidebarConfig.startPage;
-
-// Validate pageSlug to prevent path traversal - only allow alphanumeric, hyphens, underscores
-if (!/^[a-zA-Z0-9_-]+$/.test(pageSlug)) {
-    throw new Error('Invalid page slug');
-}
-
-const contentPromise = fetchFromGitHub(`${pageSlug}.md`);
-
-const content = await contentPromise;
-
-const htmlContent = marked(content);
+const sidebar = sidebarConfig?.sidebar || [];
+const currentPage =
+    new URL(Astro.request.url).searchParams.get("page") ||
+    sidebarConfig?.startPage;
 ---
 
-<Main>
-    <div class="docs-container docs-page">
-        <aside class="docs-sidebar fade-in-on-scroll">
-            <nav>
-                {sidebar.map((section: any) => (
-                    <div class="sidebar-section">
-                        <h3>{section.title}</h3>
-                        <ul>
-                            {section.pages.map((page: any) => (
-                                <li>
-                                    <a href={`/docs?page=${encodeURIComponent(page.slug)}`} class={page.slug === pageSlug ? 'active' : ''}>
-                                        {page.title}
-                                    </a>
-                                </li>
+<Main title="Documentation" fullWidth={true}>
+    <div class="docs-wrapper fade-in">
+        <aside class="docs-sidebar">
+            <div class="sidebar-header">
+                <h3>Documentation</h3>
+            </div>
+            <div class="sidebar-content custom-scrollbar">
+                {
+                    sidebar.length > 0 ? (
+                        <nav>
+                            {sidebar.map((section: any) => (
+                                <div class="sidebar-section">
+                                    <h4>{section.title}</h4>
+                                    <ul>
+                                        {section.pages.map((page: any) => (
+                                            <li>
+                                                <a
+                                                    href={`/docs?page=${encodeURIComponent(page.slug)}`}
+                                                    class={
+                                                        page.slug ===
+                                                        currentPage
+                                                            ? "active"
+                                                            : ""
+                                                    }
+                                                    data-astro-prefetch
+                                                >
+                                                    {page.title}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             ))}
-                        </ul>
-                    </div>
-                ))}
-            </nav>
+                        </nav>
+                    ) : (
+                        <p class="error-text">Failed to load sidebar.</p>
+                    )
+                }
+            </div>
         </aside>
-        <main class="docs-content fade-in-on-scroll" set:html={htmlContent} />
-        <div class="page-loader" aria-hidden="true"><div class="loader"></div></div>
+
+        <div class="docs-main">
+            <div class="docs-container">
+                {
+                    error ? (
+                        <div class="alert-box error">
+                            <h2>Error Loading Documentation</h2>
+                            <p>
+                                Could not fetch documentation content. Please
+                                check your connection or try again later.
+                            </p>
+                            <p class="error-details">{error.message}</p>
+                        </div>
+                    ) : (
+                        <article class="markdown-body" set:html={htmlContent} />
+                    )
+                }
+            </div>
+        </div>
     </div>
 </Main>
 
-<script>
-    function setupDocsLoading() {
-        const root = document.querySelector('.docs-page');
-        const links = document.querySelectorAll('.docs-sidebar a');
-        links.forEach((link) => {
-            link.addEventListener('click', () => {
-                root?.classList.add('is-loading');
-            });
-        });
-        document.addEventListener('astro:page-load', () => {
-            const newRoot = document.querySelector('.docs-page');
-            newRoot?.classList.remove('is-loading');
-        });
+<style>
+    .docs-wrapper {
+        display: flex;
+        min-height: 100vh;
+        padding-top: 80px; /* Account for fixed header */
     }
 
-    function slugify(text: string) {
-        return text
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-');
+    /* Sidebar Styles */
+    .docs-sidebar {
+        width: 300px;
+        position: fixed;
+        top: 80px;
+        bottom: 0;
+        left: 0;
+        background: rgba(10, 10, 12, 0.8);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid var(--border-light);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
     }
 
-    function enhanceDocsContent() {
-        const container = document.querySelector('.docs-content');
-        if (!container) return;
-
-        // Add heading anchors
-        const headings = container.querySelectorAll('h2, h3, h4');
-        headings.forEach((heading) => {
-            if (!heading.id) {
-                const base = slugify(heading.textContent || '');
-                if (base) heading.id = base;
-            }
-            if (!heading.querySelector('.heading-anchor') && heading.id) {
-                const a = document.createElement('a');
-                a.href = `#${heading.id}`;
-                a.className = 'heading-anchor';
-                a.setAttribute('aria-label', 'Link to this section');
-                heading.prepend(a);
-            }
-        });
-
-        // Add copy buttons to code blocks
-        const pres = container.querySelectorAll('pre');
-        pres.forEach((pre) => {
-            if (pre.querySelector('.copy-code-btn')) return;
-            const code = pre.querySelector('code');
-            if (!code) return;
-            const btn = document.createElement('button');
-            btn.className = 'copy-code-btn';
-            btn.type = 'button';
-            btn.textContent = 'Copy';
-            btn.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(code.innerText);
-                    const old = btn.textContent;
-                    btn.textContent = 'Copied!';
-                    setTimeout(() => { btn.textContent = old; }, 1500);
-                } catch (e) {
-                    console.error('Copy failed', e);
-                }
-            });
-            pre.appendChild(btn);
-        });
-
-        // No forced stacking of tables; render as standard tables per CSS
+    .sidebar-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--border-light);
     }
 
-    document.addEventListener('DOMContentLoaded', setupDocsLoading);
-    document.addEventListener('astro:after-swap', setupDocsLoading);
+    .sidebar-header h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin: 0;
+    }
 
-    document.addEventListener('DOMContentLoaded', enhanceDocsContent);
-    document.addEventListener('astro:after-swap', enhanceDocsContent);
-</script>
+    .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+    }
 
+    .sidebar-section {
+        margin-bottom: 32px;
+    }
+
+    .sidebar-section h4 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-dim);
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+
+    .sidebar-content ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-content li {
+        margin-bottom: 4px;
+    }
+
+    .sidebar-content a {
+        display: block;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .sidebar-content a:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-main);
+        transform: translateX(4px);
+    }
+
+    .sidebar-content a.active {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--primary);
+        font-weight: 500;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    /* Main Content Styles */
+    .docs-main {
+        flex: 1;
+        margin-left: 300px; /* Width of sidebar */
+        padding: 40px;
+        background: radial-gradient(
+            circle at top right,
+            rgba(99, 102, 241, 0.05),
+            transparent 40%
+        );
+    }
+
+    .docs-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Markdown Styles */
+    .markdown-body {
+        color: var(--text-muted);
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+
+    .markdown-body :global(h1) {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-light);
+        background: linear-gradient(to right, #fff, #ccc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .markdown-body :global(h2) {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .markdown-body :global(h3) {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .markdown-body :global(p) {
+        margin-bottom: 1.5rem;
+    }
+
+    .markdown-body :global(a) {
+        color: var(--primary);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s;
+    }
+
+    .markdown-body :global(a:hover) {
+        border-bottom-color: var(--primary);
+    }
+
+    .markdown-body :global(ul),
+    .markdown-body :global(ol) {
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+    }
+
+    .markdown-body :global(li) {
+        margin-bottom: 0.5rem;
+    }
+
+    .markdown-body :global(code) {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.2em 0.4em;
+        border-radius: 6px;
+        font-family: "JetBrains Mono", monospace; /* Assuming a mono font is available or fallback */
+        font-size: 0.9em;
+        color: #e2e8f0;
+    }
+
+    .markdown-body :global(pre) {
+        background: #0f0f11;
+        padding: 1.5rem;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin: 2rem 0;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .markdown-body :global(pre code) {
+        background: none;
+        padding: 0;
+        color: inherit;
+        font-size: 0.9em;
+    }
+
+    .markdown-body :global(blockquote) {
+        border-left: 4px solid var(--primary);
+        background: rgba(99, 102, 241, 0.05);
+        padding: 1.5rem;
+        border-radius: 0 8px 8px 0;
+        margin: 2rem 0;
+        color: var(--text-main);
+        font-style: italic;
+    }
+
+    .markdown-body :global(img) {
+        max-width: 100%;
+        border-radius: 12px;
+        margin: 2rem 0;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-light);
+    }
+
+    .markdown-body :global(table) {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+    }
+
+    .markdown-body :global(th),
+    .markdown-body :global(td) {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-light);
+        text-align: left;
+    }
+
+    .markdown-body :global(th) {
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .alert-box {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 24px;
+        border-radius: 12px;
+        color: #fca5a5;
+    }
+
+    .error-details {
+        font-family: monospace;
+        font-size: 0.85rem;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 12px;
+        overflow-x: auto;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
+        .docs-sidebar {
+            width: 260px;
+        }
+        .docs-main {
+            margin-left: 260px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .docs-wrapper {
+            flex-direction: column;
+            padding-top: 60px;
+        }
+
+        .docs-sidebar {
+            position: relative;
+            width: 100%;
+            top: 0;
+            height: auto;
+            border-right: none;
+            border-bottom: 1px solid var(--border-light);
+            max-height: 300px; /* Collapsible feel */
+        }
+
+        .docs-main {
+            margin-left: 0;
+            padding: 24px;
+        }
+
+        .markdown-body :global(h1) {
+            font-size: 2.2rem;
+        }
+    }
+</style>

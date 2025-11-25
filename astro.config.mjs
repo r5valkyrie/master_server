@@ -38,9 +38,16 @@ export default defineConfig({
     host: true
   },
   vite: {
+    build: {
+      assetsInlineLimit: 0, // Don't inline any assets, serve them as separate files
+    },
     server: {
       // Allow hosts from environment variable (comma-separated) or all hosts if not specified
-      allowedHosts: process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(',').map(h => h.trim()) : undefined
+      allowedHosts: process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(',').map(h => h.trim()) : undefined,
+      fs: {
+        // Allow serving files from the public directory
+        strict: false
+      }
     }
   },
   integrations: [startupIntegration]

@@ -1,107 +1,771 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
+
+// Don't block on server-side fetch - let client handle it for faster initial page load
+const initialMods: any[] = [];
 ---
 
-<Main title="Mods">
-	<div class="container mods-page">
-		<div class="search-container">
-			<input type="text" id="search-bar" placeholder="Search for mods...">
-		</div>
-		<div class="grid" id="mods-grid">
-			<div class="loader"></div>
+<Main title="Mods" fullWidth={true}>
+	<div class="mods-wrapper fade-in">
+		<aside class="mods-sidebar">
+			<div class="sidebar-header">
+				<h3>Mods</h3>
+			</div>
+			<div class="sidebar-content custom-scrollbar">
+				<div class="filter-group">
+					<label for="search-bar">Search</label>
+					<div class="input-wrapper">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><circle cx="11" cy="11" r="8"></circle><line
+								x1="21"
+								y1="21"
+								x2="16.65"
+								y2="16.65"></line></svg
+						>
+						<input
+							type="text"
+							id="search-bar"
+							placeholder="Find a mod..."
+						/>
+					</div>
+				</div>
+
+				<div class="filter-group">
+					<label for="sort-select">Sort By</label>
+					<select id="sort-select">
+						<option value="downloads">Most Downloads</option>
+						<option value="rating">Highest Rated</option>
+						<option value="updated">Recently Updated</option>
+						<option value="name">Name (A-Z)</option>
+						<option value="name-desc">Name (Z-A)</option>
+					</select>
+				</div>
+
+				<div class="filter-group">
+					<label for="category-select">Category</label>
+					<select id="category-select">
+						<option value="all">All Categories</option>
+					</select>
+				</div>
+
+				<div class="sidebar-stats">
+					<div class="stat-item">
+						<span class="label">Total Mods</span>
+						<span class="value" id="total-mods">0</span>
+					</div>
+					<div class="stat-item">
+						<span class="label">Showing</span>
+						<span class="value" id="showing-mods">0</span>
+					</div>
+				</div>
+			</div>
+		</aside>
+
+		<div class="mods-main">
+			<div class="mods-grid" id="mods-grid">
+				<div class="loader-wrapper">
+					<div class="loader"></div>
+				</div>
+			</div>
+			<div id="mods-sentinel" style="height: 1px; width: 100%; grid-column: 1 / -1;"></div>
 		</div>
 	</div>
 </Main>
 
+<style>
+	.mods-wrapper {
+		display: flex;
+		min-height: 100vh;
+		padding-top: 80px;
+	}
+
+	/* Sidebar Styles */
+	.mods-sidebar {
+		width: 300px;
+		position: fixed;
+		top: 80px;
+		bottom: 0;
+		left: 0;
+		background: rgba(10, 10, 12, 0.8);
+		backdrop-filter: blur(20px);
+		border-right: 1px solid var(--border-light);
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.sidebar-header {
+		padding: 24px;
+		border-bottom: 1px solid var(--border-light);
+	}
+
+	.sidebar-header h3 {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: var(--text-main);
+		margin: 0;
+	}
+
+	.sidebar-content {
+		flex: 1;
+		overflow-y: auto;
+		padding: 24px;
+	}
+
+	.filter-group {
+		margin-bottom: 24px;
+	}
+
+	.filter-group label {
+		display: block;
+		margin-bottom: 8px;
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--text-dim);
+		font-weight: 600;
+	}
+
+	.input-wrapper {
+		position: relative;
+	}
+
+	.input-wrapper svg {
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: var(--text-dim);
+	}
+
+	#search-bar {
+		width: 100%;
+		background: rgba(0, 0, 0, 0.3);
+		border: 1px solid var(--border-light);
+		border-radius: 8px;
+		padding: 10px 12px 10px 36px;
+		color: var(--text-main);
+		font-family: inherit;
+		font-size: 0.95rem;
+		transition: all 0.2s ease;
+	}
+
+	#search-bar:focus {
+		outline: none;
+		border-color: var(--primary);
+		background: rgba(0, 0, 0, 0.4);
+	}
+
+	#sort-select,
+	#category-select {
+		width: 100%;
+		background: rgba(0, 0, 0, 0.3);
+		border: 1px solid var(--border-light);
+		border-radius: 8px;
+		padding: 10px 12px;
+		color: var(--text-main);
+		font-family: inherit;
+		font-size: 0.95rem;
+		transition: all 0.2s ease;
+		cursor: pointer;
+	}
+
+	#sort-select:focus,
+	#category-select:focus {
+		outline: none;
+		border-color: var(--primary);
+	}
+
+	/* Sidebar Stats */
+	.sidebar-stats {
+		margin-top: 32px;
+		padding-top: 24px;
+		border-top: 1px solid var(--border-light);
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.stat-item {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.9rem;
+	}
+
+	.stat-item .label {
+		color: var(--text-muted);
+	}
+
+	.stat-item .value {
+		font-weight: 600;
+		color: var(--text-main);
+	}
+
+	/* Custom Scrollbar */
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	/* Main Content Styles */
+	.mods-main {
+		flex: 1;
+		margin-left: 300px;
+		padding: 24px;
+		background: radial-gradient(
+			circle at top right,
+			rgba(99, 102, 241, 0.05),
+			transparent 40%
+		);
+	}
+
+	.mods-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 20px;
+		align-content: start;
+	}
+
+	@media (max-width: 1600px) {
+		.mods-grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	@media (max-width: 1200px) {
+		.mods-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	.loader-wrapper {
+		grid-column: 1 / -1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 50vh;
+		padding: 40px;
+	}
+
+	.loader {
+		border: 3px solid rgba(255, 255, 255, 0.1);
+		border-top: 3px solid var(--primary);
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	/* Mobile Responsiveness */
+	@media (max-width: 1024px) {
+		.mods-sidebar {
+			width: 260px;
+		}
+		.mods-main {
+			margin-left: 260px;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.mods-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.mods-wrapper {
+			flex-direction: column;
+			padding-top: 60px;
+		}
+
+		.mods-sidebar {
+			position: relative;
+			width: 100%;
+			top: 0;
+			height: auto;
+			border-right: none;
+			border-bottom: 1px solid var(--border-light);
+			max-height: none;
+		}
+
+		.sidebar-content {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px;
+			padding: 16px;
+		}
+
+		.filter-group {
+			flex: 1;
+			min-width: 140px;
+			margin-bottom: 0;
+		}
+
+		.sidebar-stats {
+			width: 100%;
+			flex-direction: row;
+			justify-content: flex-start;
+			gap: 24px;
+			margin-top: 0;
+			padding-top: 16px;
+		}
+
+		.mods-main {
+			margin-left: 0;
+			padding: 16px;
+		}
+
+		.mods-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<!-- Global styles for dynamically created cards -->
+<style is:global>
+	.mod-card {
+		background: rgba(20, 20, 25, 0.6);
+		border: 1px solid var(--border-light);
+		border-radius: 12px;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+		height: 100%;
+		opacity: 0;
+		animation: fadeInUp 0.4s ease forwards;
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(15px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.mod-card:hover {
+		background: rgba(30, 30, 40, 0.8);
+		border-color: rgba(99, 102, 241, 0.3);
+		transform: translateY(-2px);
+	}
+
+	/* Mod Image Banner */
+	.mod-image-banner {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		background: rgba(0, 0, 0, 0.3);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.mod-image-banner img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
+	}
+
+	.mod-card:hover .mod-image-banner img {
+		transform: scale(1.05);
+	}
+
+	.mod-rating {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		background: rgba(0, 0, 0, 0.7);
+		backdrop-filter: blur(8px);
+		padding: 4px 10px;
+		border-radius: 20px;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: #fbbf24;
+	}
+
+	.mod-rating svg {
+		width: 14px;
+		height: 14px;
+		fill: #fbbf24;
+	}
+
+	/* Mod Content */
+	.mod-content {
+		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+	}
+
+	.mod-title-row {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 4px;
+	}
+
+	.mod-title h2 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0;
+		line-height: 1.3;
+		color: var(--text-main);
+	}
+
+	.mod-version {
+		font-size: 0.7rem;
+		background: rgba(99, 102, 241, 0.2);
+		color: var(--primary);
+		padding: 2px 8px;
+		border-radius: 4px;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+
+	.mod-author {
+		font-size: 0.8rem;
+		color: var(--text-dim);
+		margin-bottom: 8px;
+	}
+
+	.mod-author a {
+		color: var(--text-muted);
+		text-decoration: none;
+	}
+
+	.mod-author a:hover {
+		color: var(--primary);
+	}
+
+	.mod-desc {
+		color: var(--text-muted);
+		font-size: 0.85rem;
+		margin-bottom: 12px;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		line-height: 1.5;
+		flex-grow: 1;
+	}
+
+	/* Categories */
+	.mod-categories {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-bottom: 12px;
+	}
+
+	.mod-category {
+		font-size: 0.7rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: var(--text-muted);
+		padding: 3px 8px;
+		border-radius: 4px;
+		font-weight: 500;
+	}
+
+	/* Stats Row */
+	.mod-stats {
+		display: flex;
+		gap: 16px;
+		padding: 12px 0;
+		border-top: 1px solid var(--border-light);
+		margin-bottom: 12px;
+	}
+
+	.mod-stat {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+	}
+
+	.mod-stat svg {
+		width: 14px;
+		height: 14px;
+		opacity: 0.7;
+	}
+
+	.mod-stat .value {
+		font-weight: 600;
+		color: var(--text-main);
+	}
+
+	/* Actions */
+	.mod-actions {
+		display: flex;
+		gap: 8px;
+	}
+
+	.mod-btn {
+		flex: 1;
+		padding: 10px 12px;
+		border-radius: 8px;
+		text-align: center;
+		font-size: 0.85rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: all 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+	}
+
+	.mod-btn svg {
+		width: 16px;
+		height: 16px;
+	}
+
+	.mod-btn-primary {
+		background: var(--primary);
+		color: white;
+	}
+
+	.mod-btn-primary:hover {
+		background: var(--primary-hover);
+		box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+	}
+
+	.mod-btn-secondary {
+		background: rgba(255, 255, 255, 0.05);
+		color: var(--text-muted);
+		border: 1px solid var(--border-light);
+	}
+
+	.mod-btn-secondary:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: var(--text-main);
+	}
+
+	.no-mods-message {
+		grid-column: 1 / -1;
+		text-align: center;
+		padding: 60px 20px;
+		color: var(--text-muted);
+	}
+</style>
+
 <script>
+	// Extend Window interface for TypeScript
+	declare global {
+		interface Window {
+			__modsCache: { data: any[] | null; timestamp: number };
+			setupObserver?: () => void;
+		}
+	}
+
+	// Use a global cache so data persists across navigations
+	window.__modsCache = window.__modsCache || { data: null, timestamp: 0 };
+	const CACHE_TTL = 5 * 60 * 1000; // 5 minutes client-side cache
+
+	const BATCH_SIZE = 16;
 	let allMods: any[] = [];
 	let filteredMods: any[] = [];
 	let renderedCount = 0;
-	const BATCH_SIZE = 9;
 	let infiniteObserver: IntersectionObserver | null = null;
-	let scrollFallbackAttached = false;
+	let currentSort = 'downloads';
+	let currentCategory = 'all';
 
-	function createModCard(mod: any) {
-		const card = document.createElement('div');
-		card.className = 'card fade-in-on-scroll';
+	function updateStats() {
+		const totalEl = document.getElementById('total-mods');
+		const showingEl = document.getElementById('showing-mods');
+		if (totalEl) totalEl.textContent = allMods.filter(m => !m?.is_deprecated && !m?.has_nsfw_content).length.toString();
+		if (showingEl) showingEl.textContent = filteredMods.length.toString();
+	}
+
+	function populateCategories(): void {
+		const categorySelect = document.getElementById('category-select');
+		if (!categorySelect) return;
+
+		// Collect all unique categories
+		const categories = new Set<string>();
+		allMods.forEach(mod => {
+			if (!mod?.is_deprecated && !mod?.has_nsfw_content && mod.categories) {
+				mod.categories.forEach((cat: string) => categories.add(cat));
+			}
+		});
+
+		// Sort and populate
+		const sortedCategories = [...categories].sort();
+		categorySelect.innerHTML = '<option value="all">All Categories</option>';
+		sortedCategories.forEach(cat => {
+			const option = document.createElement('option');
+			option.value = cat;
+			option.textContent = cat;
+			categorySelect.appendChild(option);
+		});
+	}
+
+	function sortMods(mods: any[], sortType: string): any[] {
+		const sorted = [...mods];
+		switch (sortType) {
+			case 'name':
+				return sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+			case 'name-desc':
+				return sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+			case 'downloads':
+				return sorted.sort((a, b) => {
+					const aDownloads = (a.versions || []).reduce((sum: number, v: any) => sum + (v.downloads || 0), 0);
+					const bDownloads = (b.versions || []).reduce((sum: number, v: any) => sum + (v.downloads || 0), 0);
+					return bDownloads - aDownloads;
+				});
+			case 'rating':
+				return sorted.sort((a, b) => (b.rating_score || 0) - (a.rating_score || 0));
+			case 'updated':
+				return sorted.sort((a, b) => {
+					const aDate = new Date(a.date_updated || 0);
+					const bDate = new Date(b.date_updated || 0);
+					return bDate.getTime() - aDate.getTime();
+				});
+			default:
+				return sorted;
+		}
+	}
+
+	function formatBytes(bytes: number): string {
+		if (!bytes) return '0 B';
+		const k = 1024;
+		const sizes = ['B', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+	}
+
+	function formatDownloads(num: number): string {
+		if (!num) return '0';
+		if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+		if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+		return num.toString();
+	}
+
+	function createModCard(mod: any): HTMLDivElement {
+		const card = document.createElement("div");
+		card.className = "mod-card";
 
 		const latestVersion = mod.versions?.[0] || {};
-		const iconUrl = mod.icon || latestVersion.icon || 'https://placehold.co/100?text=PlaceHolder';
-		const description = latestVersion?.description || 'No description available.';
-		const downloadUrl = 'r5v://mod/install?name=' + mod.full_name || '#';
-		const packageUrl = mod.package_url || '#';
-		const displayName = (mod.name || '').replace(/_/g, ' ');
+		const iconUrl = latestVersion.icon || mod.icon || "https://placehold.co/400x225/1a1a1f/666?text=No+Image";
+		const description = latestVersion?.description || "No description available.";
+		const downloadUrl = "r5v://mod/install?name=" + (mod.full_name || "");
+		const packageUrl = mod.package_url || "#";
+		const displayName = (mod.name || "").replace(/_/g, " ");
+		const author = mod.owner || "Unknown";
+		const version = latestVersion.version_number || "1.0.0";
+		const rating = mod.rating_score || 0;
+		const downloads = latestVersion.downloads || 0;
+		const totalDownloads = (mod.versions || []).reduce((sum: number, v: any) => sum + (v.downloads || 0), 0);
+		const fileSize = latestVersion.file_size || 0;
+		const categories = (mod.categories || []).slice(0, 3); // Limit to 3 categories
+
+		const categoriesHtml = categories.length > 0 
+			? `<div class="mod-categories">${categories.map((c: string) => `<span class="mod-category">${c}</span>`).join('')}</div>`
+			: '';
 
 		card.innerHTML = `
-			<div class="mod-icon-wrapper">
-				<div class="img-loader"></div>
-				<img alt="${displayName}" class="mod-icon" loading="lazy" style="opacity: 0;" />
-			</div>
-			<div class="card-content">
-				<div class="card-main-content">
-					<h2>${displayName}</h2>
-					<p>${description}</p>
+			<div class="mod-image-banner">
+				<img src="${iconUrl}" alt="${displayName}" loading="lazy" onerror="this.src='https://placehold.co/400x225/1a1a1f/666?text=No+Image'">
+				<div class="mod-rating">
+					<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+					${rating}
 				</div>
-				<div class="card-actions">
-					<a href="${downloadUrl}" class="btn download-btn">Download</a>
-					<a href="${packageUrl}" target="_blank" rel="noopener noreferrer" class="btn thunder-btn">View on Thunderstore</a>
+			</div>
+			<div class="mod-content">
+				<div class="mod-title-row">
+					<div class="mod-title">
+						<h2>${displayName}</h2>
+					</div>
+					<span class="mod-version">v${version}</span>
+				</div>
+				<div class="mod-author">by <a href="${packageUrl}" target="_blank">${author}</a></div>
+				<p class="mod-desc">${description}</p>
+				${categoriesHtml}
+				<div class="mod-stats">
+					<div class="mod-stat">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+						<span class="value">${formatDownloads(totalDownloads)}</span>
+					</div>
+					<div class="mod-stat">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+						<span class="value">${formatBytes(fileSize)}</span>
+					</div>
+				</div>
+				<div class="mod-actions">
+					<a href="${downloadUrl}" class="mod-btn mod-btn-primary">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+						Install
+					</a>
+					<a href="${packageUrl}" target="_blank" rel="noopener noreferrer" class="mod-btn mod-btn-secondary">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+						Details
+					</a>
 				</div>
 			</div>
 		`;
 
-		const img = card.querySelector('.mod-icon') as HTMLImageElement;
-		const loader = card.querySelector('.img-loader') as HTMLElement;
-
-		function showImage() {
-			if (loader) loader.style.display = 'none';
-			img.style.opacity = '1';
-		}
-
-		// Preload to ensure onload fires consistently across browsers
-		const pre = new Image();
-		const placeholder = 'https://placehold.co/100?text=PlaceHolder';
-		let settled = false;
-		const settle = (src: string) => {
-			if (settled) return;
-			settled = true;
-			img.src = src;
-			showImage();
-		};
-		pre.onload = () => settle(iconUrl);
-		pre.onerror = () => settle(placeholder);
-		pre.decoding = 'async';
-		pre.loading = 'eager';
-		pre.src = iconUrl;
-
-		// Safety timeout
-		window.setTimeout(() => {
-			if (!settled) settle(placeholder);
-		}, 5000);
-
 		return card;
 	}
 
-	function ensureSentinel(grid: HTMLElement) {
-		let sentinel = document.getElementById('mods-sentinel');
+	function ensureSentinel(grid: HTMLElement): HTMLElement {
+		let sentinel = document.getElementById("mods-sentinel");
 		if (!sentinel) {
-			sentinel = document.createElement('div');
-			sentinel.id = 'mods-sentinel';
-			sentinel.style.height = '1px';
-			sentinel.style.width = '100%';
-			sentinel.style.gridColumn = '1 / -1';
+			sentinel = document.createElement("div");
+			sentinel.id = "mods-sentinel";
+			sentinel.style.height = "1px";
+			sentinel.style.width = "100%";
+			sentinel.style.gridColumn = "1 / -1";
 			grid.appendChild(sentinel);
 		}
-		return sentinel as HTMLElement;
+		return sentinel;
 	}
 
 	function appendNextBatch() {
-		const grid = document.getElementById('mods-grid');
+		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 
 		const end = Math.min(renderedCount + BATCH_SIZE, filteredMods.length);
-		const ref = document.getElementById('mods-sentinel');
+		const ref = document.getElementById("mods-sentinel");
+
 		for (let i = renderedCount; i < end; i++) {
 			const card = createModCard(filteredMods[i]);
+			// Staggered animation delay based on position in current batch
+			const batchIndex = i - renderedCount;
+			card.style.animationDelay = `${batchIndex * 0.05}s`;
 			if (ref && ref.parentElement === grid) {
 				grid.insertBefore(card, ref);
 			} else {
@@ -110,8 +774,8 @@ import Main from '../layouts/Main.astro';
 		}
 		renderedCount = end;
 
-		if ((window as any).setupObserver) {
-			(window as any).setupObserver();
+		if (window.setupObserver) {
+			window.setupObserver();
 		}
 
 		if (renderedCount >= filteredMods.length && infiniteObserver) {
@@ -120,11 +784,11 @@ import Main from '../layouts/Main.astro';
 	}
 
 	function setupInfiniteScroll() {
-		const grid = document.getElementById('mods-grid');
+		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 		const sentinel = ensureSentinel(grid);
 
-		if (!('IntersectionObserver' in window)) {
+		if (!("IntersectionObserver" in window)) {
 			while (renderedCount < filteredMods.length) appendNextBatch();
 			return;
 		}
@@ -133,87 +797,169 @@ import Main from '../layouts/Main.astro';
 			infiniteObserver.disconnect();
 		}
 
-		infiniteObserver = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting && renderedCount < filteredMods.length) {
-					appendNextBatch();
-				}
-			});
-		}, { rootMargin: '600px 0px' });
+		infiniteObserver = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (
+						entry.isIntersecting &&
+						renderedCount < filteredMods.length
+					) {
+						appendNextBatch();
+					}
+				});
+			},
+			{ rootMargin: "400px 0px" },
+		);
 
 		infiniteObserver.observe(sentinel);
-
-		// Scroll fallback: if near bottom and IO didn't trigger
-		if (!scrollFallbackAttached) {
-			scrollFallbackAttached = true;
-			window.addEventListener('scroll', () => {
-				const nearBottom = window.innerHeight + window.scrollY >= (document.body.offsetHeight - 800);
-				if (nearBottom && renderedCount < filteredMods.length) {
-					appendNextBatch();
-				}
-			}, { passive: true });
-		}
 	}
 
-	function renderMods(modsToRender: any[]) {
-		const grid = document.getElementById('mods-grid');
+	function renderMods(modsToRender: any[]): void {
+		const grid = document.getElementById("mods-grid");
 		if (!grid) return;
 
-		grid.innerHTML = '';
+		grid.innerHTML = "";
 		filteredMods = modsToRender;
 		renderedCount = 0;
+
+		updateStats();
+
+		if (filteredMods.length === 0) {
+			grid.innerHTML =
+				'<div class="no-mods-message">No mods found matching your search.</div>';
+			return;
+		}
 
 		ensureSentinel(grid);
 		appendNextBatch();
 		setupInfiniteScroll();
 	}
 
-	function filterAndRenderMods() {
-		const searchTerm = (document.getElementById('search-bar') as HTMLInputElement).value.toLowerCase();
-		const filtered = allMods.filter(mod => !mod?.is_deprecated && !mod?.has_nsfw_content && (mod.name || '').toLowerCase().includes(searchTerm));
+	function filterAndRenderMods(): void {
+		const searchBar = document.getElementById("search-bar") as HTMLInputElement | null;
+		const searchTerm = searchBar ? searchBar.value.toLowerCase() : "";
+		
+		let filtered = allMods.filter((mod) => {
+			if (mod?.is_deprecated || mod?.has_nsfw_content) return false;
+			
+			// Search filter
+			const nameMatch = (mod.name || "").toLowerCase().includes(searchTerm);
+			const descMatch = (mod.versions?.[0]?.description || "").toLowerCase().includes(searchTerm);
+			if (searchTerm && !nameMatch && !descMatch) return false;
+			
+			// Category filter
+			if (currentCategory !== 'all') {
+				if (!mod.categories || !mod.categories.includes(currentCategory)) return false;
+			}
+			
+			return true;
+		});
+		
+		filtered = sortMods(filtered, currentSort);
 		renderMods(filtered);
 	}
 
-	function fetchMods() {
-		(async () => {
-			const grid = document.getElementById('mods-grid');
-			const pageRoot = document.querySelector('.mods-page');
+	async function initMods() {
+		const grid = document.getElementById("mods-grid");
+		if (!grid) return;
 
-			pageRoot?.classList.add('is-loading');
-			if (grid) grid.innerHTML = '<div class="loader"></div>';
+		// Check if we have valid cached data
+		const cache = window.__modsCache;
+		const now = Date.now();
+		
+		if (cache.data && cache.data.length > 0 && (now - cache.timestamp) < CACHE_TTL) {
+			// Use cached data - instant render!
+			allMods = cache.data;
+			populateCategories();
+			filterAndRenderMods();
+			return;
+		}
 
-			if (allMods.length > 0) {
-				filterAndRenderMods();
-				pageRoot?.classList.remove('is-loading');
-				return;
-			}
+		// Show loader
+		grid.innerHTML = '<div class="loader-wrapper"><div class="loader"></div></div>';
 
-			try {
-				const q = (document.getElementById('search-bar') as HTMLInputElement)?.value || '';
-				const endpoint = q ? `/api/client/mods?q=${encodeURIComponent(q)}` : '/api/client/mods';
-				const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
-				if (!response.ok) {
-					throw new Error(`HTTP ${response.status}`);
-				}
-				allMods = await response.json();
-				filterAndRenderMods();
-				pageRoot?.classList.remove('is-loading');
-			} catch (error) {
-				if (grid) {
-					grid.innerHTML = '<p>Failed to load mods. Please try again later.</p>';
-				}
-				pageRoot?.classList.remove('is-loading');
-				console.error('Failed to fetch mods:', error);
-			}
-		})();
+		try {
+			const response = await fetch("/api/client/mods", {
+				headers: { Accept: "application/json" },
+			});
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+			allMods = await response.json();
+			
+			// Update cache
+			window.__modsCache = { data: allMods, timestamp: Date.now() };
+			
+			populateCategories();
+			filterAndRenderMods();
+		} catch (error) {
+			grid.innerHTML =
+				'<div class="no-mods-message">Failed to load mods. Please try again later.</div>';
+			console.error("Failed to fetch mods:", error);
+		}
 	}
 
-	// Run on initial page load
-	fetchMods();
-	// Run on subsequent page loads
-	document.addEventListener('astro:page-load', fetchMods);
+	function setupListeners() {
+		const searchBar = document.getElementById("search-bar");
+		const sortSelect = document.getElementById("sort-select");
+		const categorySelect = document.getElementById("category-select");
+		
+		if (searchBar) {
+			searchBar.addEventListener("input", filterAndRenderMods);
+		}
+		
+		if (sortSelect) {
+			sortSelect.addEventListener("change", (e) => {
+				currentSort = (e.target as HTMLSelectElement).value;
+				filterAndRenderMods();
+			});
+		}
+		
+		if (categorySelect) {
+			categorySelect.addEventListener("change", (e) => {
+				currentCategory = (e.target as HTMLSelectElement).value;
+				filterAndRenderMods();
+			});
+		}
+	}
 
-	document.getElementById('search-bar')?.addEventListener('input', () => {
-		filterAndRenderMods();
+	// Initialize on page load - wait for DOM to be fully ready
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', () => {
+			setTimeout(() => {
+				initMods();
+				setupListeners();
+			}, 500);
+		});
+	} else {
+		// DOM already loaded, but give a small delay for layout
+		requestAnimationFrame(() => {
+			setTimeout(() => {
+				initMods();
+				setupListeners();
+			}, 500);
+		});
+	}
+
+	// Re-initialize on Astro page transitions
+	document.addEventListener("astro:after-swap", () => {
+		// Reset local state for fresh render
+		allMods = [];
+		filteredMods = [];
+		renderedCount = 0;
+		currentSort = 'downloads';
+		currentCategory = 'all';
+		if (infiniteObserver) {
+			infiniteObserver.disconnect();
+			infiniteObserver = null;
+		}
+		
+		// Only init if we're on the mods page
+		if (document.getElementById("mods-grid")) {
+			// Wait for view transition to complete before initializing
+			setTimeout(() => {
+				initMods();
+				setupListeners();
+			}, 500);
+		}
 	});
 </script>

@@ -1,103 +1,596 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
 
-const GITHUB_REPO = 'r5valkyrie/docs';
-const GITHUB_BRANCH = 'main';
-const GITHUB_CONTRIBUTORS_PATH = 'contributors';
+const GITHUB_REPO = "r5valkyrie/docs";
+const GITHUB_BRANCH = "main";
+const GITHUB_CONTRIBUTORS_PATH = "contributors";
 
-async function fetchFile(fileName: string) {
-    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}?t=${Date.now()}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch ${fileName}`);
-    }
-    return response.json();
+// Fix GitHub blob URLs to raw URLs to avoid CORS issues
+function normalizeGitHubUrl(url: string): string {
+	if (!url) return url;
+	
+	// Convert github.com/user/repo/blob/branch/path?raw=true to raw.githubusercontent.com/user/repo/branch/path
+	const blobMatch = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+?)(\?raw=true)?$/);
+	if (blobMatch) {
+		const [, user, repo, branch, path] = blobMatch;
+		return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+	}
+	
+	return url;
+}
+
+async function fetchContributors(fileName: string) {
+	const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONTRIBUTORS_PATH}/${fileName}`;
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			console.error(
+				`Failed to fetch ${fileName}. Status: ${response.status}`,
+			);
+			return [];
+		}
+		const contributors = await response.json();
+		// Normalize avatar URLs
+		return contributors.map((c: any) => ({
+			...c,
+			avatar: normalizeGitHubUrl(c.avatar)
+		}));
+	} catch (error) {
+		console.error(`Error fetching ${fileName}:`, error);
+		return [];
+	}
 }
 
 const [valkyrieContributors, r5reloadedContributors] = await Promise.all([
-    fetchFile('contributors.json'),
-    fetchFile('r5reloaded_contributors.json')
+	fetchContributors("contributors.json"),
+	fetchContributors("r5reloaded_contributors.json"),
 ]);
+
+const totalContributors = valkyrieContributors.length + r5reloadedContributors.length;
 ---
 
-<Main>
-    <div class="contributors-container">
-        <h1>Valkyrie Contributors</h1>
-        <div class="contributors-grid">
-            {valkyrieContributors.map((contributor: any) => (
-                <div class="contributor-card fade-in-on-scroll">
-                    <img src={contributor.avatar} alt={contributor.name} class="contributor-avatar" />
-                    <h2>{contributor.name}</h2>
-                    <p>{contributor.description}</p>
-                </div>
-            ))}
-        </div>
+<Main title="Contributors" fullWidth={true}>
+	<div class="contributors-wrapper fade-in">
+		<aside class="contributors-sidebar">
+			<div class="sidebar-header">
+				<h3>Contributors</h3>
+			</div>
+			<div class="sidebar-content custom-scrollbar">
+				<p class="sidebar-intro">
+					The amazing people who make this project possible.
+				</p>
 
-        <h1 class="section-title">Original R5Reloaded Contributors</h1>
-        <div class="contributors-grid">
-            {r5reloadedContributors.map((contributor: any) => (
-                <div class="contributor-card fade-in-on-scroll">
-                    <img src={contributor.avatar} alt={contributor.name} class="contributor-avatar" />
-                    <h2>{contributor.name}</h2>
-                    <p>{contributor.description}</p>
-                </div>
-            ))}
-        </div>
-    </div>
+				<nav class="sidebar-nav">
+					<a href="#valkyrie" class="nav-item active">
+						<span class="nav-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+						</span>
+						R5Valkyrie Team
+						<span class="count">{valkyrieContributors.length}</span>
+					</a>
+					<a href="#r5reloaded" class="nav-item">
+						<span class="nav-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+						</span>
+						R5Reloaded
+						<span class="count">{r5reloadedContributors.length}</span>
+					</a>
+				</nav>
+
+				<div class="sidebar-stats">
+					<div class="stat-item">
+						<span class="label">Total Contributors</span>
+						<span class="value">{totalContributors}</span>
+					</div>
+				</div>
+
+				<div class="sidebar-cta">
+					<p>Want to contribute?</p>
+					<a href="https://github.com/r5valkyrie/" target="_blank" class="btn-contribute">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+						View on GitHub
+					</a>
+				</div>
+			</div>
+		</aside>
+
+		<main class="contributors-main">
+			<section id="valkyrie" class="contributors-section">
+				<div class="section-header">
+					<h2>R5Valkyrie Team</h2>
+					<p>Core team members building the future of Apex modding</p>
+				</div>
+				<div class="contributors-grid">
+					{
+						valkyrieContributors.map((contributor: any, index: number) => (
+							<a
+								href={contributor.url}
+								target="_blank"
+								class="contributor-card"
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="card-glow"></div>
+								<div class="avatar-wrapper">
+									<img
+										src={contributor.avatar}
+										alt={contributor.name}
+										loading="lazy"
+										crossorigin="anonymous"
+									/>
+								</div>
+								<div class="contributor-info">
+									<h3>{contributor.name}</h3>
+									<span class="role">
+										{contributor.description || "Contributor"}
+									</span>
+								</div>
+								<div class="card-link">
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+								</div>
+							</a>
+						))
+					}
+				</div>
+			</section>
+
+			<section id="r5reloaded" class="contributors-section">
+				<div class="section-header">
+					<h2>R5Reloaded Contributors</h2>
+					<p>The foundation that made this possible</p>
+				</div>
+				<div class="contributors-grid">
+					{
+						r5reloadedContributors.map((contributor: any, index: number) => (
+							<a
+								href={contributor.url}
+								target="_blank"
+								class="contributor-card"
+								style={`animation-delay: ${index * 0.05}s`}
+							>
+								<div class="card-glow"></div>
+								<div class="avatar-wrapper">
+									<img
+										src={contributor.avatar}
+										alt={contributor.name}
+										loading="lazy"
+										crossorigin="anonymous"
+									/>
+								</div>
+								<div class="contributor-info">
+									<h3>{contributor.name}</h3>
+									<span class="role">
+										{contributor.description || "Contributor"}
+									</span>
+								</div>
+								<div class="card-link">
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+								</div>
+							</a>
+						))
+					}
+				</div>
+			</section>
+		</main>
+	</div>
 </Main>
 
 <style>
-    .contributors-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        color: var(--text-color);
-        width: 100%;
-    }
+	.contributors-wrapper {
+		display: flex;
+		min-height: 100vh;
+		padding-top: 80px;
+	}
 
-    h1 {
-        font-size: 2.5rem;
-        text-align: center;
-        margin-bottom: 2rem;
-        color: white;
-    }
-    
-    .section-title {
-        margin-top: 4rem;
-    }
+	/* Sidebar */
+	.contributors-sidebar {
+		width: 300px;
+		position: fixed;
+		top: 80px;
+		bottom: 0;
+		left: 0;
+		background: rgba(10, 10, 12, 0.8);
+		backdrop-filter: blur(20px);
+		border-right: 1px solid var(--border-light);
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+	}
 
-    .contributors-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 2rem;
-    }
+	.sidebar-header {
+		padding: 24px;
+		border-bottom: 1px solid var(--border-light);
+	}
 
-    .contributor-card {
-        background-color: rgba(25, 28, 34, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 8px;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+	.sidebar-header h3 {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: var(--text-main);
+		margin: 0;
+	}
 
-    .contributor-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        margin-bottom: 1rem;
-        border: 3px solid var(--primary-color);
-    }
+	.sidebar-content {
+		flex: 1;
+		overflow-y: auto;
+		padding: 24px;
+	}
 
-    .contributor-card h2 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-        color: white;
-    }
+	.sidebar-intro {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		line-height: 1.6;
+		margin-bottom: 24px;
+	}
 
-    .contributor-card p {
-        line-height: 1.6;
-    }
+	/* Sidebar Navigation */
+	.sidebar-nav {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-bottom: 32px;
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 12px 14px;
+		border-radius: 10px;
+		color: var(--text-muted);
+		text-decoration: none;
+		transition: all 0.2s ease;
+		font-size: 0.9rem;
+		font-weight: 500;
+	}
+
+	.nav-item:hover {
+		background: rgba(255, 255, 255, 0.05);
+		color: var(--text-main);
+	}
+
+	.nav-item.active {
+		background: rgba(99, 102, 241, 0.15);
+		color: var(--primary);
+	}
+
+	.nav-icon {
+		display: flex;
+		opacity: 0.7;
+	}
+
+	.nav-item .count {
+		margin-left: auto;
+		font-size: 0.75rem;
+		background: rgba(255, 255, 255, 0.1);
+		padding: 2px 8px;
+		border-radius: 10px;
+	}
+
+	.nav-item.active .count {
+		background: rgba(99, 102, 241, 0.3);
+	}
+
+	/* Sidebar Stats */
+	.sidebar-stats {
+		padding: 20px 0;
+		border-top: 1px solid var(--border-light);
+		border-bottom: 1px solid var(--border-light);
+		margin-bottom: 24px;
+	}
+
+	.stat-item {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.9rem;
+	}
+
+	.stat-item .label {
+		color: var(--text-muted);
+	}
+
+	.stat-item .value {
+		font-weight: 600;
+		color: var(--text-main);
+	}
+
+	/* Sidebar CTA */
+	.sidebar-cta {
+		text-align: center;
+	}
+
+	.sidebar-cta p {
+		color: var(--text-dim);
+		font-size: 0.85rem;
+		margin-bottom: 12px;
+	}
+
+	.btn-contribute {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 20px;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid var(--border-light);
+		border-radius: 8px;
+		color: var(--text-main);
+		text-decoration: none;
+		font-size: 0.85rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		width: 100%;
+	}
+
+	.btn-contribute:hover {
+		background: rgba(99, 102, 241, 0.15);
+		border-color: rgba(99, 102, 241, 0.3);
+		color: var(--primary);
+	}
+
+	/* Custom Scrollbar */
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	/* Main Content */
+	.contributors-main {
+		flex: 1;
+		margin-left: 300px;
+		padding: 32px 40px;
+		background: linear-gradient(
+			180deg,
+			rgba(8, 8, 12, 1) 0%,
+			rgba(5, 5, 8, 1) 100%
+		);
+	}
+
+	.contributors-section {
+		margin-bottom: 60px;
+	}
+
+	.section-header {
+		margin-bottom: 32px;
+	}
+
+	.section-header h2 {
+		font-size: 1.75rem;
+		font-weight: 600;
+		margin-bottom: 8px;
+		color: var(--text-main);
+	}
+
+	.section-header p {
+		color: var(--text-muted);
+		font-size: 0.95rem;
+	}
+
+	/* Contributors Grid */
+	.contributors-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 20px;
+	}
+
+	/* Contributor Card */
+	.contributor-card {
+		position: relative;
+		background: rgba(15, 15, 20, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 16px;
+		padding: 28px 20px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		text-decoration: none;
+		transition: all 0.3s ease;
+		overflow: hidden;
+		animation: fadeInUp 0.5s ease forwards;
+		opacity: 0;
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.card-glow {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100px;
+		height: 100px;
+		background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		pointer-events: none;
+	}
+
+	.contributor-card:hover {
+		transform: translateY(-4px);
+		background: rgba(20, 20, 28, 0.9);
+		border-color: rgba(99, 102, 241, 0.3);
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	}
+
+	.contributor-card:hover .card-glow {
+		opacity: 1;
+	}
+
+	.avatar-wrapper {
+		width: 80px;
+		height: 80px;
+		border-radius: 50%;
+		overflow: hidden;
+		margin-bottom: 16px;
+		border: 2px solid rgba(255, 255, 255, 0.1);
+		background: rgba(0, 0, 0, 0.3);
+		position: relative;
+		z-index: 1;
+		transition: all 0.3s ease;
+	}
+
+	.contributor-card:hover .avatar-wrapper {
+		border-color: rgba(99, 102, 241, 0.5);
+		box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+	}
+
+	.avatar-wrapper img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.contributor-info {
+		position: relative;
+		z-index: 1;
+	}
+
+	.contributor-info h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin-bottom: 8px;
+		color: var(--text-main);
+	}
+
+	.role {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		background: rgba(255, 255, 255, 0.05);
+		padding: 4px 12px;
+		border-radius: 20px;
+		display: inline-block;
+	}
+
+	.card-link {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		color: var(--text-dim);
+		opacity: 0;
+		transition: all 0.2s ease;
+	}
+
+	.contributor-card:hover .card-link {
+		opacity: 1;
+		color: var(--primary);
+	}
+
+	/* Mobile Responsive */
+	@media (max-width: 1024px) {
+		.contributors-sidebar {
+			width: 260px;
+		}
+		.contributors-main {
+			margin-left: 260px;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.contributors-wrapper {
+			flex-direction: column;
+			padding-top: 60px;
+		}
+
+		.contributors-sidebar {
+			position: relative;
+			width: 100%;
+			top: 0;
+			height: auto;
+			border-right: none;
+			border-bottom: 1px solid var(--border-light);
+		}
+
+		.sidebar-content {
+			padding: 16px;
+		}
+
+		.sidebar-intro {
+			display: none;
+		}
+
+		.sidebar-nav {
+			flex-direction: row;
+			overflow-x: auto;
+			margin-bottom: 16px;
+			gap: 12px;
+		}
+
+		.nav-item {
+			white-space: nowrap;
+			padding: 10px 16px;
+		}
+
+		.sidebar-stats {
+			display: none;
+		}
+
+		.sidebar-cta {
+			display: none;
+		}
+
+		.contributors-main {
+			margin-left: 0;
+			padding: 24px 16px;
+		}
+
+		.contributors-grid {
+			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+			gap: 12px;
+		}
+
+		.contributor-card {
+			padding: 20px 16px;
+		}
+
+		.avatar-wrapper {
+			width: 64px;
+			height: 64px;
+		}
+	}
 </style>
+
+<script>
+	// Handle active nav state on scroll
+	document.addEventListener('DOMContentLoaded', () => {
+		const sections = document.querySelectorAll('.contributors-section');
+		const navItems = document.querySelectorAll('.nav-item');
+
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const id = entry.target.getAttribute('id');
+					navItems.forEach(item => {
+						item.classList.remove('active');
+						if (item.getAttribute('href') === `#${id}`) {
+							item.classList.add('active');
+						}
+					});
+				}
+			});
+		}, { rootMargin: '-20% 0px -80% 0px' });
+
+		sections.forEach(section => observer.observe(section));
+	});
+</script>

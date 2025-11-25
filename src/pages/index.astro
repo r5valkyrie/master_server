@@ -1,10 +1,961 @@
 ---
-import Main from '../layouts/Main.astro';
+import Main from "../layouts/Main.astro";
 ---
 
-<Main>
-	<div class="container fade-in-on-scroll">
-		<img src="/assets/logo_small.png" alt="Valkyrie Logo" class="center-image">
-		<div class="center-text">Welcome to Valkyrie</div>
-	</div>
+<Main title="Home" fullWidth={true}>
+	<section class="hero">
+		<div class="hero-content fade-in">
+			<img src="/assets/logo.svg" alt="Valkyrie" class="hero-logo" />
+			<h1>
+				The Future of <span class="text-gradient">Apex Legends</span>
+			</h1>
+			<p class="hero-text">
+				Experience the game like never before with custom servers,
+				modding support, and a thriving community.
+			</p>
+			<div class="hero-actions">
+				<a href="https://discord.gg/GcJSMUGJyD" target="_blank" class="btn btn-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+					</svg>
+					Join Discord
+				</a>
+				<a href="https://github.com/r5valkyrie/" target="_blank" class="btn btn-secondary">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+					</svg>
+					GitHub
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="showcase-section">
+		<div class="container">
+			<div class="section-header centered fade-in-on-scroll">
+				<h2>Explore R5Valkyrie</h2>
+			</div>
+
+			<div class="carousel-wrapper fade-in-on-scroll">
+				<button class="carousel-button carousel-button--left is-hidden" aria-label="Previous slide">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><polyline points="15 18 9 12 15 6"></polyline></svg
+					>
+				</button>
+
+				<div class="carousel-container" tabindex="0">
+					<div class="carousel-track-container">
+						<ul class="carousel-track">
+							<li class="carousel-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img
+											src="/assets/community.png"
+											alt="Amazing Community"
+										/>
+									</div>
+									<div class="showcase-text">
+										<h3>Amazing Community</h3>
+										<p>
+											Join our amazingcommunity of players and modders to get help, share your creations, and more.
+										</p>
+										<a href="https://discord.gg/GcJSMUGJyD" target="_blank" class="slide-cta">
+											Join Discord
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li class="carousel-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img
+											src="/assets/modding.png"
+											alt="Modding Support"
+										/>
+									</div>
+									<div class="showcase-text">
+										<h3>Full Modding Support</h3>
+										<p>
+											Customize every aspect of the game.
+											Import custom assets, create new maps,
+											and tweak weapon stats to your liking.
+										</p>
+										<a href="/docs" class="slide-cta">
+											Read the Docs
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li class="carousel-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img
+											src="/assets/serverbrowser.png"
+											alt="Community Servers"
+										/>
+									</div>
+									<div class="showcase-text">
+										<h3>Community Servers</h3>
+										<p>
+											Host your own dedicated servers with
+											full control over settings, bans, and
+											permissions. Join a community that fits
+											your playstyle.
+										</p>
+										<a href="/servers" class="slide-cta">
+											Browse Servers
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li class="carousel-slide current-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img
+											src="/assets/modmanager.jpeg"
+											alt="Mod Manager"
+										/>
+									</div>
+									<div class="showcase-text">
+										<h3>Mod Manager</h3>
+										<p>
+											Install and manage mods with a single click using our integrated mod manager.
+										</p>
+										<a href="/mods" class="slide-cta">
+											Browse Mods
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li class="carousel-slide">
+								<div class="showcase-item">
+									<div class="showcase-image">
+										<img src="/assets/github.png" alt="Open Source" />
+									</div>
+								</div>
+								<div class="showcase-text">
+									<h3>Open Source</h3>
+									<p>
+										R5Valkyrie is open source and community driven.
+									</p>
+									<a href="https://github.com/r5valkyrie/" target="_blank" class="slide-cta">
+										View on GitHub
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+									</a>
+								</div>
+							</li>
+						</ul>
+					</div>
+
+					<div class="carousel-controls">
+						<div class="carousel-nav">
+							<!-- Indicators are dynamically generated based on slide count -->
+						</div>
+						<button class="carousel-pause" aria-label="Pause autoplay">
+							<svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+							<svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+						</button>
+					</div>
+				</div>
+
+				<button class="carousel-button carousel-button--right" aria-label="Next slide">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><polyline points="9 18 15 12 9 6"></polyline></svg
+					>
+				</button>
+			</div>
+		</div>
+	</section>
+
 </Main>
+
+<style>
+	.hero {
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 60px 20px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.hero-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 24px;
+		position: relative;
+		z-index: 1;
+	}
+
+	.hero-logo {
+		height: 120px;
+		width: auto;
+		margin-bottom: 8px;
+		filter: brightness(0) invert(1) drop-shadow(0 0 30px rgba(99, 102, 241, 0.3));
+	}
+
+	.hero-badge {
+		background: rgba(99, 102, 241, 0.1);
+		color: var(--primary);
+		padding: 6px 16px;
+		border-radius: var(--radius-full);
+		font-size: 0.9rem;
+		font-weight: 600;
+		border: 1px solid rgba(99, 102, 241, 0.2);
+		backdrop-filter: blur(10px);
+	}
+
+	.hero-text {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+		max-width: 600px;
+		line-height: 1.6;
+	}
+
+	.hero-actions {
+		display: flex;
+		gap: 16px;
+		margin-top: 10px;
+	}
+
+	.hero-actions .btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	/* Showcase Section */
+	.showcase-section {
+		padding: 100px 0;
+		background: linear-gradient(
+			180deg,
+			rgba(8, 8, 12, 1) 0%,
+			rgba(5, 5, 8, 1) 100%
+		);
+		overflow: hidden;
+		position: relative;
+	}
+
+	.showcase-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 150%;
+		height: 1px;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			rgba(99, 102, 241, 0.3) 50%,
+			transparent 100%
+		);
+	}
+
+	.showcase-section::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 800px;
+		height: 800px;
+		background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+		pointer-events: none;
+	}
+
+	.section-header.centered {
+		text-align: center;
+		margin-bottom: 60px;
+		position: relative;
+		z-index: 1;
+	}
+
+	.section-header h2 {
+		font-size: 2.5rem;
+		margin-bottom: 10px;
+	}
+
+	.section-header p {
+		color: var(--text-muted);
+		font-size: 1.2rem;
+	}
+
+	/* Carousel Styles - Enhanced */
+	.carousel-wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.carousel-container {
+		position: relative;
+		height: 600px;
+		width: 100%;
+		overflow: hidden;
+		border-radius: 20px;
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+		outline: none;
+		border: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.carousel-container:focus-visible {
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--primary);
+	}
+
+	.carousel-track-container {
+		height: 100%;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.carousel-track {
+		padding: 0;
+		margin: 0;
+		list-style: none;
+		position: relative;
+		height: 100%;
+		transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.carousel-slide {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.carousel-slide.current-slide {
+		opacity: 1;
+	}
+
+	.showcase-item {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		overflow: hidden;
+	}
+
+	/* Image as Background */
+	.showcase-image {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		width: 100%;
+		height: 100%;
+	}
+
+	.showcase-image::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			135deg,
+			rgba(0, 0, 0, 0.4) 0%,
+			rgba(0, 0, 0, 0.1) 50%,
+			rgba(0, 0, 0, 0.3) 100%
+		);
+		z-index: 2;
+	}
+
+	.showcase-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 8s ease;
+	}
+
+	.carousel-slide.current-slide .showcase-image img {
+		transform: scale(1.08);
+	}
+
+	/* Text as Glass Overlay */
+	.showcase-text {
+		position: absolute;
+		bottom: 50px;
+		left: 50px;
+		z-index: 3;
+		max-width: 520px;
+		background: rgba(10, 10, 15, 0.8);
+		backdrop-filter: blur(20px);
+		padding: 32px 36px;
+		border-radius: 16px;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+		transform: translateY(20px);
+		opacity: 0;
+		transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+	}
+
+	.carousel-slide.current-slide .showcase-text {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	.slide-number {
+		display: inline-block;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.15em;
+		color: var(--primary);
+		margin-bottom: 12px;
+		padding: 4px 10px;
+		background: rgba(99, 102, 241, 0.15);
+		border-radius: 4px;
+	}
+
+	.showcase-text h3 {
+		font-size: 2rem;
+		margin-bottom: 12px;
+		color: #fff;
+		line-height: 1.2;
+		font-weight: 700;
+	}
+
+	.showcase-text p {
+		font-size: 1rem;
+		line-height: 1.7;
+		margin-bottom: 20px;
+		color: rgba(255, 255, 255, 0.75);
+	}
+
+	.slide-cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--primary);
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.slide-cta:hover {
+		color: #fff;
+		gap: 12px;
+	}
+
+	.slide-cta svg {
+		transition: transform 0.2s ease;
+	}
+
+	.slide-cta:hover svg {
+		transform: translateX(4px);
+	}
+
+	/* Navigation Buttons - Outside Carousel */
+	.carousel-button {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		background: rgba(15, 15, 20, 0.9);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.7);
+		width: 48px;
+		height: 48px;
+		border-radius: 12px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		z-index: 10;
+	}
+
+	.carousel-button--left {
+		left: -70px;
+	}
+
+	.carousel-button--right {
+		right: -70px;
+	}
+
+	.carousel-button:hover {
+		background: rgba(99, 102, 241, 0.2);
+		border-color: rgba(99, 102, 241, 0.4);
+		color: white;
+		transform: translateY(-50%) scale(1.05);
+	}
+
+	.carousel-button:active {
+		transform: translateY(-50%) scale(0.95);
+	}
+
+	.carousel-button.is-hidden {
+		opacity: 0.3;
+		pointer-events: none;
+	}
+
+	/* Controls Container */
+	.carousel-controls {
+		position: absolute;
+		bottom: 24px;
+		right: 24px;
+		z-index: 10;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(12px);
+		padding: 10px 14px;
+		border-radius: 30px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	/* Indicators */
+	.carousel-nav {
+		display: flex;
+		gap: 6px;
+		align-items: center;
+	}
+
+	/* Pause Button */
+	.carousel-pause {
+		background: transparent;
+		border: none;
+		color: rgba(255, 255, 255, 0.7);
+		cursor: pointer;
+		padding: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		border-radius: 4px;
+	}
+
+	.carousel-pause:hover {
+		color: white;
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.carousel-pause .play-icon {
+		display: none;
+	}
+
+	.carousel-container.paused .carousel-pause .pause-icon {
+		display: none;
+	}
+
+	.carousel-container.paused .carousel-pause .play-icon {
+		display: block;
+	}
+
+	/* Mobile Responsive */
+	@media (max-width: 1600px) {
+		.carousel-button--left {
+			left: -60px;
+		}
+		.carousel-button--right {
+			right: -60px;
+		}
+	}
+
+	@media (max-width: 1500px) {
+		.carousel-wrapper {
+			margin: 0 80px;
+		}
+		.carousel-button--left {
+			left: -65px;
+		}
+		.carousel-button--right {
+			right: -65px;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.carousel-wrapper {
+			margin: 0 20px;
+		}
+
+		.carousel-button {
+			width: 40px;
+			height: 40px;
+			border-radius: 10px;
+		}
+
+		.carousel-button--left {
+			left: -50px;
+		}
+		.carousel-button--right {
+			right: -50px;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.carousel-wrapper {
+			margin: 0 16px;
+		}
+
+		.carousel-container {
+			height: 500px;
+			border-radius: 12px;
+		}
+
+		.showcase-text {
+			bottom: 0;
+			left: 0;
+			right: 0;
+			max-width: 100%;
+			border-radius: 12px 12px 0 0;
+			padding: 20px 16px;
+			border: none;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.showcase-text h3 {
+			font-size: 1.4rem;
+		}
+
+		.showcase-text p {
+			font-size: 0.9rem;
+			margin-bottom: 14px;
+		}
+
+		.carousel-controls {
+			bottom: auto;
+			top: 12px;
+			right: 12px;
+			padding: 8px 10px;
+		}
+
+		.carousel-button {
+			display: none;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.hero-actions {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.btn {
+			width: 100%;
+		}
+	}
+</style>
+
+<style is:global>
+	/* Carousel Indicators - global for dynamically created elements */
+	.carousel-indicator {
+		display: block;
+		border: none;
+		border-radius: 3px;
+		width: 32px;
+		min-width: 32px;
+		height: 4px;
+		min-height: 4px;
+		background: rgba(255, 255, 255, 0.25);
+		cursor: pointer;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		padding: 0;
+		margin: 0;
+	}
+
+	.carousel-indicator .indicator-progress {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 0%;
+		background: var(--primary);
+		border-radius: 3px;
+	}
+
+	.carousel-indicator.current-slide {
+		background: rgba(255, 255, 255, 0.3);
+		width: 48px;
+		min-width: 48px;
+	}
+
+	.carousel-indicator.current-slide .indicator-progress {
+		animation: carousel-progress-fill 6s linear forwards;
+	}
+
+	.carousel-container.paused .carousel-indicator.current-slide .indicator-progress {
+		animation-play-state: paused;
+	}
+
+	@keyframes carousel-progress-fill {
+		from { width: 0%; }
+		to { width: 100%; }
+	}
+
+	.carousel-indicator:hover {
+		background: rgba(255, 255, 255, 0.4);
+	}
+</style>
+
+<script>
+	function setupCarousel() {
+		const wrapper = document.querySelector('.carousel-wrapper') as HTMLElement | null;
+		const container = document.querySelector('.carousel-container') as HTMLElement | null;
+		const track = document.querySelector('.carousel-track') as HTMLElement | null;
+		if (!track || !container || !wrapper) return;
+
+		const slides = Array.from(track.children) as HTMLElement[];
+		const nextButton = wrapper.querySelector('.carousel-button--right') as HTMLElement | null;
+		const prevButton = wrapper.querySelector('.carousel-button--left') as HTMLElement | null;
+		const dotsNav = container.querySelector('.carousel-nav') as HTMLElement | null;
+		const pauseButton = container.querySelector('.carousel-pause') as HTMLElement | null;
+
+		if (slides.length === 0) return;
+
+		// Dynamically create indicators based on slide count
+		const dots: HTMLElement[] = [];
+		if (dotsNav) {
+			dotsNav.innerHTML = '';
+			slides.forEach((_, index) => {
+				const dot = document.createElement('div');
+				dot.className = 'carousel-indicator' + (index === 0 ? ' current-slide' : '');
+				dot.setAttribute('role', 'button');
+				dot.setAttribute('tabindex', '0');
+				dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+				dot.innerHTML = '<span class="indicator-progress"></span>';
+				dotsNav.appendChild(dot);
+				dots.push(dot);
+			});
+		}
+
+		const AUTOPLAY_INTERVAL = 6000;
+		let autoplayTimer: number | null = null;
+		let isPaused = false;
+		let currentIndex = 0;
+		let touchStartX = 0;
+		let touchEndX = 0;
+
+		// Set up slide positions
+		const slideWidth = slides[0].getBoundingClientRect().width;
+		slides.forEach((slide, index) => {
+			slide.style.left = slideWidth * index + 'px';
+		});
+
+		// Trigger zoom animation on first slide and first dot progress
+		const firstSlide = slides[0];
+		const firstDot = dots[0];
+		if (firstSlide) {
+			// Remove class, wait for next frame, then re-add to trigger animation
+			firstSlide.classList.remove('current-slide');
+			if (firstDot) firstDot.classList.remove('current-slide');
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					firstSlide.classList.add('current-slide');
+					if (firstDot) {
+						// Reset progress animation
+						const progress = firstDot.querySelector('.indicator-progress') as HTMLElement;
+						if (progress) {
+							progress.style.animation = 'none';
+							progress.offsetHeight; // Force reflow
+							progress.style.animation = '';
+						}
+						firstDot.classList.add('current-slide');
+					}
+				});
+			});
+		}
+
+		const goToSlide = (targetIndex: number) => {
+			if (targetIndex < 0 || targetIndex >= slides.length) return;
+
+			const currentSlide = slides[currentIndex];
+			const targetSlide = slides[targetIndex];
+			const currentDot = dots[currentIndex];
+			const targetDot = dots[targetIndex];
+
+			// Update track position
+			track.style.transform = `translateX(-${targetSlide.style.left})`;
+
+			// Update slide classes
+			currentSlide.classList.remove('current-slide');
+			targetSlide.classList.add('current-slide');
+
+			// Update dots and reset animation
+			if (currentDot && targetDot) {
+				currentDot.classList.remove('current-slide');
+				// Reset the progress animation by forcing reflow
+				const targetProgress = targetDot.querySelector('.indicator-progress') as HTMLElement;
+				if (targetProgress) {
+					targetProgress.style.animation = 'none';
+					targetProgress.offsetHeight; // Force reflow
+					targetProgress.style.animation = '';
+				}
+				targetDot.classList.add('current-slide');
+			}
+
+			// Update arrows
+			if (prevButton && nextButton) {
+				prevButton.classList.toggle('is-hidden', targetIndex === 0);
+				nextButton.classList.toggle('is-hidden', targetIndex === slides.length - 1);
+			}
+
+			currentIndex = targetIndex;
+
+			// Restart autoplay timer
+			if (!isPaused) {
+				startAutoplay();
+			}
+		};
+
+		const nextSlide = () => {
+			const next = currentIndex < slides.length - 1 ? currentIndex + 1 : 0;
+			goToSlide(next);
+		};
+
+		const prevSlide = () => {
+			const prev = currentIndex > 0 ? currentIndex - 1 : slides.length - 1;
+			goToSlide(prev);
+		};
+
+		const startAutoplay = () => {
+			stopAutoplay();
+			if (isPaused) return;
+
+			autoplayTimer = window.setTimeout(() => {
+				nextSlide();
+			}, AUTOPLAY_INTERVAL);
+		};
+
+		const stopAutoplay = () => {
+			if (autoplayTimer) {
+				clearTimeout(autoplayTimer);
+				autoplayTimer = null;
+			}
+		};
+
+		const togglePause = () => {
+			isPaused = !isPaused;
+			container.classList.toggle('paused', isPaused);
+			if (isPaused) {
+				stopAutoplay();
+			} else {
+				startAutoplay();
+			}
+		};
+
+		// Event Listeners
+		if (prevButton) {
+			prevButton.addEventListener('click', () => {
+				prevSlide();
+			});
+		}
+
+		if (nextButton) {
+			nextButton.addEventListener('click', () => {
+				nextSlide();
+			});
+		}
+
+		if (dotsNav) {
+			dotsNav.addEventListener('click', (e) => {
+				const targetDot = (e.target as HTMLElement).closest('.carousel-indicator');
+				if (!targetDot) return;
+				const targetIndex = dots.indexOf(targetDot as HTMLElement);
+				if (targetIndex !== -1 && targetIndex !== currentIndex) {
+					goToSlide(targetIndex);
+				}
+			});
+		}
+
+		if (pauseButton) {
+			pauseButton.addEventListener('click', togglePause);
+		}
+
+		// Keyboard navigation
+		container.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				prevSlide();
+			} else if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				nextSlide();
+			} else if (e.key === ' ') {
+				e.preventDefault();
+				togglePause();
+			}
+		});
+
+		// Touch/swipe support
+		container.addEventListener('touchstart', (e) => {
+			touchStartX = e.changedTouches[0].screenX;
+		}, { passive: true });
+
+		container.addEventListener('touchend', (e) => {
+			touchEndX = e.changedTouches[0].screenX;
+			const diff = touchStartX - touchEndX;
+			const threshold = 50;
+
+			if (Math.abs(diff) > threshold) {
+				if (diff > 0) {
+					nextSlide();
+				} else {
+					prevSlide();
+				}
+			}
+		}, { passive: true });
+
+		// Pause on hover (optional - can be annoying)
+		// container.addEventListener('mouseenter', () => {
+		// 	if (!isPaused) stopAutoplay();
+		// });
+		// container.addEventListener('mouseleave', () => {
+		// 	if (!isPaused) startAutoplay();
+		// });
+
+		// Handle window resize
+		const resizeHandler = () => {
+			const newSlideWidth = slides[0].getBoundingClientRect().width;
+			slides.forEach((slide, index) => {
+				slide.style.left = newSlideWidth * index + 'px';
+			});
+			track.style.transform = `translateX(-${slides[currentIndex].style.left})`;
+		};
+
+		window.addEventListener('resize', resizeHandler);
+
+		// Start autoplay
+		startAutoplay();
+
+		// Cleanup on navigation
+		document.addEventListener('astro:before-swap', () => {
+			stopAutoplay();
+			window.removeEventListener('resize', resizeHandler);
+		}, { once: true });
+	}
+
+	// Run on initial load and after every navigation
+	document.addEventListener('astro:page-load', setupCarousel);
+</script>

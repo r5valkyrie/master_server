@@ -2,6 +2,22 @@ import type { APIRoute } from 'astro';
 import { gunzipSync } from 'node:zlib';
 import { logger } from '../../../lib/logger.ts';
 
+// In-memory cache for mods data
+interface ModsCache {
+    data: any[] | null;
+    timestamp: number;
+    isRefreshing: boolean;
+}
+
+const cache: ModsCache = {
+    data: null,
+    timestamp: 0,
+    isRefreshing: false
+};
+
+// Cache TTL: 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
+
 async function fetchBufferFollowRedirects(url: string): Promise<Uint8Array> {
     const headers: Record<string, string> = {
         'User-Agent': 'R5Valkyrie-Server/1.0',
@@ -28,18 +44,18 @@ function gunzipMaybe(buf: Uint8Array): Uint8Array {
     try { return gunzipSync(buf); } catch { return buf; }
 }
 
-export const GET: APIRoute = async ({ url }) => {
+async function fetchModsFromThunderstore(): Promise<any[]> {
     const community = process.env.THUNDERSTORE_COMMUNITY || 'r5valkyrie';
-    const query = String(url.searchParams.get('q') || '').toLowerCase();
-
     const indexUrl = `https://thunderstore.io/c/${community}/api/v1/package-listing-index/`;
+    
     try {
         const idxBuf = await fetchBufferFollowRedirects(indexUrl);
         const idxJson = JSON.parse(Buffer.from(gunzipMaybe(idxBuf)).toString('utf8'));
         const urls: string[] = Array.isArray(idxJson) ? idxJson : [];
-        const concurrency = 6;
+        const concurrency = 8;
         const results: any[] = [];
         let cursor = 0;
+        
         await Promise.all(Array.from({ length: concurrency }).map(async () => {
             while (cursor < urls.length) {
                 const j = cursor++;
@@ -49,34 +65,74 @@ export const GET: APIRoute = async ({ url }) => {
                     const text = Buffer.from(gunzipMaybe(b)).toString('utf8');
                     const arr = JSON.parse(text);
                     if (Array.isArray(arr)) results.push(...arr);
-                } catch(e) { logger.error(`Error fetching mods: ${e}`, { prefix: 'CLIENT' }); }
+                } catch(e) { 
+                    logger.error(`Error fetching mod chunk: ${e}`, { prefix: 'CLIENT' }); 
+                }
             }
         }));
-
-        let packs = results;
-        if (query) {
-            packs = packs.filter((p: any) => String(p?.name || '').toLowerCase().includes(query) || String(p?.full_name || '').toLowerCase().includes(query));
-        }
-        return new Response(JSON.stringify(packs), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        
+        return results;
     } catch (e) {
-
-        logger.error(`Error fetching mods: ${e}`, { prefix: 'CLIENT' });
+        logger.error(`Error fetching mods index: ${e}`, { prefix: 'CLIENT' });
         // Fallback to simple endpoint
-        try {
-            const fallbackUrl = `https://thunderstore.io/c/${community}/api/v1/package/`;
-            const resp = await fetch(fallbackUrl, { headers: { 'User-Agent': 'R5Valkyrie-Server/1.0' } });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            let packs: any[] = await resp.json();
-            if (query) {
-                packs = packs.filter((p: any) => String(p?.name || '').toLowerCase().includes(query) || String(p?.full_name || '').toLowerCase().includes(query));
-            }
-            return new Response(JSON.stringify(packs), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        } catch (err: any) {
-            const fallbackMessage = (e && typeof e === 'object' && 'message' in (e as any)) ? (e as any).message : String(e);
-            const message = err?.message ? String(err.message) : fallbackMessage;
-            return new Response(JSON.stringify({ success: false, error: message }), { status: 500 });
+        const fallbackUrl = `https://thunderstore.io/c/${community}/api/v1/package/`;
+        const resp = await fetch(fallbackUrl, { headers: { 'User-Agent': 'R5Valkyrie-Server/1.0' } });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        return await resp.json();
+    }
+}
+
+async function refreshCache(): Promise<void> {
+    if (cache.isRefreshing) return;
+    
+    cache.isRefreshing = true;
+    try {
+        const mods = await fetchModsFromThunderstore();
+        cache.data = mods;
+        cache.timestamp = Date.now();
+        logger.info(`Mods cache refreshed: ${mods.length} mods loaded`, { prefix: 'CLIENT' });
+    } catch (e) {
+        logger.error(`Failed to refresh mods cache: ${e}`, { prefix: 'CLIENT' });
+    } finally {
+        cache.isRefreshing = false;
+    }
+}
+
+export const GET: APIRoute = async ({ url }) => {
+    const query = String(url.searchParams.get('q') || '').toLowerCase();
+    const now = Date.now();
+    const cacheAge = now - cache.timestamp;
+    
+    // If cache is empty or expired, we need to fetch
+    if (!cache.data || cacheAge > CACHE_TTL) {
+        // If we have stale data, return it immediately and refresh in background
+        if (cache.data && !cache.isRefreshing) {
+            // Trigger background refresh
+            refreshCache();
+        } else if (!cache.data) {
+            // No data at all, must wait for fetch
+            await refreshCache();
         }
     }
+    
+    // Return cached data (or empty array if still loading)
+    let packs = cache.data || [];
+    
+    // Apply search filter
+    if (query) {
+        packs = packs.filter((p: any) => 
+            String(p?.name || '').toLowerCase().includes(query) || 
+            String(p?.full_name || '').toLowerCase().includes(query)
+        );
+    }
+    
+    return new Response(JSON.stringify(packs), { 
+        status: 200, 
+        headers: { 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, max-age=60'
+        } 
+    });
 };
 
 
