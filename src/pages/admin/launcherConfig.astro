@@ -54,7 +54,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
     </div>
 
     <!-- Channels Grid Container -->
-    <div id="channels-container" class="settings-panels-container">
+    <div id="channels-container">
       <div class="loading-state">
         <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
@@ -161,10 +161,21 @@ import Dashboard from '../../layouts/Dashboard.astro';
 </Dashboard>
 
 <style>
+  #channels-container {
+    margin-top: 1.5rem;
+  }
+
   .channels-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .channels-items {
+      grid-template-columns: 1fr;
+    }
   }
 
   .channel-panel {
@@ -173,11 +184,14 @@ import Dashboard from '../../layouts/Dashboard.astro';
     border-radius: 12px;
     padding: 1.5rem;
     transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
   }
 
   .channel-panel:hover {
     border-color: rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-2px);
   }
 
   .channel-panel-header {
@@ -260,24 +274,30 @@ import Dashboard from '../../layouts/Dashboard.astro';
     display: flex;
     gap: 0.5rem;
     padding-top: 1rem;
+    margin-top: auto;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .loading-state {
+  #channels-container .loading-state,
+  #channels-container .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem;
+    padding: 4rem 2rem;
     text-align: center;
-    grid-column: 1 / -1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-top: 1rem;
   }
 
-  .loading-state svg {
+  #channels-container .loading-state svg,
+  #channels-container .empty-state svg {
     width: 48px;
     height: 48px;
     margin-bottom: 1rem;
-    opacity: 0.5;
+    opacity: 0.3;
   }
 
   .spinner {
@@ -293,14 +313,8 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
   }
 
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    text-align: center;
-    grid-column: 1 / -1;
+  .hidden {
+    display: none !important;
   }
 </style>
 
