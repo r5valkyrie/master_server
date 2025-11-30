@@ -54,7 +54,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
     </div>
 
     <!-- Channels Grid Container -->
-    <div id="channels-container">
+    <div id="channels-container" class="channels-grid">
       <div class="loading-state">
         <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
@@ -63,12 +63,12 @@ import Dashboard from '../../layouts/Dashboard.astro';
       </div>
       
       <!-- Empty State -->
-      <div id="channels-empty-state" class="empty-state hidden">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;">
+      <div id="channels-empty-state" class="channels-empty hidden">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
         </svg>
         <p>No channels found</p>
-        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Click "Add Channel" to create one</p>
+        <p class="text-sm mt-2">Click "Add Channel" to create one</p>
       </div>
 
       <!-- Channels will be rendered here -->
@@ -161,7 +161,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
 </Dashboard>
 
 <style>
-  #channels-container {
+  .channels-grid {
     margin-top: 1.5rem;
   }
 
@@ -169,7 +169,6 @@ import Dashboard from '../../layouts/Dashboard.astro';
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1.5rem;
-    margin-top: 1rem;
   }
 
   @media (max-width: 768px) {
@@ -178,59 +177,81 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
   }
 
-  .channel-panel {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.2s;
+  .channel-card {
     display: flex;
     flex-direction: column;
+    background: rgba(25, 28, 34, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .channel-panel:hover {
-    border-color: rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.04);
-    transform: translateY(-2px);
+  .channel-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 40px rgba(86, 123, 243, 0.15);
+    transform: translateY(-4px);
   }
 
-  .channel-panel-header {
+  .channel-card.enabled {
+    border-left: 4px solid #10b981;
+  }
+
+  .channel-card.disabled {
+    border-left: 4px solid #ef4444;
+    opacity: 0.7;
+  }
+
+  .channel-card-header {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(40, 44, 52, 0.4);
+  }
+
+  .channel-status {
     display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .channel-name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: #fff;
+    word-break: break-word;
   }
 
-  .channel-status-badge {
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     padding: 0.25rem 0.75rem;
-    border-radius: 999px;
+    border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
   }
 
-  .channel-status-badge.enabled {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
+  .status-badge.enabled {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10b981;
   }
 
-  .channel-status-badge.disabled {
-    background: rgba(239, 68, 68, 0.2);
+  .status-badge.disabled {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     color: #ef4444;
   }
 
-  .channel-panel-body {
-    margin-bottom: 1rem;
+  .channel-card-body {
+    flex: 1;
+    padding: 1.25rem;
   }
 
   .channel-info-grid {
@@ -241,63 +262,75 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
   .channel-info-item {
     display: flex;
-    align-items: start;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-  }
-
-  .channel-info-item svg {
-    width: 18px;
-    height: 18px;
-    opacity: 0.5;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .channel-info-content {
-    flex: 1;
-    min-width: 0;
+    gap: 0.5rem;
   }
 
   .channel-info-label {
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 120px;
   }
 
   .channel-info-value {
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
     word-break: break-all;
   }
 
-  .channel-panel-footer {
+  .channel-card-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    margin-top: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 0.75rem;
+    background: rgba(40, 44, 52, 0.3);
   }
 
-  #channels-container .loading-state,
-  #channels-container .empty-state {
+  .channel-card-footer .btn {
+    flex: 1;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .channel-card-footer .btn svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  .loading-state,
+  .channels-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 4rem 2rem;
     text-align: center;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(25, 28, 34, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 
-  #channels-container .loading-state svg,
-  #channels-container .empty-state svg {
+  .loading-state svg,
+  .channels-empty svg {
     width: 48px;
     height: 48px;
     margin-bottom: 1rem;
     opacity: 0.3;
+  }
+
+  .loading-state p,
+  .channels-empty p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0.5rem 0;
   }
 
   .spinner {
@@ -401,64 +434,44 @@ document.addEventListener('DOMContentLoaded', function () {
         emptyState?.classList.add('hidden');
         
         container.innerHTML = channels.map((channel) => `
-          <div class="channel-panel">
-            <div class="channel-panel-header">
-              <div>
-                <h3 class="channel-name">${escapeHtml(channel.name)}</h3>
-                <span class="channel-status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
+          <div class="channel-card ${channel.enabled ? 'enabled' : 'disabled'}">
+            <div class="channel-card-header">
+              <h3 class="channel-name">${escapeHtml(channel.name)}</h3>
+              <div class="channel-status">
+                <span class="status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
                   ${channel.enabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
             </div>
-            <div class="channel-panel-body">
+            <div class="channel-card-body">
               <div class="channel-info-grid">
                 <div class="channel-info-item">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                  </svg>
-                  <div class="channel-info-content">
-                    <div class="channel-info-label">Requires Access Key</div>
-                    <div class="channel-info-value">${channel.requires_key ? 'Yes' : 'No'}</div>
-                  </div>
+                  <span class="channel-info-label">Access Key</span>
+                  <span class="channel-info-value">${channel.requires_key ? 'Required' : 'Not Required'}</span>
                 </div>
                 <div class="channel-info-item">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                  </svg>
-                  <div class="channel-info-content">
-                    <div class="channel-info-label">Automatic Updates</div>
-                    <div class="channel-info-value">${channel.allow_updates ? 'Enabled' : 'Disabled'}</div>
-                  </div>
+                  <span class="channel-info-label">Auto-Updates</span>
+                  <span class="channel-info-value">${channel.allow_updates ? 'Enabled' : 'Disabled'}</span>
                 </div>
                 <div class="channel-info-item">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                  <div class="channel-info-content">
-                    <div class="channel-info-label">Game Client URL</div>
-                    <div class="channel-info-value">${escapeHtml(channel.game_url)}</div>
-                  </div>
+                  <span class="channel-info-label">Game URL</span>
+                  <span class="channel-info-value">${escapeHtml(channel.game_url)}</span>
                 </div>
                 <div class="channel-info-item">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
-                  </svg>
-                  <div class="channel-info-content">
-                    <div class="channel-info-label">Dedicated Server URL</div>
-                    <div class="channel-info-value">${escapeHtml(channel.dedi_url)}</div>
-                  </div>
+                  <span class="channel-info-label">Server URL</span>
+                  <span class="channel-info-value">${escapeHtml(channel.dedi_url)}</span>
                 </div>
               </div>
             </div>
-            <div class="channel-panel-footer">
-              <button class="btn btn-sm btn-outline btn-edit" data-channel='${JSON.stringify(channel).replace(/'/g, '&apos;')}'>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+            <div class="channel-card-footer">
+              <button class="btn btn-outline btn-edit" data-channel='${JSON.stringify(channel).replace(/'/g, '&apos;')}'>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
                 Edit
               </button>
-              <button class="btn btn-sm btn-danger btn-delete" data-id="${channel.id}" data-name="${escapeHtml(channel.name)}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+              <button class="btn btn-danger btn-delete" data-id="${channel.id}" data-name="${escapeHtml(channel.name)}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
                 Delete
