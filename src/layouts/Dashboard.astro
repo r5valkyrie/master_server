@@ -15,6 +15,7 @@ const pageMap: Record<string, string> = {
   '/admin/userManagement': 'Admins',
   '/admin/apiKeys': 'API Keys',
   '/admin/settings': 'Settings',
+  '/admin/launcherConfig': 'Launcher Config',
 };
 
 const currentPage = pageMap[pathname] || 'Dashboard';
@@ -150,6 +151,13 @@ try {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
                   </svg>
                   <span class="nav-item-text">Versions</span>
+                </a>
+                
+                <a href="/admin/launcherConfig" class={`nav-item ${currentPage === 'Launcher Config' ? 'active' : ''}`}>
+                  <svg class="nav-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                  </svg>
+                  <span class="nav-item-text">Launcher Config</span>
                 </a>
               </div>
             </div>

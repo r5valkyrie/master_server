@@ -2,8 +2,7 @@
 import Dashboard from '../../layouts/Dashboard.astro';
 ---
 <Dashboard>
-  <!-- Launcher Configuration Management -->
-  <div id="launcher-config-page">
+  <div class="content-container">
     <!-- Page Header -->
     <div class="page-header">
       <h1>Launcher Configuration</h1>
@@ -11,78 +10,89 @@ import Dashboard from '../../layouts/Dashboard.astro';
     </div>
 
     <!-- Global Config Section -->
-    <div class="config-section">
-      <div class="section-header">
-        <h2>Global Configuration</h2>
-      </div>
-      <div class="config-card">
-        <form id="global-config-form">
-          <div class="form-group">
+    <div class="settings-panels-container">
+      <div class="settings-panel settings-panel-content full-width">
+        <div class="settings-panel-header">
+          <div class="settings-panel-title">
+            <span class="settings-section-label content">config</span>
+            <h3>Global Configuration</h3>
+          </div>
+        </div>
+        <div class="settings-panel-body">
+          <form id="global-config-form">
+            <p class="settings-panel-description">Configure global launcher settings</p>
             <label class="form-label" for="backgroundVideoInput">Background Video</label>
-            <input type="text" id="backgroundVideoInput" class="form-input" placeholder="shortshowcr5v.mp4">
-            <small class="form-help">Filename of the video to display in launcher background (relative to assets folder)</small>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Save Global Config
-            </button>
-          </div>
-        </form>
+            <input type="text" id="backgroundVideoInput" class="settings-panel-input" placeholder="shortshowcr5v.mp4">
+            <small style="display: block; margin-top: 0.5rem; color: #666; font-size: 0.875rem;">Filename of the video to display in launcher background (relative to assets folder)</small>
+            <div class="settings-panel-actions">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Save Configuration
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
-    <!-- Channels Section -->
-    <div class="config-section">
-      <div class="section-header">
-        <h2>Launcher Channels</h2>
+    <!-- Channels Section Header -->
+    <div class="page-header" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div>
+          <h2>Launcher Channels</h2>
+          <p>Manage update channels for the launcher</p>
+        </div>
         <button class="btn btn-primary" id="add-channel-btn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
           Add Channel
         </button>
       </div>
+    </div>
 
-      <!-- Channels Grid Container -->
-      <div id="channels-container" class="channels-grid">
-        <div class="loading-state">
-          <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
-          </svg>
-          <p>Loading channels...</p>
-        </div>
-        
-        <!-- Empty State -->
-        <div id="channels-empty-state" class="channels-empty hidden">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
-          </svg>
-          <p>No channels found</p>
-          <p class="text-sm mt-2">Click "Add Channel" to create one</p>
-        </div>
-
-        <!-- Channels will be rendered here -->
-        <div id="channels-items" class="channels-items"></div>
+    <!-- Channels Grid Container -->
+    <div id="channels-container" class="settings-panels-container">
+      <div class="loading-state">
+        <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
+        </svg>
+        <p>Loading channels...</p>
       </div>
+      
+      <!-- Empty State -->
+      <div id="channels-empty-state" class="empty-state hidden">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
+        </svg>
+        <p>No channels found</p>
+        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Click "Add Channel" to create one</p>
+      </div>
+
+      <!-- Channels will be rendered here -->
+      <div id="channels-items" class="channels-items"></div>
     </div>
 
     <!-- API Endpoint Info -->
-    <div class="config-section">
-      <div class="section-header">
-        <h2>API Endpoint</h2>
-      </div>
-      <div class="config-card">
-        <p class="mb-2">The launcher will fetch configuration from:</p>
-        <code class="api-endpoint">{Astro.url.origin}/api/client/launcherConfig</code>
-        <button class="btn btn-sm btn-outline mt-3" id="test-api-btn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-          </svg>
-          Test API Endpoint
-        </button>
+    <div class="page-header" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+      <h2>API Endpoint</h2>
+      <p>Public endpoint for launcher clients</p>
+    </div>
+
+    <div class="settings-panels-container">
+      <div class="settings-panel settings-panel-content full-width">
+        <div class="settings-panel-body">
+          <p style="margin-bottom: 1rem;">The launcher will fetch configuration from:</p>
+          <code style="display: block; background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; word-break: break-all; margin-bottom: 1rem;">{Astro.url.origin}/api/client/launcherConfig</code>
+          <button class="btn btn-sm btn-outline" id="test-api-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+            Test API Endpoint
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -151,152 +161,119 @@ import Dashboard from '../../layouts/Dashboard.astro';
 </Dashboard>
 
 <style>
-  .config-section {
-    margin-bottom: 2rem;
-  }
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .section-header h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .config-card {
-    background: var(--card-bg, #fff);
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .api-endpoint {
-    display: block;
-    background: #f5f5f5;
-    padding: 0.75rem;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.9rem;
-    word-break: break-all;
-  }
-
-  .channels-grid {
-    position: relative;
-    min-height: 200px;
-  }
-
   .channels-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 1.5rem;
   }
 
-  .channel-card {
-    background: var(--card-bg, #fff);
-    border-radius: 8px;
+  .channel-panel {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.2s;
   }
 
-  .channel-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  .channel-panel:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
   }
 
-  .channel-card-header {
+  .channel-panel-header {
     display: flex;
     justify-content: space-between;
     align-items: start;
     margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .channel-name {
     font-size: 1.25rem;
     font-weight: 600;
-    margin: 0;
+    margin: 0 0 0.25rem 0;
+    color: #fff;
   }
 
-  .channel-status {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .status-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+  .channel-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
-  .status-badge.enabled {
-    background: #d4edda;
-    color: #155724;
+  .channel-status-badge.enabled {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
   }
 
-  .status-badge.disabled {
-    background: #f8d7da;
-    color: #721c24;
+  .channel-status-badge.disabled {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
   }
 
-  .channel-card-body {
+  .channel-panel-body {
     margin-bottom: 1rem;
   }
 
-  .channel-info {
+  .channel-info-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    gap: 0.75rem;
   }
 
-  .info-item {
+  .channel-info-item {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    align-items: start;
+    gap: 0.75rem;
     font-size: 0.875rem;
   }
 
-  .info-item svg {
-    width: 16px;
-    height: 16px;
-    opacity: 0.6;
+  .channel-info-item svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.5;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
-  .info-label {
+  .channel-info-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .channel-info-label {
     font-weight: 500;
-    min-width: 100px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.25rem;
   }
 
-  .info-value {
-    color: #666;
+  .channel-info-value {
+    color: rgba(255, 255, 255, 0.9);
     word-break: break-all;
   }
 
-  .channel-card-footer {
+  .channel-panel-footer {
     display: flex;
     gap: 0.5rem;
     padding-top: 1rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .loading-state,
-  .channels-empty {
+  .loading-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 3rem;
     text-align: center;
+    grid-column: 1 / -1;
   }
 
-  .loading-state svg,
-  .channels-empty svg {
+  .loading-state svg {
     width: 48px;
     height: 48px;
     margin-bottom: 1rem;
@@ -316,16 +293,14 @@ import Dashboard from '../../layouts/Dashboard.astro';
     }
   }
 
-  .form-help {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.875rem;
-    color: #666;
-  }
-
-  .form-actions {
+  .empty-state {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    grid-column: 1 / -1;
   }
 </style>
 
@@ -412,56 +387,64 @@ document.addEventListener('DOMContentLoaded', function () {
         emptyState?.classList.add('hidden');
         
         container.innerHTML = channels.map((channel) => `
-          <div class="channel-card">
-            <div class="channel-card-header">
-              <h3 class="channel-name">${escapeHtml(channel.name)}</h3>
-              <div class="channel-status">
-                <span class="status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
+          <div class="channel-panel">
+            <div class="channel-panel-header">
+              <div>
+                <h3 class="channel-name">${escapeHtml(channel.name)}</h3>
+                <span class="channel-status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
                   ${channel.enabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
             </div>
-            <div class="channel-card-body">
-              <div class="channel-info">
-                <div class="info-item">
+            <div class="channel-panel-body">
+              <div class="channel-info-grid">
+                <div class="channel-info-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                   </svg>
-                  <span class="info-label">Requires Key:</span>
-                  <span class="info-value">${channel.requires_key ? 'Yes' : 'No'}</span>
+                  <div class="channel-info-content">
+                    <div class="channel-info-label">Requires Access Key</div>
+                    <div class="channel-info-value">${channel.requires_key ? 'Yes' : 'No'}</div>
+                  </div>
                 </div>
-                <div class="info-item">
+                <div class="channel-info-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                   </svg>
-                  <span class="info-label">Auto-Updates:</span>
-                  <span class="info-value">${channel.allow_updates ? 'Yes' : 'No'}</span>
+                  <div class="channel-info-content">
+                    <div class="channel-info-label">Automatic Updates</div>
+                    <div class="channel-info-value">${channel.allow_updates ? 'Enabled' : 'Disabled'}</div>
+                  </div>
                 </div>
-                <div class="info-item">
+                <div class="channel-info-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                   </svg>
-                  <span class="info-label">Game URL:</span>
-                  <span class="info-value">${escapeHtml(channel.game_url)}</span>
+                  <div class="channel-info-content">
+                    <div class="channel-info-label">Game Client URL</div>
+                    <div class="channel-info-value">${escapeHtml(channel.game_url)}</div>
+                  </div>
                 </div>
-                <div class="info-item">
+                <div class="channel-info-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
                   </svg>
-                  <span class="info-label">Server URL:</span>
-                  <span class="info-value">${escapeHtml(channel.dedi_url)}</span>
+                  <div class="channel-info-content">
+                    <div class="channel-info-label">Dedicated Server URL</div>
+                    <div class="channel-info-value">${escapeHtml(channel.dedi_url)}</div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="channel-card-footer">
+            <div class="channel-panel-footer">
               <button class="btn btn-sm btn-outline btn-edit" data-channel='${JSON.stringify(channel).replace(/'/g, '&apos;')}'>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
                 Edit
               </button>
               <button class="btn btn-sm btn-danger btn-delete" data-id="${channel.id}" data-name="${escapeHtml(channel.name)}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
                 Delete
