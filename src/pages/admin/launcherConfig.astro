@@ -1,0 +1,653 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+<Dashboard>
+  <!-- Launcher Configuration Management -->
+  <div id="launcher-config-page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Launcher Configuration</h1>
+      <p>Manage launcher settings and channels</p>
+    </div>
+
+    <!-- Global Config Section -->
+    <div class="config-section">
+      <div class="section-header">
+        <h2>Global Configuration</h2>
+      </div>
+      <div class="config-card">
+        <form id="global-config-form">
+          <div class="form-group">
+            <label class="form-label" for="backgroundVideoInput">Background Video</label>
+            <input type="text" id="backgroundVideoInput" class="form-input" placeholder="shortshowcr5v.mp4">
+            <small class="form-help">Filename of the video to display in launcher background (relative to assets folder)</small>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Save Global Config
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Channels Section -->
+    <div class="config-section">
+      <div class="section-header">
+        <h2>Launcher Channels</h2>
+        <button class="btn btn-primary" id="add-channel-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Add Channel
+        </button>
+      </div>
+
+      <!-- Channels Grid Container -->
+      <div id="channels-container" class="channels-grid">
+        <div class="loading-state">
+          <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
+          </svg>
+          <p>Loading channels...</p>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="channels-empty-state" class="channels-empty hidden">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
+          </svg>
+          <p>No channels found</p>
+          <p class="text-sm mt-2">Click "Add Channel" to create one</p>
+        </div>
+
+        <!-- Channels will be rendered here -->
+        <div id="channels-items" class="channels-items"></div>
+      </div>
+    </div>
+
+    <!-- API Endpoint Info -->
+    <div class="config-section">
+      <div class="section-header">
+        <h2>API Endpoint</h2>
+      </div>
+      <div class="config-card">
+        <p class="mb-2">The launcher will fetch configuration from:</p>
+        <code class="api-endpoint">{Astro.url.origin}/api/client/launcherConfig</code>
+        <button class="btn btn-sm btn-outline mt-3" id="test-api-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+          Test API Endpoint
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Channel Modal -->
+  <div id="channel-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="channel-modal-title">Add New Channel</h3>
+        <button class="modal-close" id="close-channel-modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-content">
+        <form id="channel-form">
+          <input type="hidden" id="channelIdInput">
+          
+          <div class="form-group">
+            <label class="form-label" for="channelNameInput">Channel Name</label>
+            <input type="text" id="channelNameInput" class="form-input" required placeholder="LIVE">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="gameUrlInput">Game URL</label>
+            <input type="url" id="gameUrlInput" class="form-input" required placeholder="https://example.com/game">
+            <small class="form-help">URL to download the game client</small>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="dediUrlInput">Dedicated Server URL</label>
+            <input type="url" id="dediUrlInput" class="form-input" required placeholder="https://example.com/server.7z">
+            <small class="form-help">URL to download the dedicated server</small>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="enabledInput" class="form-checkbox" checked>
+              <span class="form-label mb-0">Channel Enabled</span>
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="requiresKeyInput" class="form-checkbox">
+              <span class="form-label mb-0">Requires Access Key</span>
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="allowUpdatesInput" class="form-checkbox" checked>
+              <span class="form-label mb-0">Allow Automatic Updates</span>
+            </label>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-channel-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="submit-channel-btn">Add Channel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</Dashboard>
+
+<style>
+  .config-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .config-card {
+    background: var(--card-bg, #fff);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .api-endpoint {
+    display: block;
+    background: #f5f5f5;
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+
+  .channels-grid {
+    position: relative;
+    min-height: 200px;
+  }
+
+  .channels-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .channel-card {
+    background: var(--card-bg, #fff);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .channel-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .channel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+
+  .channel-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .channel-status {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .status-badge.enabled {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status-badge.disabled {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .channel-card-body {
+    margin-bottom: 1rem;
+  }
+
+  .channel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .info-item svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+  }
+
+  .info-label {
+    font-weight: 500;
+    min-width: 100px;
+  }
+
+  .info-value {
+    color: #666;
+    word-break: break-all;
+  }
+
+  .channel-card-footer {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .loading-state,
+  .channels-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+  }
+
+  .loading-state svg,
+  .channels-empty svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .form-help {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #666;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+</style>
+
+<script>
+// @ts-nocheck
+document.addEventListener('DOMContentLoaded', function () {
+  // Modal elements
+  const channelModal = document.getElementById('channel-modal');
+  const addChannelBtn = document.getElementById('add-channel-btn');
+  const testApiBtn = document.getElementById('test-api-btn');
+  const channelForm = document.getElementById('channel-form');
+  const globalConfigForm = document.getElementById('global-config-form');
+
+  let isEditMode = false;
+
+  // Notification helper
+  function notify(type, title, message) {
+    window.showNotification?.(type, title, message);
+  }
+
+  // Modal management
+  function openModal(modal) {
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function closeModal(modal) {
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // Add channel button
+  if (addChannelBtn) {
+    addChannelBtn.addEventListener('click', () => {
+      isEditMode = false;
+      document.getElementById('channel-modal-title').textContent = 'Add New Channel';
+      document.getElementById('submit-channel-btn').textContent = 'Add Channel';
+      channelForm.reset();
+      document.getElementById('channelIdInput').value = '';
+      document.getElementById('enabledInput').checked = true;
+      document.getElementById('allowUpdatesInput').checked = true;
+      openModal(channelModal);
+    });
+  }
+
+  // Test API button
+  if (testApiBtn) {
+    testApiBtn.addEventListener('click', async function() {
+      try {
+        const res = await fetch('/api/client/launcherConfig');
+        if (res.ok) {
+          const config = await res.json();
+          alert('API Test Successful!\n\n' + JSON.stringify(config, null, 2));
+        } else {
+          notify('error', 'Error', 'API test failed');
+        }
+      } catch (e) {
+        notify('error', 'Error', 'Failed to test API');
+      }
+    });
+  }
+
+  // Load launcher config
+  async function fetchLauncherConfig() {
+    try {
+      const response = await fetch('/api/admin/launcherConfig');
+      const payload = await response.json();
+      
+      // Update global config form
+      document.getElementById('backgroundVideoInput').value = payload.config?.backgroundVideo || '';
+
+      // Update channels
+      const channels = payload.channels || [];
+      const container = document.getElementById('channels-items');
+      const loadingState = document.querySelector('#channels-container .loading-state');
+      const emptyState = document.getElementById('channels-empty-state');
+      
+      if (!container) return;
+
+      loadingState?.classList.add('hidden');
+
+      if (channels.length === 0) {
+        container.innerHTML = '';
+        emptyState?.classList.remove('hidden');
+      } else {
+        emptyState?.classList.add('hidden');
+        
+        container.innerHTML = channels.map((channel) => `
+          <div class="channel-card">
+            <div class="channel-card-header">
+              <h3 class="channel-name">${escapeHtml(channel.name)}</h3>
+              <div class="channel-status">
+                <span class="status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
+                  ${channel.enabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+            </div>
+            <div class="channel-card-body">
+              <div class="channel-info">
+                <div class="info-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                  <span class="info-label">Requires Key:</span>
+                  <span class="info-value">${channel.requires_key ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="info-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  <span class="info-label">Auto-Updates:</span>
+                  <span class="info-value">${channel.allow_updates ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="info-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  <span class="info-label">Game URL:</span>
+                  <span class="info-value">${escapeHtml(channel.game_url)}</span>
+                </div>
+                <div class="info-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+                  </svg>
+                  <span class="info-label">Server URL:</span>
+                  <span class="info-value">${escapeHtml(channel.dedi_url)}</span>
+                </div>
+              </div>
+            </div>
+            <div class="channel-card-footer">
+              <button class="btn btn-sm btn-outline btn-edit" data-channel='${JSON.stringify(channel).replace(/'/g, '&apos;')}'>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button class="btn btn-sm btn-danger btn-delete" data-id="${channel.id}" data-name="${escapeHtml(channel.name)}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        // Bind edit handlers
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const channel = JSON.parse(this.dataset.channel);
+            
+            isEditMode = true;
+            document.getElementById('channel-modal-title').textContent = 'Edit Channel';
+            document.getElementById('submit-channel-btn').textContent = 'Update Channel';
+            
+            document.getElementById('channelIdInput').value = channel.id;
+            document.getElementById('channelNameInput').value = channel.name;
+            document.getElementById('gameUrlInput').value = channel.game_url;
+            document.getElementById('dediUrlInput').value = channel.dedi_url;
+            document.getElementById('enabledInput').checked = channel.enabled;
+            document.getElementById('requiresKeyInput').checked = channel.requires_key;
+            document.getElementById('allowUpdatesInput').checked = channel.allow_updates;
+
+            openModal(channelModal);
+          });
+        });
+
+        // Bind delete handlers
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            
+            if (!confirm(`Are you sure you want to delete channel "${name}"?\n\nThis action cannot be undone.`)) {
+              return;
+            }
+            
+            try {
+              const res = await fetch(`/api/admin/launcherConfig?id=${encodeURIComponent(id)}`, {
+                method: 'DELETE'
+              });
+              
+              if (res.ok) {
+                notify('success', 'Success', `Channel "${name}" deleted successfully`);
+                fetchLauncherConfig();
+              } else {
+                const error = await res.json();
+                notify('error', 'Error', error.error || 'Failed to delete channel');
+              }
+            } catch (error) {
+              console.error('Error deleting channel:', error);
+              notify('error', 'Error', 'Failed to delete channel');
+            }
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch launcher config:', error);
+      notify('error', 'Error', 'Failed to load launcher configuration');
+    }
+  }
+
+  // Modal close handlers
+  document.querySelectorAll('.modal-close, #cancel-channel-btn, #close-channel-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+      closeModal(channelModal);
+    });
+  });
+
+  // Close modal on overlay click
+  channelModal?.addEventListener('click', function(e) {
+    if (e.target === channelModal) {
+      closeModal(channelModal);
+    }
+  });
+
+  // Global config form submission
+  if (globalConfigForm) {
+    globalConfigForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const backgroundVideo = document.getElementById('backgroundVideoInput').value;
+      
+      try {
+        const res = await fetch('/api/admin/launcherConfig', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'updateConfig',
+            key: 'backgroundVideo', 
+            value: backgroundVideo 
+          })
+        });
+        
+        if (res.ok) {
+          notify('success', 'Success', 'Global configuration updated successfully');
+        } else {
+          const error = await res.json();
+          notify('error', 'Error', error.error || 'Failed to update configuration');
+        }
+      } catch (error) {
+        console.error('Error updating global config:', error);
+        notify('error', 'Error', 'Failed to update configuration');
+      }
+    });
+  }
+
+  // Channel form submission
+  if (channelForm) {
+    channelForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const channelId = document.getElementById('channelIdInput').value;
+      const name = document.getElementById('channelNameInput').value;
+      const game_url = document.getElementById('gameUrlInput').value;
+      const dedi_url = document.getElementById('dediUrlInput').value;
+      const enabled = document.getElementById('enabledInput').checked;
+      const requires_key = document.getElementById('requiresKeyInput').checked;
+      const allow_updates = document.getElementById('allowUpdatesInput').checked;
+      
+      if (!name.trim() || !game_url.trim() || !dedi_url.trim()) {
+        notify('error', 'Error', 'All fields are required');
+        return;
+      }
+      
+      try {
+        let res;
+        if (isEditMode && channelId) {
+          // Update existing channel
+          res = await fetch('/api/admin/launcherConfig', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              action: 'updateChannel',
+              id: parseInt(channelId),
+              name: name.trim(),
+              game_url: game_url.trim(),
+              dedi_url: dedi_url.trim(),
+              enabled,
+              requires_key,
+              allow_updates
+            })
+          });
+        } else {
+          // Create new channel
+          res = await fetch('/api/admin/launcherConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              action: 'createChannel',
+              name: name.trim(),
+              game_url: game_url.trim(),
+              dedi_url: dedi_url.trim(),
+              enabled,
+              requires_key,
+              allow_updates
+            })
+          });
+        }
+        
+        if (res.ok) {
+          notify('success', 'Success', `Channel ${isEditMode ? 'updated' : 'added'} successfully`);
+          closeModal(channelModal);
+          fetchLauncherConfig();
+          channelForm.reset();
+        } else {
+          const error = await res.json();
+          notify('error', 'Error', error.error || `Failed to ${isEditMode ? 'update' : 'add'} channel`);
+        }
+      } catch (error) {
+        console.error('Error saving channel:', error);
+        notify('error', 'Error', `Failed to ${isEditMode ? 'update' : 'add'} channel`);
+      }
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Initial load
+  fetchLauncherConfig();
+});
+</script>
+

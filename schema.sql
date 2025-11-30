@@ -419,6 +419,44 @@ INSERT INTO `system_settings` (`setting_key`, `setting_value`, `description`) VA
 ON DUPLICATE KEY UPDATE `setting_key`=`setting_key`;
 
 -- ============================================================================
+-- LAUNCHER CONFIG TABLE
+-- Stores global launcher configuration
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `launcher_config` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `config_key` VARCHAR(100) NOT NULL UNIQUE COMMENT 'Configuration key (e.g., backgroundVideo)',
+    `config_value` TEXT NOT NULL COMMENT 'Configuration value',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
+    
+    INDEX `idx_config_key` (`config_key`) COMMENT 'For quick config lookup'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Global launcher configuration';
+
+-- Insert default launcher config
+INSERT INTO `launcher_config` (`config_key`, `config_value`) VALUES 
+('backgroundVideo', 'somevideo.mp4')
+ON DUPLICATE KEY UPDATE `config_key`=`config_key`;
+
+-- ============================================================================
+-- LAUNCHER CHANNELS TABLE
+-- Stores launcher channel configurations (LIVE, INDEV, etc.)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `launcher_channels` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(100) NOT NULL UNIQUE COMMENT 'Channel name (e.g., LIVE, INDEV)',
+    `game_url` VARCHAR(500) NOT NULL COMMENT 'URL for game client download',
+    `dedi_url` VARCHAR(500) NOT NULL COMMENT 'URL for dedicated server download',
+    `enabled` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Is this channel enabled?',
+    `requires_key` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Does this channel require an access key?',
+    `allow_updates` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Allow automatic updates for this channel?',
+    `display_order` INT NOT NULL DEFAULT 0 COMMENT 'Display order in launcher (lower = first)',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When channel was created',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
+    
+    INDEX `idx_enabled` (`enabled`) COMMENT 'For filtering active channels',
+    INDEX `idx_display_order` (`display_order`) COMMENT 'For ordered display'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Launcher channel configurations';
+
+-- ============================================================================
 -- SCHEMA VERSION INFO
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `schema_version` (
@@ -431,7 +469,8 @@ INSERT INTO `schema_version` (`version`, `description`) VALUES
 ('1.0.0', 'Initial schema for R5Valkyrie Master Server'),
 ('1.1.0', 'Added discord_config table for storing Discord bot channel IDs'),
 ('1.2.0', 'Added api_keys table for API key management'),
-('1.3.0', 'Added system_settings table for system configuration')
+('1.3.0', 'Added system_settings table for system configuration'),
+('1.4.0', 'Added launcher_config and launcher_channels tables for launcher configuration')
 ON DUPLICATE KEY UPDATE `version`=`version`;
 
 -- ============================================================================

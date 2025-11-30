@@ -54,6 +54,11 @@ const { currentPage, loggedInUser, role = '' } = Astro.props;
           ]}>
             Versions
           </a>
+          <a href="/admin/launcherConfig" class:list={[
+            { 'active-page': currentPage === 'Launcher Config' }
+          ]}>
+            Launcher Config
+          </a>
           {role === 'master' && (
             <a href="/admin/userManagement" class:list={[
                 { 'active-page': currentPage === 'UserManagement' }
