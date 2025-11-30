@@ -146,7 +146,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
           <div class="form-group">
             <label class="flex items-center gap-2">
               <input type="checkbox" id="allowUpdatesInput" class="form-checkbox" checked>
-              <span class="form-label mb-0">Allow Automatic Updates</span>
+              <span class="form-label mb-0">Allow Updates</span>
             </label>
           </div>
           
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   <span class="channel-info-value">${channel.requires_key ? 'Required' : 'Not Required'}</span>
                 </div>
                 <div class="channel-info-item">
-                  <span class="channel-info-label">Auto-Updates</span>
+                  <span class="channel-info-label">Allow Updates</span>
                   <span class="channel-info-value">${channel.allow_updates ? 'Enabled' : 'Disabled'}</span>
                 </div>
                 <div class="channel-info-item">

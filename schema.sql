@@ -447,7 +447,7 @@ CREATE TABLE IF NOT EXISTS `launcher_channels` (
     `dedi_url` VARCHAR(500) NOT NULL COMMENT 'URL for dedicated server download',
     `enabled` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Is this channel enabled?',
     `requires_key` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Does this channel require an access key?',
-    `allow_updates` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Allow automatic updates for this channel?',
+    `allow_updates` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Allow updates for this channel?',
     `display_order` INT NOT NULL DEFAULT 0 COMMENT 'Display order in launcher (lower = first)',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When channel was created',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
