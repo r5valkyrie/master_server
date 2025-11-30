@@ -74,27 +74,6 @@ import Dashboard from '../../layouts/Dashboard.astro';
       <!-- Channels will be rendered here -->
       <div id="channels-items" class="channels-items"></div>
     </div>
-
-    <!-- API Endpoint Info -->
-    <div class="page-header" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
-      <h2>API Endpoint</h2>
-      <p>Public endpoint for launcher clients</p>
-    </div>
-
-    <div class="settings-panels-container">
-      <div class="settings-panel settings-panel-content full-width">
-        <div class="settings-panel-body">
-          <p style="margin-bottom: 1rem;">The launcher will fetch configuration from:</p>
-          <code style="display: block; background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; word-break: break-all; margin-bottom: 1rem;">{Astro.url.origin}/api/client/launcherConfig</code>
-          <button class="btn btn-sm btn-outline" id="test-api-btn">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-            Test API Endpoint
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Add/Edit Channel Modal -->
