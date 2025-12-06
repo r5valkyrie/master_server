@@ -11,7 +11,18 @@ export const POST: APIRoute = async ({ request }) => {
     try {
         await initializeVersions(); // Ensure versions are loaded before proceeding
 
-        const body = await request.json();
+        // Handle request body (empty body is normal for listing all public servers)
+        let body: any = {};
+        const text = await request.text();
+        if (text && text.trim().length > 0) {
+            try {
+                body = JSON.parse(text);
+            } catch (parseError) {
+                // Malformed JSON - log and continue with empty body
+                logger.warn(`Malformed JSON in request body: ${parseError}`, { prefix: 'API' });
+            }
+        }
+        
         let language = ValidateLanguage(body.language);
 
         if (!language) {
