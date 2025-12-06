@@ -53,6 +53,11 @@ export function ConvertServerDataTypes(server: any, useRealTypes: boolean) {
     sv.checksum = useRealTypes ? parseInt(sv.checksum) : `${sv.checksum}`;
     sv.numPlayers = useRealTypes ? parseInt(sv.playerCount) : `${sv.playerCount}`;
     
+    // modsProfile is optional and passed through as-is
+    if (sv.modsProfile) {
+        sv.modsProfile = sv.modsProfile.toString();
+    }
+    
     // requiredMods normalization
     let requiredModsArr: string[] = [];
     if (Array.isArray(sv.requiredMods)) {
@@ -154,6 +159,7 @@ export async function getServers(useRealTypes: boolean) {
                 server.hasPassword = "false";
             if (!server.requiredMods) server.requiredMods = "[]";
             if (!server.enabledMods) server.enabledMods = "[]";
+            if (!server.modsProfile) server.modsProfile = "";
             server.password = "";
             servers.push(useRealTypes ? ConvertServerDataTypes(server, useRealTypes) : server);
         }
@@ -229,7 +235,7 @@ export async function getServersByIP(ip: string) {
 // Lightweight meta cache helpers (no IPs logged externally)
 const META_HASH_KEY = 'ms:servers:meta';
 
-export async function upsertServerMeta(ip: string, port: number, meta: { name?: string; map?: string; playlist?: string; requiredMods?: string[]; enabledMods?: any[] }) {
+export async function upsertServerMeta(ip: string, port: number, meta: { name?: string; map?: string; playlist?: string; requiredMods?: string[]; enabledMods?: any[]; modsProfile?: string }) {
     if (!redisClient) return;
     const key = `${ip}:${port}`;
     try {
@@ -238,13 +244,14 @@ export async function upsertServerMeta(ip: string, port: number, meta: { name?: 
             map: meta.map || '',
             playlist: meta.playlist || '',
             requiredMods: JSON.stringify(meta.requiredMods || []),
-            enabledMods: JSON.stringify(meta.enabledMods || [])
+            enabledMods: JSON.stringify(meta.enabledMods || []),
+            modsProfile: meta.modsProfile || ''
         };
         await redisClient.hSet(META_HASH_KEY, key, JSON.stringify(stored));
     } catch (e) { console.error('upsertServerMeta error:', e); }
 }
 
-export async function getServerMeta(ip: string, port: number): Promise<{ name: string; map: string; playlist: string; requiredMods: string[]; enabledMods: any[] } | null> {
+export async function getServerMeta(ip: string, port: number): Promise<{ name: string; map: string; playlist: string; requiredMods: string[]; enabledMods: any[]; modsProfile: string } | null> {
     if (!redisClient) return null;
     const key = `${ip}:${port}`;
     try {
@@ -256,7 +263,8 @@ export async function getServerMeta(ip: string, port: number): Promise<{ name: s
             map: parsed.map || '',
             playlist: parsed.playlist || '',
             requiredMods: (() => { try { const arr = JSON.parse(parsed.requiredMods || '[]'); return Array.isArray(arr) ? arr : []; } catch { return []; } })(),
-            enabledMods: (() => { try { const arr = JSON.parse(parsed.enabledMods || '[]'); return Array.isArray(arr) ? arr : []; } catch { return []; } })()
+            enabledMods: (() => { try { const arr = JSON.parse(parsed.enabledMods || '[]'); return Array.isArray(arr) ? arr : []; } catch { return []; } })(),
+            modsProfile: parsed.modsProfile || ''
         };
     } catch { return null; }
 }

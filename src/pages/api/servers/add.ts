@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
     try {
         await initializeVersions();
         const body = await request.json();
-        let { name, description, map, version, numPlayers, maxPlayers, checksum, port, playlist, key, hidden, hasPassword, password, requiredMods, enabledMods } = body;
+        let { name, description, map, version, numPlayers, maxPlayers, checksum, port, playlist, key, hidden, hasPassword, password, requiredMods, enabledMods, modsProfile } = body;
 
         // Get the IP address, preferring cf-connecting-ip, and parse it to get the first IP in the list.
         let ip = request.headers.get('Cf-Pseudo-IPv4') || request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '';
@@ -57,6 +57,14 @@ export const POST: APIRoute = async ({ request }) => {
         if (!ip) return ParamError("Couldn't retrieve an IP address.");
         if (port < 0 || port > 65535) return ParamError("Port must be in the range 0-65535");
         if (!/^[a-zA-Z0-9_]+$/.test(playlist)) return ParamError("Playlist must be composed of latin letters, numbers, and underscores.");
+
+        // Validate modsProfile if provided (optional UUID format)
+        if (modsProfile && modsProfile.length > 0) {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(modsProfile)) {
+                return ParamError("modsProfile must be a valid UUID format (e.g., 019af13c-105c-45e4-6aaa-b27d0ff5876d)");
+            }
+        }
 
         // Normalize requiredMods to an array of non-empty strings
         if (Array.isArray(requiredMods)) {
@@ -167,6 +175,7 @@ export const POST: APIRoute = async ({ request }) => {
             ...(hasPassword && { password }),
             requiredMods,
             enabledMods,
+            ...(modsProfile && { modsProfile }),
         };
 
         await setServer(server);

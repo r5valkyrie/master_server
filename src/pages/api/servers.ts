@@ -21,15 +21,24 @@ export const POST: APIRoute = async ({ request }) => {
         let useRealTypes = await IsVersionFlagSet(body.version, flags.VF_REAL_TYPES);
         let servers = (await getServers(useRealTypes)) || [];
 
-        const keyResult = await verifyApiKey(body.password || '');
-        if (!keyResult.valid) {
+        // Check for API key authentication (for admin access to hidden servers)
+        let isAuthenticated = false;
+        if (body.apiKey && body.apiKey.length > 0) {
+            const keyResult = await verifyApiKey(body.apiKey);
+            if (keyResult.valid && keyResult.keyId) {
+                // Authenticated with API key - show all servers including hidden
+                isAuthenticated = true;
+                await logAdminEvent(`API key #${keyResult.keyId} used: servers`);
+            }
+        }
+        
+        // If not authenticated, filter to show only public servers
+        if (!isAuthenticated) {
             if (body.version) {
                 servers = servers.filter(s => (body.version == s.version));
             }
             servers = servers.map(({ version, ...keepAttrs }) => keepAttrs);
             servers = servers.filter(s => (s.hidden === false || s.hidden === 'false'));
-        } else if (keyResult.keyId) {
-            await logAdminEvent(`API key #${keyResult.keyId} used: servers`);
         }
 
         servers.sort((a, b) => (parseInt(b.playerCount) - parseInt(a.playerCount)));

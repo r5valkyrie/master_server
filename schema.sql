@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS `servers` (
     `password` VARCHAR(255) COMMENT 'Server password (if has_password=1)',
     `required_mods` JSON COMMENT 'Array of required mod objects',
     `enabled_mods` JSON COMMENT 'Array of enabled mod objects',
+    `mods_profile` VARCHAR(36) COMMENT 'Mod profile token (UUID format, optional)',
     `last_heartbeat` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last heartbeat from server',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When server was first registered',
     
