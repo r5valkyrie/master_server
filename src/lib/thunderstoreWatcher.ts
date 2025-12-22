@@ -244,16 +244,23 @@ async function runOnce(): Promise<void> {
             const prev = memorySeenVersions[id];
             if (!prev) {
                 updates.push({ mod, latest, type: 'new' });
-                memorySeenVersions[id] = String(latest.version_number || '');
             } else if (prev !== String(latest.version_number || '')) {
                 updates.push({ mod, latest, type: 'update' });
-                memorySeenVersions[id] = String(latest.version_number || '');
             }
         }
 
         if (updates.length > 0) {
             const embeds = updates.map(u => buildEmbed(u.mod, u.latest, community, u.type));
             await postDiscordEmbeds(channelId, embeds);
+            
+            // Only mark as seen AFTER successful Discord posting
+            for (const update of updates) {
+                const id = String(update.mod.uuid4 || '').trim();
+                if (id) {
+                    memorySeenVersions[id] = String(update.latest.version_number || '');
+                }
+            }
+            
             await saveSeenVersions(memorySeenVersions);
             logger.info(`Posted ${updates.length} update(s)`, { prefix: 'THUNDERSTORE' });
         }
