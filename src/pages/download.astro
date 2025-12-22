@@ -1570,43 +1570,52 @@ import Main from "../layouts/Main.astro";
 </style>
 
 <script>
-	// OS Detection
-	function detectOS() {
-		const userAgent = navigator.userAgent.toLowerCase();
-		const platform = navigator.platform?.toLowerCase() || '';
-		
-		// Check for Mac first
-		if (userAgent.includes('mac') || platform.includes('mac')) {
-			return 'mac';
+	// OS Detection - run immediately to prevent flash
+	(function() {
+		function detectOS() {
+			const userAgent = navigator.userAgent.toLowerCase();
+			const platform = navigator.platform?.toLowerCase() || '';
+			
+			// Check for Mac first
+			if (userAgent.includes('mac') || platform.includes('mac')) {
+				return 'mac';
+			}
+			// Check for Linux - includes X11 which is common in Linux user agents
+			if (userAgent.includes('linux') || userAgent.includes('x11') || platform.includes('linux')) {
+				return 'linux';
+			}
+			// Default to Windows
+			return 'windows';
 		}
-		// Check for Linux - includes X11 which is common in Linux user agents
-		if (userAgent.includes('linux') || userAgent.includes('x11') || platform.includes('linux')) {
-			return 'linux';
+
+		function setupOSDownloads() {
+			const os = detectOS();
+			const windowsElements = document.querySelectorAll('.os-windows');
+			const linuxElements = document.querySelectorAll('.os-linux');
+			const macElements = document.querySelectorAll('.os-mac');
+
+			// Hide all first
+			windowsElements.forEach(el => el.style.display = 'none');
+			linuxElements.forEach(el => el.style.display = 'none');
+			macElements.forEach(el => el.style.display = 'none');
+
+			// Show based on detected OS
+			if (os === 'mac') {
+				macElements.forEach(el => el.style.display = 'flex');
+			} else if (os === 'linux') {
+				linuxElements.forEach(el => el.style.display = 'inline-flex');
+			} else {
+				windowsElements.forEach(el => el.style.display = 'inline-flex');
+			}
 		}
-		// Default to Windows
-		return 'windows';
-	}
 
-	function setupOSDownloads() {
-		const os = detectOS();
-		const windowsElements = document.querySelectorAll('.os-windows');
-		const linuxElements = document.querySelectorAll('.os-linux');
-		const macElements = document.querySelectorAll('.os-mac');
-
-		// Hide all first
-		windowsElements.forEach(el => el.style.display = 'none');
-		linuxElements.forEach(el => el.style.display = 'none');
-		macElements.forEach(el => el.style.display = 'none');
-
-		// Show based on detected OS
-		if (os === 'mac') {
-			macElements.forEach(el => el.style.display = 'flex');
-		} else if (os === 'linux') {
-			linuxElements.forEach(el => el.style.display = 'inline-flex');
+		// Run immediately if DOM is ready, otherwise wait for it
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', setupOSDownloads);
 		} else {
-			windowsElements.forEach(el => el.style.display = 'inline-flex');
+			setupOSDownloads();
 		}
-	}
+	})();
 
 	// Scroll reveal animations
 	function setupScrollReveal() {
@@ -1654,12 +1663,40 @@ import Main from "../layouts/Main.astro";
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
-		setupOSDownloads();
 		setupScrollReveal();
 		setupBadgeImageSwitch();
 	});
 	document.addEventListener('astro:after-swap', () => {
-		setupOSDownloads();
+		// Re-run OS detection for client-side navigation
+		const os = (function() {
+			const userAgent = navigator.userAgent.toLowerCase();
+			const platform = navigator.platform?.toLowerCase() || '';
+			
+			if (userAgent.includes('mac') || platform.includes('mac')) {
+				return 'mac';
+			}
+			if (userAgent.includes('linux') || userAgent.includes('x11') || platform.includes('linux')) {
+				return 'linux';
+			}
+			return 'windows';
+		})();
+
+		const windowsElements = document.querySelectorAll('.os-windows');
+		const linuxElements = document.querySelectorAll('.os-linux');
+		const macElements = document.querySelectorAll('.os-mac');
+
+		windowsElements.forEach(el => el.style.display = 'none');
+		linuxElements.forEach(el => el.style.display = 'none');
+		macElements.forEach(el => el.style.display = 'none');
+
+		if (os === 'mac') {
+			macElements.forEach(el => el.style.display = 'flex');
+		} else if (os === 'linux') {
+			linuxElements.forEach(el => el.style.display = 'inline-flex');
+		} else {
+			windowsElements.forEach(el => el.style.display = 'inline-flex');
+		}
+
 		setupScrollReveal();
 		setupBadgeImageSwitch();
 	});
