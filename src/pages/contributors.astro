@@ -76,27 +76,45 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 				<h3>Contributors</h3>
 			</div>
 			<div class="sidebar-content custom-scrollbar">
-				<p class="sidebar-intro">
-					The amazing people who make this project possible.
-				</p>
+				<div class="sidebar-stats">
+					<div class="stat-row">
+						<span class="stat-number">{supporters.length + valkyrieContributors.length + r5reloadedContributors.length}</span>
+						<span class="stat-label">Total Contributors</span>
+					</div>
+					<div class="stat-divider"></div>
+					<div class="stat-breakdown">
+						<div class="stat-mini">
+							<span class="stat-mini-num">{supporters.length}</span>
+							<span class="stat-mini-label">Supporters</span>
+						</div>
+						<div class="stat-mini">
+							<span class="stat-mini-num">{valkyrieContributors.length}</span>
+							<span class="stat-mini-label">Valkyrie</span>
+						</div>
+						<div class="stat-mini">
+							<span class="stat-mini-num">{r5reloadedContributors.length}</span>
+							<span class="stat-mini-label">Reloaded</span>
+						</div>
+					</div>
+				</div>
 
 				<nav class="sidebar-nav">
 					<a href="#supporters" class="nav-item">
-						<span class="nav-icon">
+						<span class="nav-icon supporter-icon">
 							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 						</span>
 						Supporters
 						<span class="count">{supporters.length}</span>
 					</a>
 					<a href="#valkyrie" class="nav-item active">
-						<span class="nav-icon">
+						<span class="nav-icon valkyrie-icon">
 							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
 						</span>
 						R5Valkyrie
 						<span class="count">{valkyrieContributors.length}</span>
 					</a>
 					<a href="#r5reloaded" class="nav-item">
-						<span class="nav-icon">
+						<span class="nav-icon reloaded-icon">
 							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
 						</span>
 						R5Reloaded
@@ -117,20 +135,42 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 		</aside>
 
 		<main class="contributors-main">
+			<!-- Hero Banner -->
+			<div class="contributors-hero">
+				<div class="hero-bg-glow"></div>
+				<div class="hero-content">
+					<h1>Our <span class="text-gradient">Contributors</span></h1>
+					<p>The amazing people who build, support, and champion R5Valkyrie. None of this would be possible without them.</p>
+					<div class="hero-avatars">
+						{[...valkyrieContributors, ...r5reloadedContributors].slice(0, 5).map((c: any) => (
+							<img src={c.avatar} alt={c.name} loading="lazy" crossorigin="anonymous" class="hero-avatar-mini" />
+						))}
+						{(valkyrieContributors.length + r5reloadedContributors.length) > 5 && (
+							<span class="hero-avatar-more">+{valkyrieContributors.length + r5reloadedContributors.length - 5}</span>
+						)}
+					</div>
+				</div>
+			</div>
 
+			{supporters.length > 0 && (
 			<section id="supporters" class="contributors-section">
 				<div class="section-header">
-					<h2>Supporters</h2>
-					<p>Community members who help keep the project alive</p>
+					<div class="section-icon supporter-accent">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+					</div>
+					<div>
+						<h2>Supporters</h2>
+						<p>Community members who help keep the project alive</p>
+					</div>
 				</div>
 				<div class="contributors-grid">
 					{
 						supporters.map((supporter: any, index: number) => (
 							<div
 								class="contributor-card supporter-card"
-								style={`animation-delay: ${index * 0.05}s`}
+								style={`animation-delay: ${index * 0.04}s`}
 							>
-								<div class="card-glow supporter-glow"></div>
+								<div class="card-accent supporter-bar"></div>
 								<div class="avatar-wrapper supporter-avatar">
 									<img
 										src={supporter.avatar}
@@ -153,11 +193,17 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 					}
 				</div>
 			</section>
+			)}
 			
 			<section id="valkyrie" class="contributors-section">
 				<div class="section-header">
-					<h2>R5Valkyrie Contributors</h2>
-					<p>Contributors to the R5Valkyrie project</p>
+					<div class="section-icon valkyrie-accent">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+					</div>
+					<div>
+						<h2>R5Valkyrie Contributors</h2>
+						<p>The team building the future of Apex Legends modding</p>
+					</div>
 				</div>
 				<div class="contributors-grid">
 					{
@@ -165,10 +211,10 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 							<a
 								href={contributor.url}
 								target="_blank"
-								class="contributor-card"
-								style={`animation-delay: ${index * 0.05}s`}
+								class="contributor-card valkyrie-card"
+								style={`animation-delay: ${index * 0.04}s`}
 							>
-								<div class="card-glow"></div>
+								<div class="card-accent valkyrie-bar"></div>
 								<div class="avatar-wrapper">
 									<img
 										src={contributor.avatar}
@@ -194,8 +240,13 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 
 			<section id="r5reloaded" class="contributors-section">
 				<div class="section-header">
-					<h2>R5Reloaded Contributors</h2>
-					<p>The foundation that made this possible</p>
+					<div class="section-icon reloaded-accent">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+					</div>
+					<div>
+						<h2>R5Reloaded Contributors</h2>
+						<p>The foundation that made this all possible</p>
+					</div>
 				</div>
 				<div class="contributors-grid">
 					{
@@ -203,10 +254,10 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 							<a
 								href={contributor.url}
 								target="_blank"
-								class="contributor-card"
-								style={`animation-delay: ${index * 0.05}s`}
+								class="contributor-card reloaded-card"
+								style={`animation-delay: ${index * 0.04}s`}
 							>
-								<div class="card-glow"></div>
+								<div class="card-accent reloaded-bar"></div>
 								<div class="avatar-wrapper">
 									<img
 										src={contributor.avatar}
@@ -234,21 +285,21 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 </Main>
 
 <style>
+	/* ===== Layout ===== */
 	.contributors-wrapper {
 		display: flex;
 		min-height: 100vh;
 		padding-top: 80px;
 	}
 
-	/* Sidebar */
+	/* ===== Sidebar ===== */
 	.contributors-sidebar {
 		width: 300px;
 		position: fixed;
 		top: 80px;
 		bottom: 0;
 		left: 0;
-		background: rgba(10, 10, 12, 0.8);
-		backdrop-filter: blur(20px);
+		background: #0a0a0c;
 		border-right: 1px solid var(--border-light);
 		z-index: 10;
 		display: flex;
@@ -256,12 +307,12 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 	}
 
 	.sidebar-header {
-		padding: 24px;
+		padding: 20px 24px;
 		border-bottom: 1px solid var(--border-light);
 	}
 
 	.sidebar-header h3 {
-		font-size: 1.2rem;
+		font-size: 1.15rem;
 		font-weight: 600;
 		color: var(--text-main);
 		margin: 0;
@@ -270,34 +321,88 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 	.sidebar-content {
 		flex: 1;
 		overflow-y: auto;
-		padding: 24px;
+		padding: 20px 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
 	}
 
-	.sidebar-intro {
+	/* ===== Sidebar Stats ===== */
+	.sidebar-stats {
+		padding: 0 0 20px 0;
+		border-bottom: 1px solid var(--border-light);
+		margin-bottom: 20px;
+	}
+
+	.stat-row {
+		display: flex;
+		align-items: baseline;
+		gap: 10px;
+		margin-bottom: 14px;
+	}
+
+	.stat-number {
+		font-size: 2rem;
+		font-weight: 700;
+		color: var(--text-main);
+		line-height: 1;
+	}
+
+	.stat-label {
+		font-size: 0.8rem;
 		color: var(--text-muted);
-		font-size: 0.9rem;
-		line-height: 1.6;
-		margin-bottom: 24px;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
-	/* Sidebar Navigation */
+	.stat-divider {
+		height: 1px;
+		background: var(--border-light);
+		margin-bottom: 14px;
+	}
+
+	.stat-breakdown {
+		display: flex;
+		gap: 16px;
+	}
+
+	.stat-mini {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.stat-mini-num {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: var(--text-main);
+	}
+
+	.stat-mini-label {
+		font-size: 0.7rem;
+		color: var(--text-dim);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	/* ===== Sidebar Nav ===== */
 	.sidebar-nav {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
-		margin-bottom: 32px;
+		gap: 4px;
+		margin-bottom: 24px;
 	}
 
 	.nav-item {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 12px 14px;
+		gap: 10px;
+		padding: 10px 14px;
 		border-radius: 10px;
 		color: var(--text-muted);
 		text-decoration: none;
 		transition: all 0.2s ease;
-		font-size: 0.9rem;
+		font-size: 0.88rem;
 		font-weight: 500;
 	}
 
@@ -307,60 +412,48 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 	}
 
 	.nav-item.active {
-		background: rgba(99, 102, 241, 0.15);
+		background: rgba(99, 102, 241, 0.12);
 		color: var(--primary);
 	}
 
 	.nav-icon {
 		display: flex;
-		opacity: 0.7;
+		align-items: center;
+		opacity: 0.65;
 	}
+
+	.supporter-icon { color: #f97316; }
+	.valkyrie-icon { color: var(--primary); }
+	.reloaded-icon { color: #22d3ee; }
+
+	.nav-item.active .nav-icon { opacity: 1; }
 
 	.nav-item .count {
 		margin-left: auto;
-		font-size: 0.75rem;
-		background: rgba(255, 255, 255, 0.1);
+		font-size: 0.72rem;
+		font-weight: 600;
+		background: rgba(255, 255, 255, 0.08);
 		padding: 2px 8px;
 		border-radius: 10px;
+		color: var(--text-dim);
 	}
 
 	.nav-item.active .count {
-		background: rgba(99, 102, 241, 0.3);
+		background: rgba(99, 102, 241, 0.25);
+		color: var(--primary);
 	}
 
-	/* Sidebar Stats */
-	.sidebar-stats {
-		padding: 20px 0;
-		border-top: 1px solid var(--border-light);
-		border-bottom: 1px solid var(--border-light);
-		margin-bottom: 24px;
-	}
-
-	.stat-item {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.9rem;
-	}
-
-	.stat-item .label {
-		color: var(--text-muted);
-	}
-
-	.stat-item .value {
-		font-weight: 600;
-		color: var(--text-main);
-	}
-
-	/* Sidebar CTA */
+	/* ===== Sidebar CTA ===== */
 	.sidebar-cta {
+		margin-top: auto;
 		border-top: 1px solid var(--border-light);
+		padding-top: 20px;
 		text-align: center;
 	}
 
 	.sidebar-cta p {
-		padding-top: 20px;
 		color: var(--text-dim);
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		margin-bottom: 12px;
 	}
 
@@ -370,10 +463,10 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 		justify-content: center;
 		gap: 8px;
 		padding: 10px 20px;
-		background: rgba(255, 255, 255, 0.05);
+		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid var(--border-light);
-		border-radius: 8px;
-		color: var(--text-main);
+		border-radius: 10px;
+		color: var(--text-muted);
 		text-decoration: none;
 		font-size: 0.85rem;
 		font-weight: 500;
@@ -382,137 +475,233 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 	}
 
 	.btn-contribute:hover {
-		background: rgba(99, 102, 241, 0.15);
+		background: rgba(99, 102, 241, 0.12);
 		border-color: rgba(99, 102, 241, 0.3);
 		color: var(--primary);
 	}
 
-	/* Custom Scrollbar */
-	.custom-scrollbar::-webkit-scrollbar {
-		width: 6px;
-	}
+	/* ===== Scrollbar ===== */
+	.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+	.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+	.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 3px; }
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
 
-	.custom-scrollbar::-webkit-scrollbar-track {
-		background: transparent;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 3px;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-		background: rgba(255, 255, 255, 0.2);
-	}
-
-	/* Main Content */
+	/* ===== Main Content ===== */
 	.contributors-main {
 		flex: 1;
 		margin-left: 300px;
-		padding: 32px 40px;
-		background: linear-gradient(
-			180deg,
-			rgba(8, 8, 12, 1) 0%,
-			rgba(5, 5, 8, 1) 100%
-		);
+		background: #0a0a0c;
 	}
 
+	/* ===== Hero ===== */
+	.contributors-hero {
+		position: relative;
+		padding: 56px 40px 48px;
+		border-bottom: 1px solid var(--border-light);
+		overflow: hidden;
+	}
+
+	.hero-bg-glow {
+		position: absolute;
+		top: -40%;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 600px;
+		height: 300px;
+		background: radial-gradient(ellipse, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+		pointer-events: none;
+	}
+
+	.hero-content {
+		position: relative;
+		z-index: 1;
+		max-width: 600px;
+	}
+
+	.hero-content h1 {
+		font-size: 2.2rem;
+		font-weight: 700;
+		color: var(--text-main);
+		margin-bottom: 12px;
+		line-height: 1.2;
+	}
+
+	.text-gradient {
+		background: linear-gradient(135deg, var(--primary) 0%, #a78bfa 50%, var(--accent) 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.hero-content p {
+		font-size: 1rem;
+		color: var(--text-muted);
+		line-height: 1.7;
+		margin-bottom: 24px;
+	}
+
+	.hero-avatars {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.hero-avatar-mini {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 2px solid rgba(255, 255, 255, 0.1);
+		object-fit: cover;
+		transition: transform 0.2s ease, border-color 0.2s ease;
+	}
+
+	.hero-avatar-mini:hover {
+		transform: scale(1.1);
+		border-color: rgba(99, 102, 241, 0.4);
+		z-index: 2;
+	}
+
+	.hero-avatar-more {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 2px solid rgba(255, 255, 255, 0.1);
+		background: rgba(99, 102, 241, 0.15);
+		color: var(--primary);
+		font-size: 0.72rem;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* ===== Sections ===== */
 	.contributors-section {
-		margin-bottom: 60px;
+		padding: 40px 40px 48px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+	}
+
+	.contributors-section:last-child {
+		border-bottom: none;
 	}
 
 	.section-header {
-		margin-bottom: 32px;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		margin-bottom: 28px;
+	}
+
+	.section-icon {
+		width: 42px;
+		height: 42px;
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.supporter-accent {
+		background: rgba(249, 115, 22, 0.12);
+		color: #f97316;
+	}
+
+	.valkyrie-accent {
+		background: rgba(99, 102, 241, 0.12);
+		color: var(--primary);
+	}
+
+	.reloaded-accent {
+		background: rgba(34, 211, 238, 0.12);
+		color: #22d3ee;
 	}
 
 	.section-header h2 {
-		font-size: 1.75rem;
+		font-size: 1.35rem;
 		font-weight: 600;
-		margin-bottom: 8px;
+		margin-bottom: 2px;
 		color: var(--text-main);
 	}
 
 	.section-header p {
-		color: var(--text-muted);
-		font-size: 0.95rem;
+		color: var(--text-dim);
+		font-size: 0.85rem;
+		margin: 0;
 	}
 
-	/* Contributors Grid */
+	/* ===== Grid ===== */
 	.contributors-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 20px;
+		grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+		gap: 16px;
 	}
 
-	/* Contributor Card */
+	/* ===== Cards ===== */
 	.contributor-card {
 		position: relative;
-		background: rgba(15, 15, 20, 0.8);
+		background: rgba(255, 255, 255, 0.025);
 		border: 1px solid rgba(255, 255, 255, 0.06);
-		border-radius: 16px;
-		padding: 28px 20px;
+		border-radius: 14px;
+		padding: 24px 18px 20px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
 		text-decoration: none;
-		transition: all 0.3s ease;
+		transition: all 0.25s ease;
 		overflow: hidden;
-		animation: fadeInUp 0.5s ease forwards;
+		animation: fadeInUp 0.4s ease forwards;
 		opacity: 0;
 	}
 
 	@keyframes fadeInUp {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
+		from { opacity: 0; transform: translateY(16px); }
+		to { opacity: 1; transform: translateY(0); }
 	}
 
-	.card-glow {
+	.card-accent {
 		position: absolute;
 		top: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 100px;
-		height: 100px;
-		background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+		left: 0;
+		right: 0;
+		height: 3px;
 		opacity: 0;
-		transition: opacity 0.3s ease;
-		pointer-events: none;
+		transition: opacity 0.25s ease;
 	}
+
+	.valkyrie-bar { background: linear-gradient(90deg, var(--primary), #a78bfa); }
+	.supporter-bar { background: linear-gradient(90deg, #f97316, #fbbf24); }
+	.reloaded-bar { background: linear-gradient(90deg, #22d3ee, #06b6d4); }
+
+	.contributor-card:hover .card-accent { opacity: 1; }
 
 	.contributor-card:hover {
-		transform: translateY(-4px);
-		background: rgba(20, 20, 28, 0.9);
-		border-color: rgba(99, 102, 241, 0.3);
-		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+		transform: translateY(-3px);
+		background: rgba(255, 255, 255, 0.045);
+		border-color: rgba(255, 255, 255, 0.1);
+		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
 	}
 
-	.contributor-card:hover .card-glow {
-		opacity: 1;
-	}
+	/* Card — type-specific hover borders */
+	.valkyrie-card:hover { border-color: rgba(99, 102, 241, 0.25); }
+	.supporter-card:hover { border-color: rgba(249, 115, 22, 0.25); }
+	.reloaded-card:hover { border-color: rgba(34, 211, 238, 0.25); }
 
+	.supporter-card { cursor: default; }
+
+	/* ===== Avatar ===== */
 	.avatar-wrapper {
-		width: 80px;
-		height: 80px;
+		width: 72px;
+		height: 72px;
 		border-radius: 50%;
 		overflow: hidden;
-		margin-bottom: 16px;
-		border: 2px solid rgba(255, 255, 255, 0.1);
+		margin-bottom: 14px;
+		border: 2px solid rgba(255, 255, 255, 0.08);
 		background: rgba(0, 0, 0, 0.3);
 		position: relative;
 		z-index: 1;
-		transition: all 0.3s ease;
-	}
-
-	.contributor-card:hover .avatar-wrapper {
-		border-color: rgba(99, 102, 241, 0.5);
-		box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+		transition: all 0.25s ease;
 	}
 
 	.avatar-wrapper img {
@@ -521,31 +710,56 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 		object-fit: cover;
 	}
 
+	.contributor-card:hover .avatar-wrapper {
+		border-color: rgba(99, 102, 241, 0.4);
+		box-shadow: 0 0 16px rgba(99, 102, 241, 0.15);
+	}
+
+	.supporter-card:hover .supporter-avatar {
+		border-color: rgba(249, 115, 22, 0.4);
+		box-shadow: 0 0 16px rgba(249, 115, 22, 0.15);
+	}
+
+	.reloaded-card:hover .avatar-wrapper {
+		border-color: rgba(34, 211, 238, 0.4);
+		box-shadow: 0 0 16px rgba(34, 211, 238, 0.15);
+	}
+
+	/* ===== Info ===== */
 	.contributor-info {
 		position: relative;
 		z-index: 1;
 	}
 
 	.contributor-info h3 {
-		font-size: 1rem;
+		font-size: 0.95rem;
 		font-weight: 600;
 		margin-bottom: 8px;
 		color: var(--text-main);
 	}
 
 	.role {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		color: var(--text-muted);
 		background: rgba(255, 255, 255, 0.05);
 		padding: 4px 12px;
 		border-radius: 20px;
-		display: inline-block;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
 	}
+
+	.discord-tag {
+		color: #7289da;
+		background: rgba(114, 137, 218, 0.1);
+	}
+
+	.discord-tag svg { flex-shrink: 0; }
 
 	.card-link {
 		position: absolute;
-		top: 12px;
-		right: 12px;
+		top: 14px;
+		right: 14px;
 		color: var(--text-dim);
 		opacity: 0;
 		transition: all 0.2s ease;
@@ -556,44 +770,12 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 		color: var(--primary);
 	}
 
-	/* Supporter Card Styles */
-	.supporter-card {
-		cursor: default;
-	}
-
-	.supporter-glow {
-		background: radial-gradient(circle, rgba(249, 115, 22, 0.2) 0%, transparent 70%);
-	}
-
-	.supporter-card:hover {
-		border-color: rgba(249, 115, 22, 0.3);
-	}
-
-	.supporter-card:hover .supporter-avatar {
-		border-color: rgba(249, 115, 22, 0.5);
-		box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
-	}
-
-	.discord-tag {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		color: #5865F2;
-		background: rgba(88, 101, 242, 0.1);
-	}
-
-	.discord-tag svg {
-		flex-shrink: 0;
-	}
-
-	/* Mobile Responsive */
+	/* ===== Mobile ===== */
 	@media (max-width: 1024px) {
-		.contributors-sidebar {
-			width: 260px;
-		}
-		.contributors-main {
-			margin-left: 260px;
-		}
+		.contributors-sidebar { width: 260px; }
+		.contributors-main { margin-left: 260px; }
+		.contributors-hero { padding: 40px 28px 36px; }
+		.contributors-section { padding: 32px 28px 40px; }
 	}
 
 	@media (max-width: 768px) {
@@ -611,60 +793,73 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 			border-bottom: 1px solid var(--border-light);
 		}
 
+		.sidebar-header { display: none; }
+
 		.sidebar-content {
-			padding: 16px;
+			padding: 12px 16px;
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 12px;
 		}
 
-		.sidebar-intro {
-			display: none;
-		}
+		.sidebar-stats { display: none; }
 
 		.sidebar-nav {
 			flex-direction: row;
 			overflow-x: auto;
-			margin-bottom: 16px;
-			gap: 12px;
+			margin-bottom: 0;
+			gap: 6px;
+			flex: 1;
 		}
 
 		.nav-item {
 			white-space: nowrap;
-			padding: 10px 16px;
+			padding: 8px 14px;
+			font-size: 0.82rem;
 		}
 
-		.sidebar-stats {
-			display: none;
+		.sidebar-cta { display: none; }
+
+		.contributors-main { margin-left: 0; }
+
+		.contributors-hero {
+			padding: 32px 20px 28px;
 		}
 
-		.sidebar-cta {
-			display: none;
-		}
+		.hero-content h1 { font-size: 1.6rem; }
+		.hero-content p { font-size: 0.9rem; }
 
-		.contributors-main {
-			margin-left: 0;
-			padding: 24px 16px;
-		}
+		.contributors-section { padding: 28px 20px 36px; }
+
+		.section-header { gap: 12px; margin-bottom: 20px; }
+		.section-icon { width: 36px; height: 36px; border-radius: 10px; }
+		.section-header h2 { font-size: 1.15rem; }
 
 		.contributors-grid {
-			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-			gap: 12px;
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+			gap: 10px;
 		}
 
-		.contributor-card {
-			padding: 20px 16px;
-		}
+		.contributor-card { padding: 18px 14px 16px; }
+		.avatar-wrapper { width: 56px; height: 56px; }
+		.contributor-info h3 { font-size: 0.85rem; }
+		.role { font-size: 0.68rem; padding: 3px 10px; }
+	}
 
-		.avatar-wrapper {
-			width: 64px;
-			height: 64px;
+	@media (max-width: 480px) {
+		.contributors-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 8px;
 		}
 	}
 </style>
 
 <script>
-	// Handle active nav state on scroll
-	document.addEventListener('DOMContentLoaded', () => {
+	function initContributorsScrollSpy() {
 		const sections = document.querySelectorAll('.contributors-section');
 		const navItems = document.querySelectorAll('.nav-item');
+		if (!sections.length || !navItems.length) return;
 
 		const observer = new IntersectionObserver((entries) => {
 			entries.forEach(entry => {
@@ -681,5 +876,8 @@ const [valkyrieContributors, r5reloadedContributors, supporters] = await Promise
 		}, { rootMargin: '-20% 0px -80% 0px' });
 
 		sections.forEach(section => observer.observe(section));
-	});
+	}
+
+	// Support Astro ClientRouter (view transitions)
+	document.addEventListener('astro:page-load', initContributorsScrollSpy);
 </script>
