@@ -227,55 +227,72 @@ import Main from "../layouts/Main.astro";
 		<div class="section-container">
 			<div class="section-header">
 				<h2>Three Steps to Play</h2>
-				<p>Get set up and join the action.</p>
+				<p>Get set up and join the action in minutes.</p>
 			</div>
 
-			<div class="steps-timeline">
-				<div class="timeline-line"></div>
-				
+			<div class="steps-grid">
 				<div class="step-card" data-step="1">
-					<div class="step-marker">
-						<span class="step-number">1</span>
-						<div class="step-pulse"></div>
+					<div class="step-top">
+						<div class="step-number-ring">
+							<span class="step-number">1</span>
+						</div>
+						<div class="step-icon-box">
+							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+						</div>
 					</div>
-					<div class="step-content">
-						<div class="step-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-					</div>
+					<div class="step-body">
 						<h3>Download & Install</h3>
-						<p>Click the download button above and run the installer. Follow the on-screen instructions to set up the R5Valkyrie Launcher on your system.</p>
+						<p>Click the download button above and run the installer. Follow the on-screen instructions to get set up.</p>
+					</div>
 				</div>
+
+				<div class="step-connector">
+					<svg viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0 12h50" stroke="url(#connector-grad)" stroke-width="2" stroke-dasharray="6 4" />
+						<path d="M46 6l8 6-8 6" stroke="url(#connector-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+						<defs><linearGradient id="connector-grad" x1="0" y1="0" x2="60" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="var(--primary)" stop-opacity="0.5" /><stop offset="1" stop-color="var(--accent, var(--primary))" stop-opacity="0.5" /></linearGradient></defs>
+					</svg>
 				</div>
 
 				<div class="step-card" data-step="2">
-					<div class="step-marker">
-						<span class="step-number">2</span>
-						<div class="step-pulse"></div>
+					<div class="step-top">
+						<div class="step-number-ring">
+							<span class="step-number">2</span>
+						</div>
+						<div class="step-icon-box">
+							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+						</div>
 					</div>
-					<div class="step-content">
-						<div class="step-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-					</div>
+					<div class="step-body">
 						<h3>Download the Game</h3>
-						<p>Open the launcher and click "Install" to download the game files. This may take a while depending on your connection speed.</p>
+						<p>Open the launcher and click "Install" to download the game files. Grab a coffee while it downloads!</p>
+					</div>
 				</div>
+
+				<div class="step-connector">
+					<svg viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0 12h50" stroke="url(#connector-grad2)" stroke-width="2" stroke-dasharray="6 4" />
+						<path d="M46 6l8 6-8 6" stroke="url(#connector-grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+						<defs><linearGradient id="connector-grad2" x1="0" y1="0" x2="60" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="var(--primary)" stop-opacity="0.5" /><stop offset="1" stop-color="var(--accent, var(--primary))" stop-opacity="0.5" /></linearGradient></defs>
+					</svg>
 				</div>
 
 				<div class="step-card" data-step="3">
-					<div class="step-marker">
-						<span class="step-number">3</span>
-						<div class="step-pulse"></div>
+					<div class="step-top">
+						<div class="step-number-ring">
+							<span class="step-number">3</span>
+						</div>
+						<div class="step-icon-box">
+							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+						</div>
 					</div>
-					<div class="step-content">
-						<div class="step-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-					</div>
+					<div class="step-body">
 						<h3>Play!</h3>
-						<p>Hit the "Play" button and you're in! Browse servers, install mods, and customize your experience however you like.</p>
+						<p>Hit "Play" and you're in! Browse servers, install mods, and customize your experience.</p>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 	</section>
 
 	<!-- System Requirements -->
@@ -1157,95 +1174,148 @@ import Main from "../layouts/Main.astro";
 	.install-section {
 		padding: 120px 20px;
 		position: relative;
+		overflow: hidden;
 	}
 
-	.steps-timeline {
-		position: relative;
-		max-width: 800px;
+	.steps-grid {
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 0;
+		max-width: 1100px;
 		margin: 0 auto;
 	}
 
-	.timeline-line {
-		position: absolute;
-		left: 28px;
-		top: 60px;
-		bottom: 60px;
-		width: 2px;
-		background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
-		opacity: 0.3;
-	}
-
-	.step-card {
+	.step-connector {
 		display: flex;
-		gap: 32px;
-		margin-bottom: 48px;
-		position: relative;
-	}
-
-	.step-card:last-child {
-		margin-bottom: 0;
-	}
-
-	.step-marker {
-		position: relative;
+		align-items: center;
+		padding-top: 52px;
+		width: 60px;
 		flex-shrink: 0;
 	}
 
-	.step-number {
-		width: 56px;
-		height: 56px;
+	.step-connector svg {
+		width: 60px;
+		height: 24px;
+	}
+
+	.step-card {
+		flex: 1;
+		max-width: 320px;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 20px;
+		padding: 32px 28px;
+		position: relative;
+		transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+	}
+
+	.step-card::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: 20px;
+		background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08), transparent 70%);
+		opacity: 0;
+		transition: opacity 0.35s ease;
+	}
+
+	.step-card:hover {
+		transform: translateY(-6px);
+		border-color: rgba(99, 102, 241, 0.2);
+		box-shadow: 0 20px 50px rgba(99, 102, 241, 0.1), 0 0 0 1px rgba(99, 102, 241, 0.05);
+	}
+
+	.step-card:hover::before {
+		opacity: 1;
+	}
+
+	.step-top {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-		border-radius: 50%;
-		font-size: 1.4rem;
-		font-weight: 700;
-		color: white;
+		gap: 16px;
+		margin-bottom: 24px;
 		position: relative;
 		z-index: 1;
 	}
 
-	.step-pulse {
+	.step-number-ring {
+		position: relative;
+		width: 48px;
+		height: 48px;
+		flex-shrink: 0;
+	}
+
+	.step-number-ring::before {
+		content: '';
 		position: absolute;
-		inset: -8px;
-		border: 2px solid var(--primary);
+		inset: 0;
 		border-radius: 50%;
-		opacity: 0;
-		animation: pulse 2s ease-in-out infinite;
+		padding: 2px;
+		background: linear-gradient(135deg, var(--primary) 0%, var(--accent, var(--primary)) 100%);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
 	}
 
-	.step-card:nth-child(2) .step-pulse { animation-delay: 0.5s; }
-	.step-card:nth-child(3) .step-pulse { animation-delay: 1s; }
-	.step-card:nth-child(4) .step-pulse { animation-delay: 1.5s; }
-
-	@keyframes pulse {
-		0% { transform: scale(0.8); opacity: 0.5; }
-		50% { transform: scale(1.2); opacity: 0; }
-		100% { transform: scale(0.8); opacity: 0; }
-	}
-
-	.step-content {
-		flex: 1;
-		background: rgba(255, 255, 255, 0.02);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		border-radius: 20px;
-		padding: 32px;
-	}
-
-	.step-icon {
+	.step-number {
+		width: 48px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.2rem;
+		font-weight: 700;
 		color: var(--primary);
-		margin-bottom: 16px;
-		opacity: 0.8;
+		position: relative;
+		z-index: 1;
 	}
 
-	.step-content h3 {
-		font-size: 1.3rem;
-		margin-bottom: 12px;
+	.step-card:hover .step-number-ring::before {
+		background: linear-gradient(135deg, var(--primary) 0%, var(--accent, var(--primary)) 100%);
+		-webkit-mask: none;
+		mask: none;
 	}
 
-	.step-content p {
+	.step-card:hover .step-number {
+		color: #fff;
+	}
+
+	.step-icon-box {
+		width: 52px;
+		height: 52px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(99, 102, 241, 0.08);
+		border: 1px solid rgba(99, 102, 241, 0.12);
+		border-radius: 14px;
+		color: var(--primary);
+		transition: all 0.35s ease;
+	}
+
+	.step-card:hover .step-icon-box {
+		background: rgba(99, 102, 241, 0.15);
+		border-color: rgba(99, 102, 241, 0.25);
+		transform: scale(1.05);
+	}
+
+	.step-body {
+		position: relative;
+		z-index: 1;
+	}
+
+	.step-body h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--text-main);
+		margin-bottom: 10px;
+	}
+
+	.step-body p {
 		color: var(--text-muted);
+		font-size: 0.95rem;
 		line-height: 1.7;
 	}
 
@@ -1527,21 +1597,22 @@ import Main from "../layouts/Main.astro";
 			grid-template-columns: 1fr;
 		}
 
-		.steps-timeline {
-			padding-left: 0;
+		.steps-grid {
+			flex-direction: column;
+			align-items: center;
+			gap: 0;
 		}
 
-		.timeline-line {
-			display: none;
+		.step-connector {
+			transform: rotate(90deg);
+			padding-top: 0;
+			width: 60px;
+			height: 40px;
 		}
 
 		.step-card {
-			flex-direction: column;
-			gap: 16px;
-		}
-
-		.step-marker {
-			align-self: flex-start;
+			max-width: 100%;
+			width: 100%;
 		}
 
 		.requirements-grid {
@@ -1722,9 +1793,9 @@ import Main from "../layouts/Main.astro";
 	.features-grid .feature-card:nth-child(5) { transition-delay: 0.4s; }
 	.features-grid .feature-card:nth-child(6) { transition-delay: 0.5s; }
 
-	.steps-timeline .step-card:nth-child(2) { transition-delay: 0.1s; }
-	.steps-timeline .step-card:nth-child(3) { transition-delay: 0.2s; }
-	.steps-timeline .step-card:nth-child(4) { transition-delay: 0.3s; }
+	.steps-grid .step-card:nth-child(1) { transition-delay: 0s; }
+	.steps-grid .step-card:nth-child(3) { transition-delay: 0.1s; }
+	.steps-grid .step-card:nth-child(5) { transition-delay: 0.2s; }
 
 	.faq-list .faq-item:nth-child(1) { transition-delay: 0s; }
 	.faq-list .faq-item:nth-child(2) { transition-delay: 0.05s; }
