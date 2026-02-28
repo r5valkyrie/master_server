@@ -42,6 +42,35 @@ const sidebar = sidebarConfig?.sidebar || [];
 const currentPage =
     new URL(Astro.request.url).searchParams.get("page") ||
     sidebarConfig?.startPage;
+
+// Pre-fetch all doc content server-side for search (in parallel)
+let allDocsContent: { slug: string; title: string; section: string; content: string }[] = [];
+try {
+    const fetchJobs: { slug: string; title: string; section: string; promise: Promise<string> }[] = [];
+    for (const section of sidebar) {
+        for (const page of (section as any).pages) {
+            fetchJobs.push({
+                slug: page.slug,
+                title: page.title,
+                section: (section as any).title,
+                promise: fetchFromGitHub(`docs/${page.slug}.md`),
+            });
+        }
+    }
+    const results = await Promise.allSettled(fetchJobs.map(j => j.promise));
+    results.forEach((result, i) => {
+        if (result.status === 'fulfilled') {
+            allDocsContent.push({
+                slug: fetchJobs[i].slug,
+                title: fetchJobs[i].title,
+                section: fetchJobs[i].section,
+                content: result.value,
+            });
+        }
+    });
+} catch {
+    // If sidebar iteration fails, search just won't have content
+}
 ---
 
 <Main title="Documentation" fullWidth={true}>
@@ -49,6 +78,13 @@ const currentPage =
         <aside class="docs-sidebar">
             <div class="sidebar-header">
                 <h3>Documentation</h3>
+                <div class="docs-search">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="docs-search-input" placeholder="Search all docs..." autocomplete="off" />
+                        <kbd class="search-shortcut" id="search-shortcut-hint">/</kbd>
+                    </div>
+                </div>
             </div>
             <div class="sidebar-content custom-scrollbar">
                 {
@@ -87,20 +123,23 @@ const currentPage =
 
         <div class="docs-main">
             <div class="docs-container">
-                {
-                    error ? (
-                        <div class="alert-box error">
-                            <h2>Error Loading Documentation</h2>
-                            <p>
-                                Could not fetch documentation content. Please
-                                check your connection or try again later.
-                            </p>
-                            <p class="error-details">{error.message}</p>
-                        </div>
-                    ) : (
-                        <article class="markdown-body" set:html={htmlContent} />
-                    )
-                }
+                <div id="search-results-container" class="search-results-container" style="display:none;"></div>
+                <div id="docs-content">
+                    {
+                        error ? (
+                            <div class="alert-box error">
+                                <h2>Error Loading Documentation</h2>
+                                <p>
+                                    Could not fetch documentation content. Please
+                                    check your connection or try again later.
+                                </p>
+                                <p class="error-details">{error.message}</p>
+                            </div>
+                        ) : (
+                            <article class="markdown-body" set:html={htmlContent} />
+                        )
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -138,6 +177,61 @@ const currentPage =
         font-weight: 600;
         color: var(--text-main);
         margin: 0;
+    }
+
+    /* Search Styles */
+    .docs-search {
+        margin-top: 16px;
+        position: relative;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        color: var(--text-dim);
+        pointer-events: none;
+    }
+
+    #docs-search-input {
+        width: 100%;
+        padding: 10px 40px 10px 36px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        color: var(--text-main);
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    #docs-search-input::placeholder {
+        color: var(--text-dim);
+    }
+
+    #docs-search-input:focus {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.05);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-shortcut {
+        position: absolute;
+        right: 10px;
+        padding: 2px 8px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border-light);
+        border-radius: 4px;
+        color: var(--text-dim);
+        font-size: 0.75rem;
+        font-family: inherit;
+        pointer-events: none;
+        line-height: 1.4;
     }
 
     .sidebar-content {
@@ -349,6 +443,108 @@ const currentPage =
         font-weight: 600;
     }
 
+    /* Search Results in Main Area */
+    .search-results-container :global(.search-results-header) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .search-results-container :global(.search-results-header h2) {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+        background: linear-gradient(to right, #fff, #ccc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .search-results-container :global(.search-results-count) {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+    }
+
+    .search-results-container :global(.search-result-card) {
+        display: block;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 16px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .search-results-container :global(.search-result-card:hover) {
+        background: rgba(99, 102, 241, 0.05);
+        border-color: rgba(99, 102, 241, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-results-container :global(.result-page-section) {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--primary);
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+
+    .search-results-container :global(.result-page-title) {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 10px;
+    }
+
+    .search-results-container :global(.result-snippets) {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-results-container :global(.result-snippet) {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+        padding: 10px 14px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        border-left: 3px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .search-results-container :global(.result-snippet mark) {
+        background: rgba(99, 102, 241, 0.35);
+        color: #fff;
+        border-radius: 3px;
+        padding: 1px 0;
+    }
+
+    .search-results-container :global(.search-no-results) {
+        text-align: center;
+        padding: 80px 0;
+        color: var(--text-dim);
+    }
+
+    .search-results-container :global(.search-no-results h3) {
+        font-size: 1.3rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+
+    .search-results-container :global(.search-no-results p) {
+        font-size: 0.95rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
     .alert-box {
         background: rgba(239, 68, 68, 0.1);
         border: 1px solid rgba(239, 68, 68, 0.2);
@@ -403,3 +599,196 @@ const currentPage =
         }
     }
 </style>
+
+<script is:inline define:vars={{ allDocsContent }}>
+    window.__allDocsContent = allDocsContent;
+</script>
+
+<script>
+    function escapeHtml(str: string): string {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function getAllSnippets(content: string, query: string, contextChars = 100, maxSnippets = 3): string[] {
+        const lower = content.toLowerCase();
+        const qLower = query.toLowerCase();
+        const snippets: string[] = [];
+        let searchFrom = 0;
+
+        while (snippets.length < maxSnippets) {
+            const idx = lower.indexOf(qLower, searchFrom);
+            if (idx === -1) break;
+
+            const start = Math.max(0, idx - contextChars);
+            const end = Math.min(content.length, idx + query.length + contextChars);
+            let snippet = content.slice(start, end).replace(/[\r\n]+/g, ' ').replace(/#{1,6}\s*/g, '').trim();
+
+            if (start > 0) snippet = '\u2026' + snippet;
+            if (end < content.length) snippet += '\u2026';
+
+            const escaped = escapeHtml(snippet);
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            snippets.push(escaped.replace(regex, '<mark>$1</mark>'));
+
+            searchFrom = idx + query.length + contextChars;
+        }
+
+        return snippets;
+    }
+
+    interface SearchResult {
+        slug: string;
+        title: string;
+        section: string;
+        snippets: string[];
+        score: number;
+    }
+
+    function search(query: string): SearchResult[] {
+        const docs = (window as any).__allDocsContent || [];
+        if (!query || query.length < 2 || docs.length === 0) return [];
+        const qLower = query.toLowerCase();
+        const results: SearchResult[] = [];
+
+        for (const doc of docs) {
+            let score = 0;
+            let snippets: string[] = [];
+
+            if (doc.title.toLowerCase().includes(qLower)) {
+                score += 10;
+            }
+
+            const headingRegex = /^#{1,6}\s+(.+)$/gm;
+            let match;
+            while ((match = headingRegex.exec(doc.content)) !== null) {
+                if (match[1].toLowerCase().includes(qLower)) {
+                    score += 5;
+                    break;
+                }
+            }
+
+            const contentSnippets = getAllSnippets(doc.content, query);
+            if (contentSnippets.length > 0) {
+                score += contentSnippets.length;
+                snippets = contentSnippets;
+            }
+
+            if (score > 0) {
+                if (snippets.length === 0) {
+                    const firstLine = doc.content.split('\n').find((l: string) => l.trim() && !l.startsWith('#'));
+                    if (firstLine) snippets = [escapeHtml(firstLine.trim().slice(0, 150))];
+                }
+                results.push({ slug: doc.slug, title: doc.title, section: doc.section, snippets, score });
+            }
+        }
+
+        return results.sort((a, b) => b.score - a.score).slice(0, 20);
+    }
+
+    function showSearchResults(results: SearchResult[], query: string) {
+        const searchContainer = document.getElementById('search-results-container')!;
+        const docsContent = document.getElementById('docs-content')!;
+
+        docsContent.style.display = 'none';
+        searchContainer.style.display = 'block';
+
+        if (results.length === 0) {
+            searchContainer.innerHTML = `
+                <div class="search-no-results">
+                    <h3>No results for "${escapeHtml(query)}"</h3>
+                    <p>Try different keywords or check your spelling.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const header = `
+            <div class="search-results-header">
+                <h2>Search Results</h2>
+                <span class="search-results-count">${results.length} result${results.length !== 1 ? 's' : ''} for "${escapeHtml(query)}"</span>
+            </div>
+        `;
+
+        const cards = results.map(r => `
+            <a href="/docs?page=${encodeURIComponent(r.slug)}" class="search-result-card">
+                <div class="result-page-section">${escapeHtml(r.section)}</div>
+                <div class="result-page-title">${escapeHtml(r.title)}</div>
+                ${r.snippets.length > 0 ? `
+                    <div class="result-snippets">
+                        ${r.snippets.map(s => `<div class="result-snippet">${s}</div>`).join('')}
+                    </div>
+                ` : ''}
+            </a>
+        `).join('');
+
+        searchContainer.innerHTML = header + cards;
+    }
+
+    function hideSearch() {
+        const searchContainer = document.getElementById('search-results-container')!;
+        const docsContent = document.getElementById('docs-content')!;
+
+        searchContainer.style.display = 'none';
+        searchContainer.innerHTML = '';
+        docsContent.style.display = 'block';
+    }
+
+    function initSearch() {
+        const input = document.getElementById('docs-search-input') as HTMLInputElement;
+        const shortcutHint = document.getElementById('search-shortcut-hint')!;
+        if (!input || !shortcutHint) return;
+
+        let debounceTimer: ReturnType<typeof setTimeout>;
+
+        input.addEventListener('focus', () => {
+            shortcutHint.style.display = 'none';
+        });
+
+        input.addEventListener('blur', () => {
+            if (!input.value) shortcutHint.style.display = '';
+        });
+
+        input.addEventListener('input', () => {
+            const query = input.value.trim();
+            clearTimeout(debounceTimer);
+
+            if (query.length < 2) {
+                hideSearch();
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                const results = search(query);
+                showSearchResults(results, query);
+            }, 150);
+        });
+    }
+
+    function initKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            const input = document.getElementById('docs-search-input') as HTMLInputElement;
+            if (!input) return;
+
+            if (e.key === '/' && document.activeElement !== input && !['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName)) {
+                e.preventDefault();
+                input.focus();
+            }
+            if (e.key === 'Escape' && document.activeElement === input) {
+                if (input.value) {
+                    input.value = '';
+                    hideSearch();
+                    const shortcutHint = document.getElementById('search-shortcut-hint');
+                    if (shortcutHint) shortcutHint.style.display = '';
+                }
+                input.blur();
+            }
+        });
+    }
+
+    // Run on initial load and after every client-side navigation
+    initSearch();
+    initKeyboardShortcuts();
+    document.addEventListener('astro:page-load', () => {
+        initSearch();
+    });
+</script>
