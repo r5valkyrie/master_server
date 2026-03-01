@@ -13,17 +13,16 @@ const { chartId, title, timeRange } = Astro.props;
     <h3 class="chart-title">{title}</h3>
     <div class="chart-controls">
       <select class="form-select" id={`${chartId}TimeRange`} name={`${chartId}TimeRange`}>
-        <option value="7">Past 7 Days</option>
-        <option value="14">Past 14 Days</option>
-        <option value="30">Past 30 Days</option>
-        <option value="60">Past 60 Days</option>
-        <option value="120">Past 120 Days</option>
-        <option value="365">Past 365 Days</option>
+        <option value="7">7 days</option>
+        <option value="14">14 days</option>
+        <option value="30">30 days</option>
+        <option value="60">60 days</option>
+        <option value="120">120 days</option>
+        <option value="365">365 days</option>
       </select>
     </div>
   </div>
-  
-  <div class="relative" style="height: 300px;">
+  <div class="chart-body" style="height: 280px; position: relative;">
     <canvas id={chartId}></canvas>
   </div>
 </div>
@@ -36,13 +35,9 @@ const { chartId, title, timeRange } = Astro.props;
       const response = await fetch(url);
       const data = await response.json();
       const ctx = document.getElementById(chartId)?.getContext('2d');
-      
       if (!ctx) return;
 
-      // Destroy existing chart if it exists
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
+      if (chartInstance) chartInstance.destroy();
 
       chartInstance = new Chart(ctx, {
         type: 'line',
@@ -50,158 +45,91 @@ const { chartId, title, timeRange } = Astro.props;
         options: {
           maintainAspectRatio: false,
           responsive: true,
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          },
+          interaction: { intersect: false, mode: 'index' },
           plugins: {
-            legend: { 
+            legend: {
               position: 'top',
-              labels: { 
-                color: '#374151',
-                font: { 
-                  weight: '500',
-                  size: 12
-                },
-                padding: 20,
+              labels: {
+                color: '#9898a8',
+                font: { weight: '500', size: 11, family: 'Inter' },
+                padding: 16,
                 usePointStyle: true,
                 pointStyle: 'circle'
               }
             },
             tooltip: {
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              titleColor: '#111827',
-              bodyColor: '#374151',
-              borderColor: '#e5e7eb',
+              backgroundColor: 'rgba(15, 15, 30, 0.95)',
+              titleColor: '#e8e8f0',
+              bodyColor: '#b0b0c0',
+              borderColor: 'rgba(139, 92, 246, 0.2)',
               borderWidth: 1,
               cornerRadius: 8,
-              displayColors: true,
               padding: 12,
+              displayColors: true,
               callbacks: {
-                label: (tooltipItem) => `${datasetLabel}: ${tooltipItem.raw}`
+                label: (t) => `${datasetLabel}: ${t.raw}`
               }
             }
           },
           scales: {
-            x: { 
+            x: {
               beginAtZero: true,
-              ticks: { 
-                color: '#6b7280',
-                font: { size: 11 }
-              },
-              grid: { 
-                color: '#f3f4f6',
-                drawBorder: false
-              },
-              border: {
-                display: false
-              }
+              ticks: { color: '#5a5a6e', font: { size: 10, family: 'Inter' } },
+              grid: { color: 'rgba(139, 92, 246, 0.06)', drawBorder: false },
+              border: { display: false }
             },
-            y: { 
+            y: {
               beginAtZero: true,
-              ticks: { 
-                color: '#6b7280',
-                font: { size: 11 }
-              },
-              grid: { 
-                color: '#f3f4f6',
-                drawBorder: false
-              },
-              border: {
-                display: false
-              }
+              ticks: { color: '#5a5a6e', font: { size: 10, family: 'Inter' } },
+              grid: { color: 'rgba(139, 92, 246, 0.06)', drawBorder: false },
+              border: { display: false }
             }
           },
           elements: {
-            line: {
-              tension: 0.3,
-              borderWidth: 2
-            },
-            point: {
-              radius: 3,
-              hoverRadius: 6,
-              borderWidth: 2,
-              backgroundColor: '#ffffff'
-            }
+            line: { tension: 0.35, borderWidth: 2 },
+            point: { radius: 2, hoverRadius: 5, borderWidth: 2, backgroundColor: '#0f0f1e' }
           }
         }
       });
     } catch (error) {
       console.error(`Failed to load chart data for ${chartId}:`, error);
-      
-      // Show error message in chart area
       const canvas = document.getElementById(chartId);
-      if (canvas) {
-        const container = canvas.parentElement;
-        if (container) {
-          container.innerHTML = `
-            <div class="flex items-center justify-center h-full text-gray-500">
-              <div class="text-center">
-                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>
-                <p class="text-sm">Failed to load chart data</p>
-                <button class="btn btn-outline btn-sm mt-2" onclick="location.reload()">Retry</button>
-              </div>
+      if (canvas?.parentElement) {
+        canvas.parentElement.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#5a5a6e;">
+            <div style="text-align:center">
+              <p style="font-size:0.85rem;">Failed to load chart</p>
+              <button class="btn btn-ghost btn-sm" style="margin-top:0.5rem" onclick="location.reload()">Retry</button>
             </div>
-          `;
-        }
+          </div>`;
       }
     }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const timeRangeSelect = document.getElementById(`${chartId}TimeRange`);
-    const chartContainer = document.getElementById(chartId)?.parentElement;
-    
-    if (!timeRangeSelect) return;
+    const sel = document.getElementById(`${chartId}TimeRange`);
+    const container = document.getElementById(chartId)?.parentElement;
+    if (!sel) return;
 
     function showLoading() {
-      if (chartContainer) {
-        chartContainer.innerHTML = `
-          <div class="flex items-center justify-center h-full">
-            <div class="text-center">
-              <svg class="w-8 h-8 mx-auto mb-2 text-primary-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-              <p class="text-sm text-gray-500">Loading chart...</p>
-            </div>
-          </div>
-        `;
-      }
+      if (container) container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#5a5a6e;"><p style="font-size:0.85rem;">Loading...</p></div>`;
     }
 
     function resetChart() {
-      if (chartContainer) {
-        chartContainer.innerHTML = `<canvas id="${chartId}"></canvas>`;
-      }
+      if (container) container.innerHTML = `<canvas id="${chartId}"></canvas>`;
     }
 
     async function updateChart() {
-      const timeRange = timeRangeSelect.value;
-      
-      // Disable select and show loading
-      timeRangeSelect.disabled = true;
+      sel.disabled = true;
       showLoading();
-      
       try {
-        // Reset chart container
         resetChart();
-        
-        // Fetch new data
-        await fetchChartData(`/api/admin/${chartId}Chart?timeRange=${timeRange}`, chartId, `Total ${title.replace(' Over Time', '')}`);
-      } catch (error) {
-        console.error('Chart update failed:', error);
-      } finally {
-        // Re-enable select
-        timeRangeSelect.disabled = false;
-      }
+        await fetchChartData(`/api/admin/${chartId}Chart?timeRange=${sel.value}`, chartId, `Total ${title.replace(' Over Time', '')}`);
+      } finally { sel.disabled = false; }
     }
 
-    timeRangeSelect.addEventListener('change', updateChart);
-
-    // Set initial value and load chart
-    timeRangeSelect.value = timeRange.toString();
+    sel.addEventListener('change', updateChart);
+    sel.value = timeRange.toString();
     updateChart();
   });
 </script>

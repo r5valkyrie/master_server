@@ -12,7 +12,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
 
     <!-- Search and Filter Toolbar -->
     <div class="mods-toolbar">
-      <div class="search-container">
+      <div class="search-container" style="max-width:24rem;">
         <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
@@ -69,7 +69,7 @@ import Dashboard from '../../layouts/Dashboard.astro';
           </svg>
           Previous
         </button>
-        <span id="page-number" class="px-3 py-2 text-sm">Page 1</span>
+        <span id="page-number" class="text-sm text-gray-500" style="padding:0 0.5rem;">Page 1</span>
         <button class="btn btn-outline btn-sm" id="next-page">
           Next
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

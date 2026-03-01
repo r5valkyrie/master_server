@@ -53,9 +53,9 @@ import Dashboard from '../../layouts/Dashboard.astro';
       </div>
     </div>
 
-    <!-- Channels Grid Container -->
-    <div id="channels-container" class="channels-grid">
-      <div class="loading-state">
+    <!-- Channels Table Container -->
+    <div id="channels-container" class="card" style="margin-top: var(--space-xl);">
+      <div id="channels-loading" class="loading-state">
         <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
         </svg>
@@ -68,11 +68,26 @@ import Dashboard from '../../layouts/Dashboard.astro';
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v12a2 2 0 002 2h8a2 2 0 002-2V8M9 8h6"></path>
         </svg>
         <p>No channels found</p>
-        <p class="text-sm mt-2">Click "Add Channel" to create one</p>
+        <p class="text-sm" style="margin-top:0.5rem;">Click "Add Channel" to create one</p>
       </div>
 
-      <!-- Channels will be rendered here -->
-      <div id="channels-items" class="channels-items"></div>
+      <!-- Channels Table -->
+      <div id="channels-table-wrap" class="table-container hidden">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Status</th>
+              <th>Access Key</th>
+              <th>Updates</th>
+              <th>Game URL</th>
+              <th>Server URL</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="channels-items"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -109,23 +124,23 @@ import Dashboard from '../../layouts/Dashboard.astro';
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="enabledInput" class="form-checkbox" checked>
-              <span class="form-label mb-0">Channel Enabled</span>
+              <span class="form-label" style="margin:0;">Channel Enabled</span>
             </label>
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="requiresKeyInput" class="form-checkbox">
-              <span class="form-label mb-0">Requires Access Key</span>
+              <span class="form-label" style="margin:0;">Requires Access Key</span>
             </label>
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="allowUpdatesInput" class="form-checkbox" checked>
-              <span class="form-label mb-0">Allow Updates</span>
+              <span class="form-label" style="margin:0;">Allow Updates</span>
             </label>
           </div>
           
@@ -209,8 +224,9 @@ document.addEventListener('DOMContentLoaded', function () {
       // Update channels
       const channels = payload.channels || [];
       const container = document.getElementById('channels-items');
-      const loadingState = document.querySelector('#channels-container .loading-state');
+      const loadingState = document.getElementById('channels-loading');
       const emptyState = document.getElementById('channels-empty-state');
+      const tableWrap = document.getElementById('channels-table-wrap');
       
       if (!container) return;
 
@@ -218,55 +234,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (channels.length === 0) {
         container.innerHTML = '';
+        tableWrap?.classList.add('hidden');
         emptyState?.classList.remove('hidden');
       } else {
         emptyState?.classList.add('hidden');
+        tableWrap?.classList.remove('hidden');
         
         container.innerHTML = channels.map((channel) => `
-          <div class="channel-card ${channel.enabled ? 'enabled' : 'disabled'}">
-            <div class="channel-card-header">
-              <h3 class="channel-name">${escapeHtml(channel.name)}</h3>
-              <div class="channel-status">
-                <span class="status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
-                  ${channel.enabled ? 'Enabled' : 'Disabled'}
-                </span>
+          <tr>
+            <td><strong>${escapeHtml(channel.name)}</strong></td>
+            <td>
+              <span class="status-badge ${channel.enabled ? 'enabled' : 'disabled'}">
+                ${channel.enabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge ${channel.requires_key ? 'verified' : 'unverified'}">
+                ${channel.requires_key ? 'Required' : 'None'}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge ${channel.allow_updates ? 'enabled' : 'disabled'}">
+                ${channel.allow_updates ? 'Yes' : 'No'}
+              </span>
+            </td>
+            <td><span class="truncate" style="max-width:12rem;display:inline-block;vertical-align:middle;" title="${escapeHtml(channel.game_url)}">${escapeHtml(channel.game_url)}</span></td>
+            <td><span class="truncate" style="max-width:12rem;display:inline-block;vertical-align:middle;" title="${escapeHtml(channel.dedi_url)}">${escapeHtml(channel.dedi_url)}</span></td>
+            <td>
+              <div class="key-actions">
+                <button class="btn btn-sm btn-outline btn-edit" data-channel='${JSON.stringify(channel).replace(/'/g, '&apos;')}'>
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:0.875rem;height:0.875rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-danger btn-delete" data-id="${channel.id}" data-name="${escapeHtml(channel.name)}">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:0.875rem;height:0.875rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Delete
+                </button>
               </div>
-            </div>
-            <div class="channel-card-body">
-              <div class="channel-info-grid">
-                <div class="channel-info-item">
-                  <span class="channel-info-label">Access Key</span>
-                  <span class="channel-info-value">${channel.requires_key ? 'Required' : 'Not Required'}</span>
-                </div>
-                <div class="channel-info-item">
-                  <span class="channel-info-label">Allow Updates</span>
-                  <span class="channel-info-value">${channel.allow_updates ? 'Enabled' : 'Disabled'}</span>
-                </div>
-                <div class="channel-info-item">
-                  <span class="channel-info-label">Game URL</span>
-                  <span class="channel-info-value">${escapeHtml(channel.game_url)}</span>
-                </div>
-                <div class="channel-info-item">
-                  <span class="channel-info-label">Server URL</span>
-                  <span class="channel-info-value">${escapeHtml(channel.dedi_url)}</span>
-                </div>
-              </div>
-            </div>
-            <div class="channel-card-footer">
-              <button class="btn btn-outline btn-edit" data-channel='${JSON.stringify(channel).replace(/'/g, '&apos;')}'>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-                Edit
-              </button>
-              <button class="btn btn-danger btn-delete" data-id="${channel.id}" data-name="${escapeHtml(channel.name)}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                Delete
-              </button>
-            </div>
-          </div>
+            </td>
+          </tr>
         `).join('');
 
         // Bind edit handlers

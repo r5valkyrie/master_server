@@ -26,9 +26,9 @@ import Dashboard from '../../layouts/Dashboard.astro';
       </button>
     </div>
 
-    <!-- Versions Grid Container -->
-    <div id="versions-container" class="versions-grid">
-      <div class="loading-state">
+    <!-- Versions Table Container -->
+    <div id="versions-container" class="card" style="margin-top: var(--space-xl);">
+      <div id="versions-loading" class="loading-state">
         <svg class="spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4m9-9h-4M7 12H3m15.364 6.364l-2.828-2.828M6.464 6.464L3.636 3.636m12.728 0l-2.828 2.828M6.464 17.536L3.636 20.364"></path>
         </svg>
@@ -44,8 +44,20 @@ import Dashboard from '../../layouts/Dashboard.astro';
         <p class="text-sm mt-2">Click "Add Version" to create one</p>
       </div>
 
-      <!-- Versions will be rendered here -->
-      <div id="versions-items" class="versions-items"></div>
+      <!-- Versions Table -->
+      <div id="versions-table-wrap" class="table-container hidden">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Checksums</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="versions-items"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -68,16 +80,16 @@ import Dashboard from '../../layouts/Dashboard.astro';
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="checksumsEnabledInput" class="form-checkbox">
-              <span class="form-label mb-0">Enable Checksums</span>
+              <span class="form-label" style="margin:0;">Enable Checksums</span>
             </label>
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="supportedInput" class="form-checkbox" checked>
-              <span class="form-label mb-0">Supported Version</span>
+              <span class="form-label" style="margin:0;">Supported Version</span>
             </label>
           </div>
           
@@ -109,16 +121,16 @@ import Dashboard from '../../layouts/Dashboard.astro';
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="checksumsEnabled2Input" class="form-checkbox">
-              <span class="form-label mb-0">Enable Checksums</span>
+              <span class="form-label" style="margin:0;">Enable Checksums</span>
             </label>
           </div>
           
           <div class="form-group">
-            <label class="flex items-center gap-2">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
               <input type="checkbox" id="supported2Input" class="form-checkbox">
-              <span class="form-label mb-0">Supported Version</span>
+              <span class="form-label" style="margin:0;">Supported Version</span>
             </label>
           </div>
           
@@ -189,56 +201,53 @@ document.addEventListener('DOMContentLoaded', function () {
       const response = await fetch('/api/admin/versions');
       const payload = await response.json();
       const versions = payload.versions || [];
-      const container = document.getElementById('versions-items');
-      const loadingState = document.getElementById('versions-list').querySelector('.loading-state');
+      const tbody = document.getElementById('versions-items');
+      const loadingState = document.getElementById('versions-loading');
       const emptyState = document.getElementById('empty-state');
+      const tableWrap = document.getElementById('versions-table-wrap');
       
-      if (!container) return;
+      if (!tbody) return;
 
       loadingState?.classList.add('hidden');
 
       if (versions.length === 0) {
-        container.innerHTML = '';
+        tbody.innerHTML = '';
+        tableWrap?.classList.add('hidden');
         emptyState?.classList.remove('hidden');
       } else {
         emptyState?.classList.add('hidden');
+        tableWrap?.classList.remove('hidden');
         
-        container.innerHTML = versions.map((version) => `
-          <div class="version-card">
-            <div class="version-card-header">
-              <h3 class="version-name">${escapeHtml(version.name)}</h3>
-            </div>
-            <div class="version-card-body">
-              <div class="version-status">
-                <div class="status-item">
-                  <span class="status-label">Checksums</span>
-                  <span class="status-value ${version.checksums_enabled ? 'enabled' : 'disabled'}">
-                    ${version.checksums_enabled ? 'Enabled' : 'Disabled'}
-                  </span>
-                </div>
-                <div class="status-item">
-                  <span class="status-label">Support Status</span>
-                  <span class="status-value ${version.supported ? 'supported' : 'legacy'}">
-                    ${version.supported ? 'Supported' : 'Legacy'}
-                  </span>
-                </div>
+        tbody.innerHTML = versions.map((version) => `
+          <tr>
+            <td><strong>${escapeHtml(version.name)}</strong></td>
+            <td>
+              <span class="status-badge ${version.checksums_enabled ? 'enabled' : 'disabled'}">
+                ${version.checksums_enabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge ${version.supported ? 'verified' : 'legacy'}">
+                ${version.supported ? 'Supported' : 'Legacy'}
+              </span>
+            </td>
+            <td>
+              <div class="key-actions">
+                <button class="btn btn-sm btn-outline btn-edit" data-name="${escapeHtml(version.name)}" data-checksums="${version.checksums_enabled}" data-supported="${version.supported}">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:0.875rem;height:0.875rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-danger btn-delete" data-name="${escapeHtml(version.name)}">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:0.875rem;height:0.875rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Delete
+                </button>
               </div>
-            </div>
-            <div class="version-card-footer">
-              <button class="btn btn-sm btn-outline btn-edit" data-name="${escapeHtml(version.name)}" data-checksums="${version.checksums_enabled}" data-supported="${version.supported}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-                Edit
-              </button>
-              <button class="btn btn-sm btn-danger btn-delete" data-name="${escapeHtml(version.name)}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                Delete
-              </button>
-            </div>
-          </div>
+            </td>
+          </tr>
         `).join('');
 
         // Bind edit handlers

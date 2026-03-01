@@ -6,40 +6,46 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valkyrie Admin Login</title>
+  <title>Sign In — R5Valk Admin</title>
   <link rel="stylesheet" type="text/css" href="/admin/css/modern-admin.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
   <div class="auth-layout">
-    <div class="auth-background-pattern"></div>
+    <!-- Animated orbs -->
+    <div class="auth-orb auth-orb-1"></div>
+    <div class="auth-orb auth-orb-2"></div>
+    <div class="auth-orb auth-orb-3"></div>
+
     <div class="auth-container">
-      <div class="card auth-card">
-        <div class="card-header auth-header">
+      <div class="auth-card">
+        <div class="auth-header">
           <div class="auth-logo">
-            <svg class="auth-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
-            <h1 class="card-title" style="font-size: 1.5rem;">Valkyrie Admin</h1>
+            <div class="auth-logo-glow">
+              <svg class="auth-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+              </svg>
+            </div>
+            <h1 class="auth-title">R5Valk</h1>
           </div>
-          <p class="text-gray-500 text-sm mt-2" style="margin-bottom: 0;">Secure administrative access</p>
+          <p class="auth-subtitle">Admin Panel</p>
         </div>
-        
-        <div class="card-content">
+
+        <div class="auth-body">
           <slot />
         </div>
-        
-        <div class="card-footer justify-center">
-          <p class="text-xs text-gray-500" style="margin: 0;">© 2024 Valkyrie Management System</p>
+
+        <div class="auth-footer">
+          <p>&copy; 2025 R5Valk</p>
         </div>
       </div>
     </div>
   </div>
 
   <style>
-    /* Auth specific layout adjustments */
     .auth-layout {
       min-height: 100vh;
       display: flex;
@@ -47,54 +53,76 @@
       justify-content: center;
       position: relative;
       overflow: hidden;
-      /* Ensure background matches admin theme */
-      background-color: #0f1b45;
-      background-image: url('/assets/bg.webp');
-      background-size: cover;
-      background-position: center center;
+      background: #06060e;
     }
 
-    /* Floating background animation using theme colors */
-    .auth-background-pattern {
+    .auth-orb {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: 
-        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 75% 75%, rgba(37, 99, 235, 0.15) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-      z-index: 0;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
       pointer-events: none;
+    }
+    .auth-orb-1 {
+      width: 400px; height: 400px;
+      background: rgba(139, 92, 246, 0.25);
+      top: -10%; left: -5%;
+      animation: orbFloat1 18s ease-in-out infinite;
+    }
+    .auth-orb-2 {
+      width: 300px; height: 300px;
+      background: rgba(168, 85, 247, 0.2);
+      bottom: -5%; right: -5%;
+      animation: orbFloat2 22s ease-in-out infinite;
+    }
+    .auth-orb-3 {
+      width: 200px; height: 200px;
+      background: rgba(192, 132, 252, 0.15);
+      top: 50%; left: 60%;
+      animation: orbFloat3 15s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(60px, 40px); }
+      66% { transform: translate(-30px, 60px); }
+    }
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(-40px, -30px); }
+      66% { transform: translate(30px, -50px); }
+    }
+    @keyframes orbFloat3 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-50px, 30px); }
     }
 
     .auth-container {
       position: relative;
       z-index: 1;
       width: 100%;
-      display: flex;
-      justify-content: center;
-      padding: 1rem;
+      max-width: 420px;
+      padding: 1.5rem;
     }
 
     .auth-card {
-      width: 100%;
-      max-width: 28rem;
-      background: rgba(30, 41, 59, 0.75); 
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      animation: slideUp 0.5s ease-out;
+      background: rgba(15, 15, 30, 0.6);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 1.25rem;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 24px 48px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+      animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .auth-header {
-      flex-direction: column;
       text-align: center;
-      background: transparent;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 2rem 2rem 1.5rem;
+      padding: 2.5rem 2rem 1.5rem;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.08);
     }
 
     .auth-logo {
@@ -104,28 +132,55 @@
       gap: 0.75rem;
     }
 
+    .auth-logo-glow {
+      width: 4rem;
+      height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 1rem;
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+    }
+
     .auth-logo-icon {
-      width: 3.5rem;
-      height: 3.5rem;
-      color: var(--primary-500);
-      filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));
-    }
-    
-    .card-footer {
-        background: transparent;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 1.5rem;
+      width: 2rem;
+      height: 2rem;
+      color: #a78bfa;
     }
 
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      33% { transform: translate(30px, -30px) rotate(120deg); }
-      66% { transform: translate(-20px, 20px) rotate(240deg); }
+    .auth-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #f0f0f8;
+      letter-spacing: -0.02em;
     }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .auth-subtitle {
+      color: #7a7a90;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .auth-body {
+      padding: 2rem;
+    }
+
+    .auth-footer {
+      text-align: center;
+      padding: 1.25rem 2rem;
+      border-top: 1px solid rgba(139, 92, 246, 0.06);
+    }
+    .auth-footer p {
+      color: #4a4a5c;
+      font-size: 0.75rem;
+      margin: 0;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
   </style>
 </body>

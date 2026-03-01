@@ -1,32 +1,45 @@
 ---
-import DashboardLayout from '../../layouts/Dashboard.astro';
+import Dashboard from '../../layouts/Dashboard.astro';
 ---
 
-<DashboardLayout>
+<Dashboard>
   <div class="content-container">
-    <div class="page-header">
-      <h1>API Key Management</h1>
-      <p>Create and manage API keys for external integrations</p>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <h1>API Keys</h1>
+        <p>Create and manage API keys for external integrations</p>
+      </div>
+      <div>
+        <button id="newKeyBtn" class="btn btn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Generate New Key
+        </button>
+      </div>
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">Active API Keys</h2>
+      <div id="keysLoading" class="loading-state" style="padding:var(--space-3xl);text-align:center;">
+        <p class="text-sm text-gray-500">Loading API keys...</p>
       </div>
-      <div class="card-content">
-        <p class="text-gray-500 mb-4">Manage your API keys for server integrations</p>
-        
-        <button id="newKeyBtn" class="btn btn-primary">
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          Generate New Key
-        </button>
-
-        <div id="keysContainer" class="keys-table-container" style="margin-top: 1.5rem;">
-          <div class="loading">Loading API keys...</div>
-        </div>
-
-        <div id="statusMessage" class="status-message" style="display: none;"></div>
+      <div id="keysEmpty" class="hidden" style="text-align:center;padding:var(--space-3xl);color:var(--gray-500);">
+        <p>No API keys yet. Generate one to get started.</p>
       </div>
+      <div id="keysTableWrap" class="table-container hidden">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Key Name</th>
+              <th>Prefix</th>
+              <th>Status</th>
+              <th>Last Used</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="keysItems"></tbody>
+        </table>
+      </div>
+      <div id="statusMessage" class="status-message" style="display: none;"></div>
     </div>
 
     <div class="modal-overlay" id="newKeyModal" style="display: none;">
@@ -34,7 +47,7 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         <div class="modal-header">
           <h3 class="modal-title">Generate New API Key</h3>
           <button class="modal-close" id="closeModal">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
         
@@ -79,20 +92,20 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
         <div class="modal-header">
           <h3 class="modal-title">API Key Generated</h3>
           <button class="modal-close" id="closeDisplayModal">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
         
         <div class="modal-content">
-          <div class="alert alert-warning mb-4">
+          <div class="alert alert-warning" style="margin-bottom:1rem;">
             <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
             <div class="alert-content">
               <strong>Save this key somewhere safe.</strong> You won't be able to view it again!
             </div>
           </div>
           
-          <div class="key-display mb-4">
-            <div class="flex gap-2">
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex;gap:0.5rem;">
               <input
                 type="text"
                 id="displayedKey"
@@ -100,13 +113,13 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
                 readonly
               />
               <button type="button" class="btn btn-primary" id="copyKeyBtn">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                 Copy
               </button>
             </div>
           </div>
 
-          <p class="text-gray-500 text-sm">
+          <p class="text-sm text-gray-500">
             This key has been added to your active keys list and can now be used for API requests.
           </p>
         </div>
@@ -163,66 +176,50 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
           return;
         }
 
-        const container = document.getElementById('keysContainer');
-        if (!container) return;
+        const loading = document.getElementById('keysLoading');
+        const empty = document.getElementById('keysEmpty');
+        const tableWrap = document.getElementById('keysTableWrap');
+        const tbody = document.getElementById('keysItems');
+
+        if (loading) loading.classList.add('hidden');
 
         if (data.keys.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No API keys yet. Create one to get started.</p></div>';
+          if (empty) empty.classList.remove('hidden');
+          if (tableWrap) tableWrap.classList.add('hidden');
           return;
         }
 
-        // Create table container structure
-        container.innerHTML = '';
-        const tableContainer = document.createElement('div');
-        tableContainer.className = 'table-container';
-        container.appendChild(tableContainer);
+        if (empty) empty.classList.add('hidden');
+        if (tableWrap) tableWrap.classList.remove('hidden');
 
-        const table = document.createElement('table');
-        table.className = 'table';
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>Key Name</th>
-              <th>Prefix</th>
-              <th>Status</th>
-              <th>Last Used</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        `;
+        if (tbody) {
+          tbody.innerHTML = data.keys.map((key: ApiKey) => {
+            const lastUsed = key.last_used ? new Date(key.last_used).toLocaleDateString() : 'Never';
+            const created = new Date(key.created_at).toLocaleDateString();
+            const statusBadge = key.active
+              ? '<span class="status-badge enabled">Active</span>'
+              : '<span class="status-badge disabled">Inactive</span>';
 
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-
-        data.keys.forEach((key: ApiKey) => {
-          const row = document.createElement('tr');
-          const lastUsed = key.last_used ? new Date(key.last_used).toLocaleDateString() : 'Never';
-          const created = new Date(key.created_at).toLocaleDateString();
-          const statusClass = key.active ? 'status-active' : 'status-inactive';
-          const statusText = key.active ? 'Active' : 'Inactive';
-
-          row.innerHTML = `
-            <td><strong>${key.key_name}</strong>${key.description ? `<div style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">${key.description}</div>` : ''}</td>
-            <td><span class="key-prefix">${key.key_prefix}...</span></td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>${lastUsed}</td>
-            <td>${created}</td>
-            <td>
-              <div class="key-actions">
-                <button class="btn btn-sm btn-secondary toggle-btn" data-id="${key.id}" data-active="${key.active}">
-                  ${key.active ? 'Disable' : 'Enable'}
-                </button>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="${key.id}">Delete</button>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        container.innerHTML = '';
-        container.appendChild(table);
+            return `<tr>
+              <td>
+                <div style="font-weight:600;color:var(--gray-900);">${key.key_name}</div>
+                ${key.description ? `<div class="text-sm text-gray-500">${key.description}</div>` : ''}
+              </td>
+              <td><span class="key-prefix">${key.key_prefix}...</span></td>
+              <td>${statusBadge}</td>
+              <td>${lastUsed}</td>
+              <td>${created}</td>
+              <td>
+                <div class="key-actions">
+                  <button class="btn btn-sm btn-secondary toggle-btn" data-id="${key.id}" data-active="${key.active}">
+                    ${key.active ? 'Disable' : 'Enable'}
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-btn" data-id="${key.id}">Delete</button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('');
+        }
 
         // Attach event listeners
         attachEventListeners();
@@ -379,4 +376,4 @@ import DashboardLayout from '../../layouts/Dashboard.astro';
     // Load keys on page load
     loadApiKeys();
   </script>
-</DashboardLayout>
+</Dashboard>
