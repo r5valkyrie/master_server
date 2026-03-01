@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getVerifiedMods, searchVerifiedMods, addVerifiedMod, removeVerifiedMod, updateVerifiedMod } from '../../../lib/verifiedMods';
 
@@ -19,7 +20,7 @@ export const GET: APIRoute = async ({ url }) => {
             }
         });
     } catch (error) {
-        console.error('Error fetching verified mods:', error);
+        logger.error(`Error fetching verified mods: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false,
             error: 'Failed to fetch verified mods' 
@@ -88,7 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
         });
         
     } catch (error) {
-        console.error("Admin Verified Mods API Error:", error);
+        logger.error(`Admin Verified Mods API Error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
             error: "An internal server error occurred." 

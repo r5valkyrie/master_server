@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
 import { logger } from '../../../lib/logger';
+import { escapeLikePattern } from '../../../lib/sql-security';
 
 export const GET: APIRoute = async ({ request }) => {
     try {
@@ -11,15 +12,11 @@ export const GET: APIRoute = async ({ request }) => {
         const filter = url.searchParams.get('filter') || '';
         const offset = (page - 1) * limit;
 
-        console.log('Users API called with:', { page, limit, q, filter }); // Debug log
-
         const pool = getPool();
         if (!pool) {
             logger.error('Database not initialized', { prefix: 'ADMIN' });
             throw new Error("Database not initialized");
         }
-
-        console.log('Database pool initialized successfully'); // Debug log
 
         let where = '';
         const params: any[] = [];
@@ -29,7 +26,8 @@ export const GET: APIRoute = async ({ request }) => {
         
         if (q) {
             conditions.push('(name LIKE ? OR steam_id LIKE ?)');
-            params.push(`%${q}%`, `%${q}%`);
+            const escaped = escapeLikePattern(q);
+            params.push(`%${escaped}%`, `%${escaped}%`);
         }
         
         // Add filter conditions
@@ -54,20 +52,8 @@ export const GET: APIRoute = async ({ request }) => {
             where = 'WHERE ' + conditions.join(' AND ');
         }
 
-        console.log('Users API - Filter:', filter, 'Query:', q, 'Where clause:', where); // Debug log
-        console.log('Users API - Params:', params); // Debug log
-        
-        if (filter === 'banned') {
-            console.log('DEBUG: Banned filter applied, checking for banned users...'); // Debug log
-        }
-
-        // First try basic query without ban status
         const basicQuery = `SELECT * FROM users ${where} ORDER BY last_seen DESC LIMIT ? OFFSET ?`;
-        console.log('Executing basic query:', basicQuery); // Debug log
-        
         const [rows] = await pool.execute(basicQuery, [...params, limit, offset]);
-        
-        console.log('Basic query successful, adding ban status...'); // Debug log
 
         // Add ban status to each row
         const enrichedRows = [];
@@ -89,7 +75,7 @@ export const GET: APIRoute = async ({ request }) => {
                         ban_expires: banInfo?.ban_expiry_date || null
                     });
                 } catch (banError) {
-                    console.error('Error fetching ban info for user:', user.steam_id, banError);
+                    logger.error(`Error fetching ban info for user: ${banError}`, { prefix: 'ADMIN' });
                     enrichedRows.push({
                         ...user,
                         is_banned: 0,
@@ -101,8 +87,6 @@ export const GET: APIRoute = async ({ request }) => {
             }
         }
 
-        console.log('Ban status added successfully'); // Debug log
-
         const [countRows] = await pool.execute(
             `SELECT COUNT(*) as total FROM users ${where}`,
             params
@@ -110,17 +94,12 @@ export const GET: APIRoute = async ({ request }) => {
 
         const total = Array.isArray(countRows) ? (countRows[0] as any).total : 0;
 
-        console.log('Users API completed successfully, returning', enrichedRows.length, 'users'); // Debug log
-
         return new Response(JSON.stringify({ data: enrichedRows, page, pageSize: limit, total }), { status: 200 });
     } catch (error) {
-        console.error("Users API Error:", error);
-        console.error("Error details:", error instanceof Error ? error.message : String(error));
-        console.error("Error stack:", error instanceof Error ? error.stack : undefined);
+        logger.error(`Users API error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
-            error: "An internal server error occurred.",
-            details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+            error: "An internal server error occurred."
         }), { status: 500 });
     }
 };

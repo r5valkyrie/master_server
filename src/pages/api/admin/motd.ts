@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { validateString } from '../../../lib/input-validation';
 
 export const GET: APIRoute = async () => {
     try {
@@ -19,6 +20,11 @@ export const POST: APIRoute = async ({ request }) => {
         if (!pool) throw new Error('Database not initialized');
         const body = await request.json();
         const content = String(body.content || '');
+        // Limit MOTD content to 50KB to prevent abuse
+        const contentCheck = validateString(content, 0, 50000);
+        if (!contentCheck.valid) {
+            return new Response(JSON.stringify({ success: false, error: `Invalid content: ${contentCheck.error}` }), { status: 400 });
+        }
         await pool.execute('REPLACE INTO motd (`id`, `content`, `updated_at`) VALUES (1, ?, NOW())', [content]);
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (err) {

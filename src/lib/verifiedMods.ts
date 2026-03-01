@@ -1,5 +1,6 @@
 import { getPool } from './db.ts';
 import { logger } from './logger.ts';
+import { escapeLikePattern } from './sql-security';
 import type { RowDataPacket } from 'mysql2/promise';
 
 export interface VerifiedMod {
@@ -40,7 +41,7 @@ export async function searchVerifiedMods(query: string): Promise<VerifiedMod[]> 
         const pool = getPool();
         if (!pool) return [];
         
-        const searchPattern = `%${query}%`;
+        const searchPattern = `%${escapeLikePattern(query)}%`;
         const [rows] = await pool.execute(
             "SELECT id, name, owner, thunderstore_link, created_at, updated_at FROM `verified_mods` WHERE name LIKE ? OR owner LIKE ? ORDER BY created_at DESC",
             [searchPattern, searchPattern]

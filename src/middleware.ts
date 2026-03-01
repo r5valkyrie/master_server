@@ -37,6 +37,92 @@ export async function ipFilter(request: Request) {
     return null; // Not banned or no IP found
 }
 
+/**
+ * CSRF protection via Origin/Referer header validation.
+ * Blocks cross-origin state-changing requests (POST/PUT/DELETE) to admin API endpoints.
+ */
+function csrfCheck(request: Request, url: URL): Response | null {
+    const method = request.method.toUpperCase();
+    // Only check state-changing methods
+    if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return null;
+
+    const origin = request.headers.get('origin');
+    const referer = request.headers.get('referer');
+
+    // Determine the expected origin from the request URL
+    const expectedOrigin = url.origin; // e.g. "https://example.com"
+
+    // Check Origin header first (most reliable, always sent by modern browsers on fetch/XHR)
+    if (origin) {
+        if (origin === expectedOrigin) return null; // Same-origin — allowed
+        return new Response(
+            JSON.stringify({ success: false, error: 'CSRF validation failed: origin mismatch' }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+
+    // Fallback: check Referer header (present on most browser requests)
+    if (referer) {
+        try {
+            const refererOrigin = new URL(referer).origin;
+            if (refererOrigin === expectedOrigin) return null; // Same-origin — allowed
+        } catch { /* invalid referer URL */ }
+        return new Response(
+            JSON.stringify({ success: false, error: 'CSRF validation failed: referer mismatch' }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+
+    // No Origin or Referer header at all — block the request.
+    // Legitimate browser fetch() and form submissions always include at least one.
+    return new Response(
+        JSON.stringify({ success: false, error: 'CSRF validation failed: missing origin' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+    );
+}
+
+// ============================================================================
+// Global admin API rate limiter
+// ============================================================================
+
+/** Per-IP request counters for admin API endpoints */
+const adminApiRateMap = new Map<string, { count: number; resetTime: number }>();
+
+const ADMIN_API_WINDOW_MS = 60 * 1000;     // 1 minute window
+const ADMIN_API_MAX_REQUESTS = 120;         // 120 requests per minute per IP (2/sec sustained)
+
+function getClientIp(request: Request): string {
+    return request.headers.get('cf-connecting-ip')
+        || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || request.headers.get('x-real-ip')
+        || 'unknown';
+}
+
+function checkAdminApiRateLimit(ip: string): { limited: boolean; retryAfterSec: number } {
+    const now = Date.now();
+    const entry = adminApiRateMap.get(ip);
+
+    if (!entry || now > entry.resetTime) {
+        adminApiRateMap.set(ip, { count: 1, resetTime: now + ADMIN_API_WINDOW_MS });
+        return { limited: false, retryAfterSec: 0 };
+    }
+
+    entry.count++;
+    if (entry.count > ADMIN_API_MAX_REQUESTS) {
+        return { limited: true, retryAfterSec: Math.ceil((entry.resetTime - now) / 1000) };
+    }
+
+    return { limited: false, retryAfterSec: 0 };
+}
+
+// Periodic cleanup every 2 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of adminApiRateMap.entries()) {
+        if (now > entry.resetTime) adminApiRateMap.delete(key);
+    }
+}, 2 * 60 * 1000);
+
 export const onRequest = defineMiddleware(async (context, next) => {
     // Ensure startup tasks are initialized (especially important for production)
     await ensureStartupTasksInitialized();
@@ -55,6 +141,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if ((url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin')) &&
         !url.pathname.startsWith('/admin/login') &&
         !url.pathname.startsWith('/api/admin/auth/login')) {
+
+        // CSRF protection for all state-changing requests to admin endpoints
+        const csrfResponse = csrfCheck(request, url);
+        if (csrfResponse) return csrfResponse;
+
+        // Global rate limit for all admin API endpoints
+        if (url.pathname.startsWith('/api/admin/')) {
+            const clientIp = getClientIp(request);
+            const { limited, retryAfterSec } = checkAdminApiRateLimit(clientIp);
+            if (limited) {
+                return new Response(
+                    JSON.stringify({ success: false, error: 'Too many requests' }),
+                    { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSec) } }
+                );
+            }
+        }
+
         const cookieHeader = request.headers.get('cookie') || '';
         const cookieName = getSessionCookieName();
         const cookieValue = cookieHeader.split(';').map(s => s.trim()).find(s => s.startsWith(cookieName + '='))?.split('=')[1];

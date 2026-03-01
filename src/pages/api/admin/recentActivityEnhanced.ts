@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
 
@@ -52,7 +53,6 @@ export const GET: APIRoute = async ({ request }) => {
                 });
             }
         } catch (logError) {
-            console.log('Activity log table not found, falling back to individual queries');
         }
 
         // Fallback to original method if activity log table doesn't exist
@@ -153,7 +153,7 @@ export const GET: APIRoute = async ({ request }) => {
         });
 
     } catch (error) {
-        console.error('Recent Activity API Error:', error);
+        logger.error(`Recent Activity API Error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({
             success: false,
             message: 'Failed to fetch recent activity',
@@ -193,6 +193,6 @@ export async function logActivity(
             ipAddress
         ]);
     } catch (error) {
-        console.error('Failed to log activity:', error);
+        logger.error(`Failed to log activity: ${error}`, { prefix: 'ADMIN' });
     }
 }

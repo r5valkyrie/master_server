@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getServers, getServerKeys } from '../../../lib/servers';
 import { logAdminEvent } from '../../../lib/discord';
@@ -153,7 +154,7 @@ export const GET: APIRoute = async ({ request }) => {
             stats
         }), { status: 200 });
     } catch (error) {
-        console.error("Admin Servers API Error:", error);
+        logger.error(`Admin Servers API Error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
             error: "An internal server error occurred." 
@@ -215,7 +216,7 @@ export const POST: APIRoute = async ({ request }) => {
             error: 'Invalid action' 
         }), { status: 400 });
     } catch (error) {
-        console.error("Admin Servers API Error:", error);
+        logger.error(`Admin Servers API Error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
             error: "An internal server error occurred." 

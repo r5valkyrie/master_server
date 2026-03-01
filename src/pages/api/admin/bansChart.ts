@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIContext } from "astro";
 import { getPool } from "../../../lib/db";
 import { checkRateLimit } from "../../../lib/security";
@@ -75,7 +76,7 @@ export async function GET(context: APIContext) {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error("API Error:", error); 
+    logger.error(`API Error: ${error}`, { prefix: 'ADMIN' }); 
     
     return new Response(JSON.stringify({ 
         success: false, 

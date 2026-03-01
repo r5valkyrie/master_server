@@ -1,6 +1,15 @@
 import type { APIRoute } from 'astro';
 import { getAllSystemSettings, setSystemSetting } from '../../../lib/db';
 import { logger } from '../../../lib/logger';
+import { validateString } from '../../../lib/input-validation';
+
+// Allowlist of valid system setting keys — prevents arbitrary key injection
+const ALLOWED_SETTING_KEYS = new Set([
+    'site_name', 'site_description', 'maintenance_mode', 'maintenance_message',
+    'max_servers', 'server_timeout', 'registration_enabled', 'motd_enabled',
+    'ban_appeal_url', 'max_login_attempts', 'session_timeout',
+    'discord_notifications_enabled', 'update_check_enabled',
+]);
 
 /**
  * GET /api/admin/systemSettings - Retrieve all system settings
@@ -33,6 +42,19 @@ export const POST: APIRoute = async (context) => {
       const value = String(update.value || '').trim();
       
       if (!key) continue;
+
+      // Enforce setting key allowlist
+      if (!ALLOWED_SETTING_KEYS.has(key)) {
+        logger.warn(`Rejected unknown system setting key: ${key}`, { prefix: 'SYSTEM_SETTINGS' });
+        continue;
+      }
+
+      // Validate value length
+      const valCheck = validateString(value, 0, 2000);
+      if (!valCheck.valid) {
+        logger.warn(`Rejected invalid value for setting ${key}: ${valCheck.error}`, { prefix: 'SYSTEM_SETTINGS' });
+        continue;
+      }
       
       const result = await setSystemSetting(key, value);
       if (!result) {

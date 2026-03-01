@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
 
@@ -109,7 +110,7 @@ export const GET: APIRoute = async ({ request }) => {
         });
 
     } catch (error) {
-        console.error('Recent Activity API Error:', error);
+        logger.error(`Recent Activity API Error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({
             success: false,
             message: 'Failed to fetch recent activity',

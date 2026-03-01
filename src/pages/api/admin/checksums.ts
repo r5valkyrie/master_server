@@ -3,6 +3,7 @@ import { getPool } from '../../../lib/db';
 import { logger } from '../../../lib/logger.ts';
 import { logAdminEvent } from '../../../lib/discord';
 import { RefreshChecksums } from '../../../lib/checksums';
+import { validateString } from '../../../lib/input-validation';
 
 export const GET: APIRoute = async ({ request }) => {
     try {
@@ -32,7 +33,7 @@ export const GET: APIRoute = async ({ request }) => {
 
         return new Response(JSON.stringify({ checksums: sortedGroupedChecksums, versions }), { status: 200 });
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API Error: ${error}`, { prefix: 'ADMIN' }); 
         
         return new Response(JSON.stringify({ 
             success: false, 
@@ -44,27 +45,36 @@ export const GET: APIRoute = async ({ request }) => {
 export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
-        console.log('Received checksum data:', body); // Debug logging
         
         const checksum = body.checksum?.toString().trim();
         const sdkversion = body.sdkversion?.toString().trim();
         const description = body.description ? body.description.toString().trim() : null;
         
-        // Detailed validation
-        if (!checksum) {
+        // Input validation using shared validators
+        const checksumCheck = validateString(checksum, 1, 256, /^[a-fA-F0-9]+$/);
+        if (!checksumCheck.valid) {
             return new Response(JSON.stringify({ 
                 success: false, 
-                error: 'Checksum is required',
-                details: 'Please enter a valid checksum hash'
+                error: `Invalid checksum: ${checksumCheck.error}`
             }), { status: 400 });
         }
-        
-        if (!sdkversion || sdkversion === '') {
+
+        const versionCheck = validateString(sdkversion, 1, 100);
+        if (!versionCheck.valid) {
             return new Response(JSON.stringify({ 
                 success: false, 
-                error: 'SDK Version is required',
-                details: 'Please select a valid SDK version from the dropdown'
+                error: `Invalid SDK version: ${versionCheck.error}`
             }), { status: 400 });
+        }
+
+        if (description) {
+            const descCheck = validateString(description, 0, 500);
+            if (!descCheck.valid) {
+                return new Response(JSON.stringify({ 
+                    success: false, 
+                    error: `Invalid description: ${descCheck.error}`
+                }), { status: 400 });
+            }
         }
         
         const pool = getPool();
@@ -85,24 +95,10 @@ export const POST: APIRoute = async ({ request }) => {
         await RefreshChecksums();
         return new Response(JSON.stringify({ success: true, message: 'Checksum added successfully' }), { status: 201 });
     } catch (error) {
-        console.error('Checksum API Error:', error);
-        
-        // Provide more specific error information
-        let errorMessage = 'An internal server error occurred.';
-        if (error instanceof Error) {
-            if (error.message.includes('Duplicate entry')) {
-                errorMessage = 'This checksum already exists in the database.';
-            } else if (error.message.includes('Data too long')) {
-                errorMessage = 'One of the values is too long for the database field.';
-            } else if (error.message.includes('cannot be null')) {
-                errorMessage = 'A required field is missing or null.';
-            }
-        }
-        
+        logger.error(`Checksum POST error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
-            error: errorMessage,
-            details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+            error: 'An internal server error occurred.'
         }), { status: 500 });
     }
 };
@@ -112,6 +108,11 @@ export const PUT: APIRoute = async ({ request }) => {
         const body = await request.json();
         const checksum = body.checksum?.toString();
         if (!checksum) return new Response(JSON.stringify({ success: false, error: 'Missing checksum' }), { status: 400 });
+
+        const checksumCheck = validateString(checksum, 1, 256, /^[a-fA-F0-9]+$/);
+        if (!checksumCheck.valid) {
+            return new Response(JSON.stringify({ success: false, error: `Invalid checksum: ${checksumCheck.error}` }), { status: 400 });
+        }
 
         const updates: string[] = [];
         const params: any[] = [];
@@ -127,7 +128,7 @@ export const PUT: APIRoute = async ({ request }) => {
         await RefreshChecksums();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
-        console.error('API Error:', error);
+        logger.error(`Checksum PUT error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ success: false, error: 'An internal server error occurred.' }), { status: 500 });
     }
 };
@@ -138,6 +139,11 @@ export const DELETE: APIRoute = async ({ request }) => {
         const checksum = url.searchParams.get('checksum');
         if (!checksum) return new Response(JSON.stringify({ success: false, error: 'Missing checksum' }), { status: 400 });
 
+        const checksumCheck = validateString(checksum, 1, 256, /^[a-fA-F0-9]+$/);
+        if (!checksumCheck.valid) {
+            return new Response(JSON.stringify({ success: false, error: `Invalid checksum: ${checksumCheck.error}` }), { status: 400 });
+        }
+
         const pool = getPool();
         if (!pool) throw new Error('Database not initialized');
         await pool.execute('DELETE FROM checksums WHERE checksum=?', [checksum]);
@@ -145,7 +151,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         await RefreshChecksums();
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
-        console.error('API Error:', error);
+        logger.error(`API Error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ success: false, error: 'An internal server error occurred.' }), { status: 500 });
     }
 };

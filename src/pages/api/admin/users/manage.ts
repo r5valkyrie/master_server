@@ -1,6 +1,15 @@
+import { logger } from '../../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../../lib/db';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import { validateString, validateEnum } from '../../../../lib/input-validation';
+
+/** Generate a cryptographically secure random password */
+function generateSecurePassword(length: number = 16): string {
+    // Use url-safe base64 and trim to desired length
+    return crypto.randomBytes(length).toString('base64url').slice(0, length);
+}
 
 export const GET: APIRoute = async ({ request }) => {
     try {
@@ -18,13 +27,18 @@ export const POST: APIRoute = async ({ request }) => {
         const body = await request.json();
         const username = String(body.username || '').trim();
         const role = String(body.role || '').trim();
-        if (!username || !['master','admin','moderator'].includes(role)) {
-            return new Response(JSON.stringify({ success: false, error: 'Invalid input' }), { status: 400 });
+        const usernameCheck = validateString(username, 1, 50, /^[a-zA-Z0-9_.-]+$/);
+        if (!usernameCheck.valid) {
+            return new Response(JSON.stringify({ success: false, error: `Invalid username: ${usernameCheck.error}` }), { status: 400 });
+        }
+        const roleCheck = validateEnum(role, ['master', 'admin', 'moderator']);
+        if (!roleCheck.valid) {
+            return new Response(JSON.stringify({ success: false, error: `Invalid role: ${roleCheck.error}` }), { status: 400 });
         }
         const pool = getPool();
         if (!pool) return new Response(JSON.stringify({ success: false, error: 'Server not ready' }), { status: 503 });
-        // Generate random first password
-        const firstPass = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-4);
+        // Generate cryptographically secure random password
+        const firstPass = generateSecurePassword();
         const hash = await bcrypt.hash(firstPass, 12);
         await pool.execute('REPLACE INTO admin_users (username, password_hash, role, must_change_password) VALUES (?,?,?,1)', [username, hash, role]);
         return new Response(JSON.stringify({ success: true, firstPassword: firstPass }), { status: 200 });
@@ -46,7 +60,7 @@ export const PUT: APIRoute = async ({ request }) => {
         if (role && ['master','admin','moderator'].includes(role)) { sets.push('role=?'); params.push(role); }
         let tempPass: string | undefined;
         if (setTempPassword) {
-            tempPass = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-4);
+            tempPass = generateSecurePassword();
             const hash = await bcrypt.hash(tempPass, 12);
             sets.push('password_hash=?', 'must_change_password=1');
             params.push(hash);
@@ -83,7 +97,7 @@ export const DELETE: APIRoute = async ({ request }) => {
         
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (err) {
-        console.error('Delete user error:', err);
+        logger.error(`Delete user error: ${err}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ success: false, error: 'Internal error' }), { status: 500 });
     }
 };

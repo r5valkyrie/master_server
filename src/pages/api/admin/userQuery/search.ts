@@ -1,3 +1,4 @@
+import { logger } from '../../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../../lib/db';
 
@@ -75,17 +76,15 @@ export const GET: APIRoute = async ({ request }) => {
         const searchType = url.searchParams.get('type') || 'all';
         const filter = url.searchParams.get('filter');
 
-        console.log('Search params:', { searchTerm, searchType, filter }); // Debug log
 
         const { query, params } = buildSearchQuery(searchTerm, searchType, filter);
         
-        console.log('Executing query:', query, 'with params:', params); // Debug log
 
         const [rows] = await pool.execute(query, params);
 
         return new Response(JSON.stringify({ success: true, rows }), { status: 200 });
     } catch (error) {
-        console.error("API Error:", error); 
+        logger.error(`API Error: ${error}`, { prefix: 'ADMIN' }); 
         
         return new Response(JSON.stringify({ 
             success: false, 

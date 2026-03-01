@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import axios from 'axios';
 
@@ -106,7 +107,7 @@ export const GET: APIRoute = async ({ request, url }) => {
           banInfo = banPlayers[0];
         }
       } catch (error) {
-        console.warn('Failed to fetch Steam ban info:', error);
+        logger.warn(`Failed to fetch Steam ban info: ${error}`, { prefix: 'ADMIN' });
         // Continue without ban info - it's not critical
       }
 
@@ -148,7 +149,7 @@ export const GET: APIRoute = async ({ request, url }) => {
       });
 
     } catch (apiError) {
-      console.error('Steam API error:', apiError);
+      logger.error(`Steam API error: ${apiError}`, { prefix: 'ADMIN' });
       return new Response(JSON.stringify({ 
         success: false, 
         error: 'Failed to fetch Steam profile data' 
@@ -159,7 +160,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     }
 
   } catch (error) {
-    console.error('Steam profile API error:', error);
+    logger.error(`Steam profile API error: ${error}`, { prefix: 'ADMIN' });
     return new Response(JSON.stringify({ 
       success: false, 
       error: 'Internal server error' 

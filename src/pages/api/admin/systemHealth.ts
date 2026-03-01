@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
+import { logger } from '../../../lib/logger';
 
 // Check Redis connection (import the servers module to access Redis client)
 async function checkRedisStatus() {
@@ -14,9 +15,10 @@ async function checkRedisStatus() {
       message: 'Redis connection healthy'
     };
   } catch (error) {
+    logger.error(`Redis health check failed: ${error}`, { prefix: 'HEALTH' });
     return {
       status: 'disconnected', 
-      message: `Redis connection failed: ${error.message}`
+      message: 'Redis connection failed'
     };
   }
 }
@@ -39,9 +41,10 @@ async function checkDatabaseStatus() {
       message: 'Database connection healthy'
     };
   } catch (error) {
+    logger.error(`Database health check failed: ${error}`, { prefix: 'HEALTH' });
     return {
       status: 'disconnected',
-      message: `Database connection failed: ${error.message}`
+      message: 'Database connection failed'
     };
   }
 }
@@ -63,9 +66,10 @@ async function getPerformanceMetrics() {
       cpuUsage: process.cpuUsage()
     };
   } catch (error) {
+    logger.error(`Performance metrics check failed: ${error}`, { prefix: 'HEALTH' });
     return {
       dbResponseTime: Date.now() - startTime,
-      error: error.message
+      error: 'Performance check failed'
     };
   }
 }
@@ -96,7 +100,7 @@ export const GET: APIRoute = async () => {
       }
     });
   } catch (error) {
-    console.error('System health check error:', error);
+    logger.error(`System health check error: ${error}`, { prefix: 'HEALTH' });
     return new Response(JSON.stringify({
       success: false,
       error: 'Failed to check system health',

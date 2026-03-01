@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import type { RowDataPacket } from 'mysql2/promise';
 import { logger } from './logger.ts';
+import { escapeLikePattern } from './sql-security';
 
 let pool: mysql.Pool | null = null;
 
@@ -19,7 +20,6 @@ export function getPool() {
             user: process.env.MYSQL_USER,
             database: process.env.MYSQL_DB,
             password: process.env.MYSQL_PASS,
-            multipleStatements: true,
         });
         return pool;
     } catch (err) {
@@ -130,7 +130,7 @@ export async function SearchSteamIdsByUsername(name: string, limit = 5): Promise
     try {
         const pool = getPool();
         if (!pool) return [];
-        const pattern = `%${name}%`;
+        const pattern = `%${escapeLikePattern(name)}%`;
         const [rows] = await pool.execute("SELECT steam_id, name FROM `users` WHERE `name` LIKE ? ORDER BY `last_seen` DESC LIMIT ?", [pattern, limit]);
         const packets = rows as RowDataPacket[];
         if (Array.isArray(packets)) {

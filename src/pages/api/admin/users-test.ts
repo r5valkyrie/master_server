@@ -30,14 +30,12 @@ export const GET: APIRoute = async ({ request }) => {
             success: true, 
             basicQuery: Array.isArray(rows) ? rows.length : 0,
             withBanQuery: Array.isArray(rowsWithBan) ? rowsWithBan.length : 0,
-            sampleData: Array.isArray(rowsWithBan) ? rowsWithBan[0] : null
         }), { status: 200 });
     } catch (error) {
         logger.error(`Test API error: ${error}`, { prefix: 'ADMIN' });
         return new Response(JSON.stringify({ 
             success: false, 
-            error: error.message,
-            stack: error.stack
+            error: 'An internal server error occurred.'
         }), { status: 500 });
     }
 };

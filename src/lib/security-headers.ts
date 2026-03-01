@@ -13,12 +13,13 @@ export function addSecurityHeaders(response: Response): Response {
     // Content Security Policy - Allow Chart.js and required resources
     const csp = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net", // Allow Chart.js CDN
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net", // Chart.js CDN (no unsafe-eval)
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // Allow inline styles and Google Fonts
         "img-src 'self' data: https:", // Allow images from self, data URLs, and HTTPS
         "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com", // Allow fonts from CDN and Google Fonts
         "connect-src 'self' https://api.steampowered.com https://cdn.jsdelivr.net", // Allow Steam API and CDN
         "media-src 'self' https://blaze.playvalkyrie.org",
+        "frame-src 'none'", // Block iframes
         "object-src 'none'", // Block object/embed/applet
         "base-uri 'self'",
         "form-action 'self'",
@@ -41,9 +42,12 @@ export function addSecurityHeaders(response: Response): Response {
         );
     }
 
-    // Remove server information
+    // Remove server information / verbose headers
     newResponse.headers.delete('Server');
     newResponse.headers.delete('X-Powered-By');
+    newResponse.headers.delete('X-AspNet-Version');
+    newResponse.headers.delete('X-AspNetMvc-Version');
+    newResponse.headers.set('Server', '');  // Overwrite with empty in case framework re-adds it
 
     // Permissions Policy (formerly Feature Policy)
     const permissionsPolicy = [
@@ -60,25 +64,31 @@ export function addSecurityHeaders(response: Response): Response {
 }
 
 /**
- * CORS headers for API endpoints
+ * CORS headers for API endpoints.
+ * Uses proper single-origin matching per the CORS spec (only one origin value allowed).
+ * Defaults to blocking all cross-origin requests if no origins are provided.
  */
-export function addCorsHeaders(response: Response, allowOrigins: string[] = []): Response {
+export function addCorsHeaders(
+    response: Response,
+    requestOrigin: string | null,
+    allowOrigins: string[] = [],
+    allowMethods: string[] = ['GET', 'POST'],
+): Response {
     const newResponse = new Response(response.body, {
         status: response.status,
         statusText: response.statusText,
         headers: new Headers(response.headers),
     });
 
-    // Default to same-origin only
-    if (allowOrigins.length > 0) {
-        newResponse.headers.set('Access-Control-Allow-Origin', allowOrigins.join(', '));
-    } else {
-        newResponse.headers.set('Access-Control-Allow-Origin', 'same-origin');
+    // Only set CORS headers if the request origin is in the allowlist
+    if (requestOrigin && allowOrigins.includes(requestOrigin)) {
+        newResponse.headers.set('Access-Control-Allow-Origin', requestOrigin);
+        newResponse.headers.set('Vary', 'Origin'); // Required when origin varies
+        newResponse.headers.set('Access-Control-Allow-Methods', allowMethods.join(', '));
+        newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+        newResponse.headers.set('Access-Control-Max-Age', '7200'); // 2 hours
     }
-
-    newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    newResponse.headers.set('Access-Control-Max-Age', '86400'); // 24 hours
+    // If origin not in allowlist, no CORS headers → browser blocks cross-origin access
 
     return newResponse;
 }

@@ -1,6 +1,14 @@
 import type { APIRoute } from 'astro';
 import { getPool, getAllDiscordConfig, setDiscordConfig } from '../../../lib/db';
 import { logger } from '../../../lib/logger';
+import { validateString } from '../../../lib/input-validation';
+
+// Allowlist of valid Discord config keys
+const ALLOWED_DISCORD_KEYS = new Set([
+    'DISCORD_BOT_TOKEN', 'DISCORD_WEBHOOK_URL', 'DISCORD_CHANNEL_ID',
+    'DISCORD_GUILD_ID', 'DISCORD_ADMIN_CHANNEL_ID', 'DISCORD_LOG_CHANNEL_ID',
+    'DISCORD_BAN_CHANNEL_ID', 'DISCORD_NOTIFICATIONS_ENABLED',
+]);
 
 export const GET: APIRoute = async () => {
     try {
@@ -27,6 +35,19 @@ export const POST: APIRoute = async ({ request }) => {
             const value = String(update.value || '').trim();
             
             if (!key) continue;
+
+            // Enforce config key allowlist
+            if (!ALLOWED_DISCORD_KEYS.has(key)) {
+                logger.warn(`Rejected unknown Discord config key: ${key}`, { prefix: 'API' });
+                continue;
+            }
+
+            // Validate value length
+            const valCheck = validateString(value, 0, 2000);
+            if (!valCheck.valid) {
+                logger.warn(`Rejected invalid value for Discord config ${key}: ${valCheck.error}`, { prefix: 'API' });
+                continue;
+            }
             
             const result = await setDiscordConfig(key, value);
             if (!result) {

@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 
 // Store application start time (this will be set when the module loads)
@@ -46,7 +47,7 @@ export const GET: APIRoute = async () => {
       }
     });
   } catch (error) {
-    console.error('Uptime API error:', error);
+    logger.error(`Uptime API error: ${error}`, { prefix: 'ADMIN' });
     return new Response(JSON.stringify({ 
       success: false, 
       error: 'Failed to get uptime' 

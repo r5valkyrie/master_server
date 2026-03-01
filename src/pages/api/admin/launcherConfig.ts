@@ -10,6 +10,13 @@ import {
     reorderLauncherChannels
 } from '../../../lib/launcherConfig.ts';
 import { logger } from '../../../lib/logger.ts';
+import { validateString } from '../../../lib/input-validation';
+
+// Allowlist of valid launcher config keys — prevents arbitrary key injection
+const ALLOWED_CONFIG_KEYS = new Set([
+    'backgroundVideo', 'launcherVersion', 'updateUrl', 'newsUrl',
+    'patchNotesUrl', 'supportUrl', 'discordInviteUrl',
+]);
 
 /**
  * Admin API endpoint for managing launcher configuration
@@ -124,6 +131,24 @@ export const PUT: APIRoute = async ({ request }) => {
             if (!key || value === undefined) {
                 return new Response(
                     JSON.stringify({ error: 'Missing key or value' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+
+            // Enforce config key allowlist
+            if (!ALLOWED_CONFIG_KEYS.has(key)) {
+                logger.warn(`Rejected unknown launcher config key: ${key}`, { prefix: 'ADMIN_API' });
+                return new Response(
+                    JSON.stringify({ error: 'Invalid config key' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+
+            // Validate value length
+            const valCheck = validateString(String(value), 0, 2000);
+            if (!valCheck.valid) {
+                return new Response(
+                    JSON.stringify({ error: `Invalid value: ${valCheck.error}` }),
                     { status: 400, headers: { 'Content-Type': 'application/json' } }
                 );
             }

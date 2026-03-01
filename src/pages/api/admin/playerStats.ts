@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getServers } from '../../../lib/servers';
 
@@ -70,7 +71,7 @@ export const GET: APIRoute = async () => {
       }
     });
   } catch (error) {
-    console.error('Player stats API error:', error);
+    logger.error(`Player stats API error: ${error}`, { prefix: 'ADMIN' });
     return new Response(JSON.stringify({
       success: false,
       error: 'Failed to get player statistics',

@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import type { APIRoute } from 'astro';
 import { getPool } from '../../../lib/db';
 
@@ -86,7 +87,7 @@ export const GET: APIRoute = async () => {
       }
     });
   } catch (error) {
-    console.error('Ban stats API error:', error);
+    logger.error(`Ban stats API error: ${error}`, { prefix: 'ADMIN' });
     return new Response(JSON.stringify({
       success: false,
       error: 'Failed to get ban statistics'
