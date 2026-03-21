@@ -49,8 +49,14 @@ function csrfCheck(request: Request, url: URL): Response | null {
     const origin = request.headers.get('origin');
     const referer = request.headers.get('referer');
 
-    // Determine the expected origin from the request URL
-    const expectedOrigin = url.origin; // e.g. "https://example.com"
+    // Determine the expected origin, accounting for reverse proxies (Cloudflare, nginx, etc.)
+    // Behind a proxy, url.origin may be "http://localhost:3000" while the browser sends
+    // "https://playvalkyrie.org". Use forwarded headers to reconstruct the real public origin.
+    const forwardedProto = request.headers.get('x-forwarded-proto');
+    const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const expectedOrigin = (forwardedProto && forwardedHost)
+        ? `${forwardedProto}://${forwardedHost.split(',')[0].trim()}`
+        : url.origin;
 
     // Check Origin header first (most reliable, always sent by modern browsers on fetch/XHR)
     if (origin) {
